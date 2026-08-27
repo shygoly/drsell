@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  shops     Shop[]
+  users     AdminUser[]
+  products  Product[]
+  orders    Order[]
+  customers Customer[]
+}
+
+model Shop {
+  id          String   @id @default(cuid())
+  shopDomain  String   @unique
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  accessToken String?
+  scopes      String?
+  installedAt DateTime @default(now())
+  uninstalledAt DateTime?
+  botSetting  BotSetting?
+  inboxUsers  InboxUser[]
+  sessions    Session[]
+  subscriptions Subscription[]
+  products    Product[]
+  orders      Order[]
+  customers   Customer[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Session {
+  id          String    @id
+  shopId      String
+  shop        Shop      @relation(fields: [shopId], references: [id])
+  state       String?
+  isOnline    Boolean   @default(false)
+  scope       String?
+  expires     DateTime?
+  accessToken String
+  userId      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model BotSetting {
+  id                    String    @id @default(cuid())
+  shopId                String    @unique
+  shop                    Shop      @relation(fields: [shopId], references: [id])
+  shopName              String?
+  botId                 String?
+  adpAppKey             String?
+  chatLogo              String?
+  chatAvatar            String?
+  onboardingStep        String    @default("1")
+  onboardingCompletedAt DateTime?
+  embedLiveAt           DateTime?
+  widgetPrimaryColor    String?   @default("#008060")
+  widgetPosition        String?   @default("bottom-right")
+  welcomeMessage        String?
+  welcomeMessageI18n    Json?
+  syncProductsEnabled   Boolean   @default(true)
+  syncOrdersEnabled     Boolean   @default(true)
+  syncCustomersEnabled  Boolean   @default(true)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model InboxUser {
+  id          String  @id @default(cuid())
+  shopId      String
+  shop        Shop    @relation(fields: [shopId], references: [id])
+  userEmail   String
+  displayName String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([shopId, userEmail])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  tenantId     String?
+  tenant       Tenant?  @relation(fields: [tenantId], references: [id])
+  email        String   @unique
+  passwordHash String
+  role         String   @default("admin")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  planCode  String
+  status    String
+  trialEnds DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MailSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  shopDomain String?
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model KnowledgeSyncJob {
+  id         String   @id @default(cuid())
+  shopDomain String
+  kind       String
+  externalId String
+  status     String
+  payload    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ChatStatDaily {
+  id        String   @id @default(cuid())
+  shopDomain String
+  day       DateTime
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([shopDomain, day])
+}
+
+/// Shopify 商品 — 按 tenantId（店铺租户）隔离
+model Product {
+  id               String   @id @default(cuid())
+  tenantId         String   @map("tenant_id")
+  tenant           Tenant   @relation(fields: [tenantId], references: [id])
+  shopId           String?  @map("shop_id")
+  shop             Shop?    @relation(fields: [shopId], references: [id])
+  shopifyProductId String   @map("shopify_product_id")
+  name             String
+  price            Decimal? @db.Decimal(10, 2)
+  description      String?  @db.Text
+  category         String?
+  stock            Int?
+  handle           String?
+  vendor           String?
+  status           String?
+  tags             String?
+  variantsJson     String?  @map("variants_json") @db.Text
+  imagesJson       String?  @map("images_json") @db.Text
+  publishedAt      DateTime? @map("published_at")
+  syncedAt         DateTime @default(now()) @map("synced_at")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@unique([tenantId, shopifyProductId])
+  @@index([tenantId])
+  @@map("products")
+}
+
+/// Shopify 订单 — 按 tenantId + customerId 查询
+model Order {
+  id                 String   @id @default(cuid())
+  tenantId           String   @map("tenant_id")
+  tenant             Tenant   @relation(fields: [tenantId], references: [id])
+  shopId             String?  @map("shop_id")
+  shop               Shop?    @relation(fields: [shopId], references: [id])
+  shopifyOrderId     String   @map("shopify_order_id")
+  customerId         String?  @map("customer_id")
+  status             String?
+  financialStatus    String?  @map("financial_status")
+  fulfillmentStatus  String?  @map("fulfillment_status")
+  total              Decimal  @db.Decimal(10, 2)
+  totalTax           Decimal? @map("total_tax") @db.Decimal(10, 2)
+  billingAddress     String?  @map("billing_address") @db.Text
+  shippingAddress    String?  @map("shipping_address") @db.Text
+  shopifyCreatedAt   DateTime? @map("shopify_created_at")
+  syncedAt           DateTime @default(now()) @map("synced_at")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@unique([tenantId, shopifyOrderId])
+  @@index([tenantId, customerId])
+  @@map("orders")
+}
+
+/// Shopify 客户 — 按 tenantId 隔离
+model Customer {
+  id                 String   @id @default(cuid())
+  tenantId           String   @map("tenant_id")
+  tenant             Tenant   @relation(fields: [tenantId], references: [id])
+  shopId             String?  @map("shop_id")
+  shop               Shop?    @relation(fields: [shopId], references: [id])
+  shopifyCustomerId  String   @map("shopify_customer_id")
+  displayName        String?  @map("display_name")
+  email              String?
+  phone              String?
+  syncedAt           DateTime @default(now()) @map("synced_at")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@unique([tenantId, shopifyCustomerId])
+  @@index([tenantId])
+  @@map("customers")
+}

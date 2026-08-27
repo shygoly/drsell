@@ -1,0 +1,12 @@
+name = "drsell-origin-proxy"
+main = "src/index.js"
+compatibility_date = "2025-08-01"
+workers_dev = true
+account_id = "5732310593ba6c86ed574f3997731071"
+
+# Do NOT bind custom_domain here — it blocks manual A records in DNS.
+# Use orange-cloud A record → 163.7.7.160 (see configure-drsell-dns.sh).
+
+[vars]
+ORIGIN_IP = "163.7.7.160"
+ORIGIN_PORT = "8088"

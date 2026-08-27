@@ -1,0 +1,44 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "0b36b70772220b71b2fe296b3deba914"
+name = "Dr Sell"
+application_url = "https://drsell.szchada.top"
+embedded = true
+handle = "drseller-alpha"
+
+[build]
+automatically_update_urls_on_dev = false
+
+[webhooks]
+api_version = "2025-04"
+
+  [[webhooks.subscriptions]]
+  uri = "/api/webhooks"
+  topics = [
+  "orders/create",
+  "products/delete",
+  "products/update",
+  "orders/delete",
+  "products/create",
+  "orders/updated",
+  "app/uninstalled",
+  "app/scopes_update"
+]
+  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
+
+[access.admin]
+direct_api_mode = "online"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_customers,read_orders,read_products,write_orders,write_products"
+
+[auth]
+redirect_urls = [
+  "https://drsell.szchada.top/api/auth/callback",
+  "https://drsell.szchada.top/auth/callback",
+  "https://drsell.szchada.top/auth/shopify/callback"
+]
+
+[pos]
+embedded = false

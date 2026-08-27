@@ -1,0 +1,75 @@
+# Drsell stack — publishes only loopback ports; TLS/SNI handled by host webrtc-ws-proxy nginx
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: drsell_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_SUPER_PASSWORD:-ChangeMe_Postgres_Super_2026!}
+    volumes:
+      - drsell_pg:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./certs:/certs:ro
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+    ports:
+      - "127.0.0.1:5433:5432"
+    networks:
+      - drsell
+
+  redis:
+    image: redis:7-alpine
+    container_name: drsell_redis
+    restart: unless-stopped
+    networks:
+      - drsell
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.api
+    container_name: drsell_api
+    restart: unless-stopped
+    env_file:
+      - ../../apps/api/.env
+    environment:
+      DATABASE_URL: postgresql://drsell_app:${DRSELL_DB_PASSWORD}@postgres:5432/drsell?sslmode=disable
+      REDIS_URL: redis://redis:6379
+      PORT: "3001"
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "127.0.0.1:5011:3001"
+    networks:
+      - drsell
+
+  web:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.web
+    container_name: drsell_web
+    restart: unless-stopped
+    env_file:
+      - ../../apps/web/.env
+    environment:
+      API_INTERNAL_URL: http://api:3001
+      SHOPIFY_APP_URL: https://drsell.szchada.top
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:5010:3000"
+    networks:
+      - drsell
+
+volumes:
+  drsell_pg:
+
+networks:
+  drsell:
+    driver: bridge
