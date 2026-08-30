@@ -1,12 +1,10 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { createAdpClient, adpSessionId } from '@drsell/adp';
+import { createOpenClawClient } from '@drsell/openclaw';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AdpService {
-  private readonly client = createAdpClient({
-    baseUrl: process.env.ADP_CHAT_URL,
-  });
+  private readonly openclaw = createOpenClawClient();
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -18,61 +16,87 @@ export class AdpService {
     externalId: string;
     kind: string;
   }) {
-    if (!params.appKey) {
-      throw new BadRequestException('ADP AppKey not configured for shop');
-    }
-    const job = await this.prisma.knowledgeSyncJob.create({
+    await this.prisma.knowledgeSyncJob.create({
       data: {
         shopDomain: params.shopDomain,
         kind: params.kind,
         externalId: params.externalId,
-        status: 'running',
-        payload: params.title,
+        status: 'skipped',
+        payload: '知识库同步已停用：OpenClaw 经 adp_reader 实时查 PG（ADR-7）',
       },
     });
-    try {
-      const result = await this.client.upsertKnowledgeDocument({
-        appKey: params.appKey,
-        title: params.title,
-        content: params.content,
-        externalId: params.externalId,
-      });
-      await this.prisma.knowledgeSyncJob.update({
-        where: { id: job.id },
-        data: { status: 'ok' },
-      });
-      return result;
-    } catch (e) {
-      await this.prisma.knowledgeSyncJob.update({
-        where: { id: job.id },
-        data: { status: 'error', payload: String(e) },
-      });
-      throw e;
-    }
+    return { skipped: true as const };
   }
 
   async proxyChatSse(params: {
-    appKey: string;
+    shopDomain: string;
     visitorId: string;
     text: string;
     conversationId?: string;
     onChunk: (chunk: string) => void;
     signal?: AbortSignal;
   }) {
-    if (!params.appKey) throw new BadRequestException('appKey required');
-    await this.client.chatSse(
-      {
-        RequestId: adpSessionId(),
-        ConversationId: params.conversationId || adpSessionId(),
-        AppKey: params.appKey,
-        VisitorId: params.visitorId,
-        Contents: [{ Type: 'text', Text: params.text }],
-        Stream: 'enable',
-        Incremental: true,
+    if (!params.shopDomain) throw new BadRequestException('shopDomain required');
+
+    const preview =
+      params.text.length > 120 ? `${params.text.slice(0, 117)}...` : params.text;
+    const thread = await this.prisma.chatThread.upsert({
+      where: {
+        shopDomain_visitorId: {
+          shopDomain: params.shopDomain,
+          visitorId: params.visitorId,
+        },
       },
-      params.onChunk,
-      params.signal,
-    );
+      create: {
+        shopDomain: params.shopDomain,
+        visitorId: params.visitorId,
+        status: 'ai',
+        channel: 'web',
+        topic: preview,
+        lastMessage: preview,
+        unread: 0,
+      },
+      update: {
+        lastMessage: preview,
+        updatedAt: new Date(),
+      },
+    });
+
+    let assistantText = '';
+    await this.openclaw.chatStream({
+      shopDomain: params.shopDomain,
+      visitorId: params.visitorId,
+      message: params.text,
+      conversationId: params.conversationId,
+      onChunk: (chunk) => {
+        assistantText += chunk;
+        params.onChunk(chunk);
+      },
+      signal: params.signal,
+    });
+
+    const assistantPreview =
+      assistantText.length > 120
+        ? `${assistantText.slice(0, 117)}...`
+        : assistantText;
+
+    await this.prisma.$transaction([
+      this.prisma.chatMessage.create({
+        data: { threadId: thread.id, role: 'user', content: params.text },
+      }),
+      this.prisma.chatMessage.create({
+        data: { threadId: thread.id, role: 'assistant', content: assistantText },
+      }),
+      this.prisma.chatThread.update({
+        where: { id: thread.id },
+        data: {
+          lastMessage: assistantPreview || thread.lastMessage,
+          updatedAt: new Date(),
+        },
+      }),
+    ]);
+
+    await this.bumpChatStat(params.shopDomain);
   }
 
   async bumpChatStat(shopDomain: string) {

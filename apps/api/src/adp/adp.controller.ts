@@ -19,10 +19,6 @@ class ChatDto {
   @IsOptional()
   @IsString()
   conversationId?: string;
-
-  @IsOptional()
-  @IsString()
-  appKey?: string;
 }
 
 @Controller('adp')
@@ -32,7 +28,6 @@ export class AdpController {
   @Auth()
   @Post('chat')
   async chat(@Body() body: ChatDto, @Res() res: Response) {
-    const appKey = body.appKey || process.env.ADP_DEFAULT_APP_KEY || '';
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -40,7 +35,7 @@ export class AdpController {
 
     try {
       await this.adp.proxyChatSse({
-        appKey,
+        shopDomain: body.shopDomain,
         visitorId: body.visitorId || 'merchant',
         text: body.text,
         conversationId: body.conversationId,

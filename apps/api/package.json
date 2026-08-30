@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@drsell/adp": "workspace:*",
+    "@drsell/openclaw": "workspace:*",
     "@drsell/shared": "workspace:*",
     "@drsell/shopify": "workspace:*",
     "@nestjs/common": "^11.1.3",

@@ -16,7 +16,7 @@
 | 前缀 | 含义 | 出处（论证在此） | 数量 |
 |---|---|---|---|
 | `INV-n` | **不变量**：任何实现都不得违反的硬约束 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 2 |
-| `ADR-n` | **架构决策**：工程层不可逆选择 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 8 |
+| `ADR-n` | **架构决策**：工程层不可逆选择 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 10 |
 | `B-n` | **边界规矩**：模块/包之间的硬边界 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 3 |
 | `DS-n` | **UI 反模式**：呈现层禁止事项 | [`DESIGN.md`](DESIGN.md)（子项目 2 创建） | 6 |
 
@@ -40,12 +40,14 @@
 |---|---|---|---|
 | `ADR-1` | pnpm 8.15.4 + turbo 2.5 workspace，包在 `apps/*` 与 `packages/*` | `pnpm-workspace.yaml` | 已守护 |
 | `ADR-2` | api 监听 3001，全局前缀 `api` | `apps/api/src/main.ts` | 未配 |
-| `ADR-3` | web 监听 3000，storefront 监听 3100 | `apps/web/package.json` | 未配 |
+| `ADR-3` | 开发：web 3000 / storefront 3100；生产：`drsell-storefront` 占 :5010 | `apps/storefront/package.json` + `scripts/deploy-mvp.sh` | 已守护 |
 | `ADR-4` | 持久化用 Prisma 6 + PostgreSQL | `apps/api/prisma/schema.prisma` | 已守护 |
 | `ADR-5` | api 全局 ValidationPipe：`whitelist` + `forbidNonWhitelisted` | `apps/api/src/main.ts` | 未配 |
 | `ADR-6` | 双设计系统并存：web = Polaris 13，storefront = shadcn/Tailwind v4 | `apps/storefront/package.json` | 已守护 |
-| `ADR-7` | ADP 智能体经 `adp_reader` 直连 PG，仅可执行 `adp_*` 函数 | `apps/api/prisma/sql/adp-reader.sql` | 已守护 |
+| `ADR-7` | ADP 智能体经 `adp_reader` 直连 PG，仅可执行 `adp_*` 函数 | `apps/api/prisma/sql/adp-reader.sql` + `scripts/verify-adp-isolation.sh` | 已守护 |
 | `ADR-8` | `Shop.accessToken` 落库 AES-256-GCM 加密（`SHOP_ACCESS_TOKEN_KEY`） | `apps/api/src/crypto/shop-token-cipher.ts` | 已守护 |
+| `ADR-9` | 客服对话经 wjclaw 本地 OpenClaw Gateway（`--profile drsell` :18790），不再调腾讯 ADP | `packages/openclaw` + `infra/openclaw/drsell/` | 已守护 |
+| `ADR-10` | `drsell.szchada.top` 根路径由 `apps/storefront` 服务（pm2 `drsell-storefront` :5010）；`apps/web` 暂停生产部署 | `scripts/deploy-mvp.sh` | 已守护 |
 
 ---
 
@@ -90,8 +92,8 @@
 
 | # | 事项 | 倾向 | 决出前禁止 |
 |---|---|---|---|
-| `TBD-1` | `apps/storefront` 与 `apps/web` 谁是权威商家 UI | — | 禁止在 web 引入 shadcn（`B-3`）；禁止在 storefront 引入 Polaris（`B-2`）；禁止把 storefront 接进 Shopify OAuth |
 | `TBD-2` | `apps/web/extensions/chatbot` 的令牌唯一源 | — | 禁止扩大 hex 散点，现值为棘轮上限 |
+| `TBD-3` | `apps/web` Shopify 嵌入后台恢复路径（子域或 `/shopify`） | — | 禁止改 Partner `application_url` 而不同步 nginx 与 OAuth 回调 |
 
 ---
 

@@ -143,6 +143,7 @@ function OnboardingWizardInner() {
         )}
         {step === '3' && (
           <WidgetStep
+            shop={shop}
             color={color}
             position={position}
             welcome={welcome}

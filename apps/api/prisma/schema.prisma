@@ -141,6 +141,35 @@ model ChatStatDaily {
   @@unique([shopDomain, day])
 }
 
+/// 访客会话线程 — storefront inbox / dashboard
+model ChatThread {
+  id          String        @id @default(cuid())
+  shopDomain  String
+  visitorId   String
+  status      String        @default("ai")
+  channel     String        @default("web")
+  topic       String?
+  lastMessage String?       @db.Text
+  unread      Int           @default(0)
+  messages    ChatMessage[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([shopDomain, visitorId])
+  @@index([shopDomain, updatedAt])
+}
+
+model ChatMessage {
+  id        String     @id @default(cuid())
+  threadId  String
+  thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  role      String
+  content   String     @db.Text
+  createdAt DateTime   @default(now())
+
+  @@index([threadId, createdAt])
+}
+
 /// Shopify 商品 — 按 tenantId（店铺租户）隔离
 model Product {
   id               String   @id @default(cuid())

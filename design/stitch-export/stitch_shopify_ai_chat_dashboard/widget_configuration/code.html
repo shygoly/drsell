@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Widget Configuration - AIChat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#006c49",
+                      "tertiary": "#006c4a",
+                      "inverse-surface": "#2d3134",
+                      "on-tertiary-fixed-variant": "#005237",
+                      "error-container": "#ffdad6",
+                      "outline": "#6d7a71",
+                      "on-secondary": "#ffffff",
+                      "on-surface": "#181c1f",
+                      "inverse-primary": "#5ddda5",
+                      "on-error-container": "#93000a",
+                      "on-primary-container": "#003421",
+                      "background": "#f6fafe",
+                      "tertiary-fixed-dim": "#7bd9ad",
+                      "tertiary-fixed": "#97f5c8",
+                      "primary-fixed": "#7bfac0",
+                      "primary": "#006c49",
+                      "surface-container": "#ebeef3",
+                      "on-error": "#ffffff",
+                      "inverse-on-surface": "#eef1f5",
+                      "surface-container-lowest": "#ffffff",
+                      "surface": "#f6fafe",
+                      "secondary": "#396756",
+                      "primary-fixed-dim": "#5ddda5",
+                      "tertiary-container": "#46a47c",
+                      "on-secondary-fixed-variant": "#204f3f",
+                      "on-secondary-container": "#3f6d5c",
+                      "surface-dim": "#d7dadf",
+                      "primary-container": "#12a875",
+                      "surface-container-low": "#f1f4f8",
+                      "on-tertiary": "#ffffff",
+                      "secondary-fixed-dim": "#a0d1bc",
+                      "on-tertiary-container": "#003421",
+                      "on-surface-variant": "#3d4a42",
+                      "surface-container-highest": "#dfe3e7",
+                      "error": "#ba1a1a",
+                      "on-primary-fixed-variant": "#005236",
+                      "outline-variant": "#bccac0",
+                      "secondary-fixed": "#bbedd7",
+                      "surface-container-high": "#e5e8ed",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-fixed": "#002114",
+                      "surface-bright": "#f6fafe",
+                      "on-primary-fixed": "#002113",
+                      "surface-variant": "#dfe3e7",
+                      "on-background": "#181c1f",
+                      "secondary-container": "#bbedd7",
+                      "on-secondary-fixed": "#002117"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "xl": "32px",
+                      "md": "16px",
+                      "gutter": "20px",
+                      "base": "4px",
+                      "sm": "8px",
+                      "xs": "4px"
+              },
+              "fontFamily": {
+                      "display-lg": [
+                              "\"Inter, -apple-system, system-ui\""
+                      ],
+                      "heading-md": [
+                              "\"Inter, -apple-system, system-ui\""
+                      ],
+                      "label-md": [
+                              "\"Inter, -apple-system, system-ui\""
+                      ],
+                      "heading-lg": [
+                              "\"Inter, -apple-system, system-ui\""
+                      ],
+                      "body-md": [
+                              "\"Inter, -apple-system, system-ui\""
+                      ],
+                      "body-sm": [
+                              "\"Inter, -apple-system, system-ui\""
+                      ]
+              },
+              "fontSize": {
+                      "display-lg": [
+                              "28px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "heading-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "heading-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body { background-color: #F6F7F9; }
+        .card-shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
+        .polaris-card { background-color: white; border-radius: 12px; border: 1px solid #E1E3E5; padding: 20px; margin-bottom: 24px; }
+        .polaris-input { border: 1px solid #C9CCCF; border-radius: 8px; padding: 8px 12px; transition: all 0.2s; }
+        .polaris-input:focus { outline: none; border-color: #12A875; box-shadow: 0 0 0 2px rgba(18, 168, 117, 0.2); }
+        .polaris-btn-primary { background-color: #12A875; color: white; border-radius: 8px; padding: 8px 16px; font-weight: 500; transition: background-color 0.2s; }
+        .polaris-btn-primary:hover { background-color: #0e8c61; }
+        .polaris-btn-secondary { background-color: transparent; border: 1px solid #12A875; color: #12A875; border-radius: 8px; padding: 8px 16px; font-weight: 500; transition: all 0.2s; }
+        .polaris-btn-secondary:hover { background-color: rgba(18, 168, 117, 0.05); }
+        .color-swatch { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #C9CCCF; cursor: pointer; }
+        .color-swatch.active { border: 2px solid #12A875; box-shadow: 0 0 0 2px white inset; }
+        .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #12A875; }
+        input:checked + .slider:before { transform: translateX(20px); }
+        
+        /* Custom scrollbar for left column */
+        .scrollable-col::-webkit-scrollbar { width: 6px; }
+        .scrollable-col::-webkit-scrollbar-track { background: transparent; }
+        .scrollable-col::-webkit-scrollbar-thumb { background: #d7dadf; border-radius: 10px; }
+        .scrollable-col::-webkit-scrollbar-thumb:hover { background: #bccac0; }
+    </style>
+</head>
+<body class="text-on-surface font-body-md antialiased overflow-hidden">
+<div class="flex h-screen w-full">
+<!-- SideNav (from Shared Components JSON) -->
+<nav class="hidden md:flex flex-col h-screen border-r border-outline-variant bg-surface dark:bg-surface-dim docked left-0 w-64 z-20 shrink-0">
+<div class="p-lg flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-white font-variation-settings: 'FILL' 1;">eco</span>
+</div>
+<div>
+<h1 class="font-heading-lg text-heading-lg font-bold text-on-surface">AIChat</h1>
+<p class="text-xs text-on-surface-variant">Green Tech AI</p>
+</div>
+</div>
+<button class="polaris-btn-primary w-full mt-2 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span> New Automation
+                </button>
+</div>
+<div class="flex-1 overflow-y-auto px-md py-4 space-y-1">
+<!-- Nav Items based on JSON -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">home</span> Home
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">chat_bubble</span> Inbox
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">smart_toy</span> AI Assistant
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-heading-md border-r-4 border-primary bg-primary-container/10 hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined font-variation-settings: 'FILL' 1;">settings_input_component</span> Widget Config
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">group</span> Customers
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">bar_chart</span> Analytics
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+                </a>
+</div>
+<div class="mt-auto border-t border-outline-variant p-md space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span> Support
+                </a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">description</span> Documentation
+                </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-background">
+<!-- TopNavBar (from Shared Components JSON) -->
+<header class="flex justify-between items-center h-14 px-gutter w-full bg-surface dark:bg-surface-dim border-b border-outline-variant z-10 shrink-0">
+<div class="flex items-center gap-6">
+<span class="font-heading-md text-heading-md text-primary hidden md:block">AIChat</span>
+<nav class="hidden md:flex gap-6">
+<a class="text-on-surface-variant font-body-sm hover:text-primary transition-opacity opacity-80 hover:opacity-100" href="#">Dashboard</a>
+<a class="text-on-surface-variant font-body-sm hover:text-primary transition-opacity opacity-80 hover:opacity-100" href="#">History</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-body-sm hover:text-primary transition-opacity opacity-80 hover:opacity-100" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="polaris-btn-secondary text-sm hidden sm:block">Test Widget</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium hidden sm:block">Quick Settings</button>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<button class="p-1 hover:bg-surface-variant rounded-full transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span></button>
+<button class="p-1 hover:bg-surface-variant rounded-full transition-colors"><span class="material-symbols-outlined text-[20px]">help_outline</span></button>
+</div>
+<img class="w-8 h-8 rounded-full border border-outline-variant object-cover ml-2" data-alt="A clean, professional headshot of a business merchant, well-lit against a neutral background, exuding confidence and modern entrepreneurship." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWjOSIB61bqMThDkjCwEQYZs24TfckZvtLi6atZseca--CcLeJs_-D19DmEFg0yKWpec7IgsbhDO64J-usi4evLOExVTeh_fZQsGAR8wuoD5VGB28HV5Soefx6Luk99ulZtUpOaphQRfo5IN4wkZurF7dqRyGrgh8S-k3pzp1lBt4u3YND7w800ALHAo1d-KXtwTSRYyfjne2iX1coGsHJHgFQLSBcskVhIXKssHXVLx2JG6-wlCWVXQ"/>
+</div>
+</header>
+<!-- Configuration Workspace (2 Columns) -->
+<main class="flex-1 overflow-hidden flex flex-col lg:flex-row relative">
+<!-- Left Column: Scrollable Form -->
+<div class="flex-1 overflow-y-auto scrollable-col p-4 md:p-lg lg:max-w-[800px]">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-display-lg text-display-lg text-on-surface">Widget Configuration</h2>
+<button class="polaris-btn-primary">Save Changes</button>
+</div>
+<!-- Card 1: Deployment -->
+<div class="polaris-card">
+<h3 class="font-heading-lg text-heading-lg text-[#0A3D2E] mb-4">Deployment</h3>
+<div class="flex items-center justify-between py-3 border-b border-outline-variant">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-heading-md text-on-surface">Theme app embed</span>
+<span class="px-2 py-0.5 bg-primary-container/10 text-primary-container text-xs font-bold rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span> Live
+                                    </span>
+</div>
+<p class="text-on-surface-variant text-sm mt-1">Enable the chat widget on your storefront.</p>
+</div>
+<button class="polaris-btn-secondary text-sm flex items-center gap-1">
+                                Open theme editor <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+</button>
+</div>
+<div class="flex items-center justify-between py-3">
+<div>
+<span class="font-heading-md text-on-surface">Show widget to visitors</span>
+<p class="text-on-surface-variant text-sm mt-1">Toggle visibility without disabling the app embed.</p>
+</div>
+<label class="toggle-switch">
+<input checked="" type="checkbox"/>
+<span class="slider"></span>
+</label>
+</div>
+</div>
+<!-- Card 2: Appearance -->
+<div class="polaris-card">
+<h3 class="font-heading-lg text-heading-lg text-[#0A3D2E] mb-6">Appearance</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+<div>
+<label class="block font-heading-md text-on-surface mb-2">Primary Color</label>
+<div class="flex gap-3">
+<div class="color-swatch active" style="background-color: #12A875;"></div>
+<div class="color-swatch" style="background-color: #202223;"></div>
+<div class="color-swatch" style="background-color: #008060;"></div>
+<div class="color-swatch" style="background-color: #2C6ECB;"></div>
+<div class="color-swatch flex items-center justify-center bg-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">add</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block font-heading-md text-on-surface mb-2">Header Color</label>
+<div class="flex gap-3">
+<div class="color-swatch active" style="background-color: #12A875;"></div>
+<div class="color-swatch flex items-center justify-center bg-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">add</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mb-6">
+<label class="block font-heading-md text-on-surface mb-2">Widget Position</label>
+<div class="flex gap-4">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="text-primary-container focus:ring-primary-container" name="position" type="radio"/>
+<span class="text-sm">Bottom Right</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="text-primary-container focus:ring-primary-container" name="position" type="radio"/>
+<span class="text-sm">Bottom Left</span>
+</label>
+</div>
+</div>
+<div class="mb-6">
+<label class="block font-heading-md text-on-surface mb-2">Window Size</label>
+<div class="flex bg-surface-variant rounded-lg p-1 w-full max-w-sm">
+<button class="flex-1 py-1.5 text-sm font-medium rounded-md text-on-surface-variant hover:text-on-surface">Small</button>
+<button class="flex-1 py-1.5 text-sm font-medium rounded-md bg-white shadow-sm text-on-surface">Medium</button>
+<button class="flex-1 py-1.5 text-sm font-medium rounded-md text-on-surface-variant hover:text-on-surface">Large</button>
+</div>
+</div>
+<div>
+<label class="block font-heading-md text-on-surface mb-2">Launcher Icon Style</label>
+<div class="grid grid-cols-3 gap-3">
+<button class="border-2 border-primary-container rounded-lg p-3 flex flex-col items-center gap-2 bg-primary-container/5">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-white">
+<span class="material-symbols-outlined">chat_bubble</span>
+</div>
+<span class="text-xs font-medium text-primary-container">Chat Bubble</span>
+</button>
+<button class="border border-outline-variant rounded-lg p-3 flex flex-col items-center gap-2 hover:bg-surface-container-lowest transition-colors">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined">help</span>
+</div>
+<span class="text-xs font-medium text-on-surface-variant">Question Mark</span>
+</button>
+<button class="border border-outline-variant rounded-lg p-3 flex flex-col items-center gap-2 hover:bg-surface-container-lowest transition-colors">
+<div class="w-10 h-10 rounded-full border border-dashed border-outline flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">upload</span>
+</div>
+<span class="text-xs font-medium text-on-surface-variant">Custom Image</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 3: Content -->
+<div class="polaris-card">
+<h3 class="font-heading-lg text-heading-lg text-[#0A3D2E] mb-6">Content &amp; AI Identity</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+<div>
+<label class="block font-heading-md text-on-surface mb-1">AI Assistant Name</label>
+<input class="polaris-input w-full" type="text" value="Ava"/>
+</div>
+<div>
+<label class="block font-heading-md text-on-surface mb-1">Avatar Image</label>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center border border-outline-variant overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A futuristic, sleek, and friendly looking AI robot avatar head, styled with smooth curves and a soft glowing green accent light on a crisp white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPxnPMxt-c_RFiJwYp3CXNzVroeAV3xXUo5MGbhC2sgxx1oxdnw54VCenByX9pd2fwMK5U1G8L4kftDGBJ6QWGrwHtvAOmpGhcwemvbCzZe2-jdKGj6SZx2BB30-Q5TN7qLXQ_TXCdmF65Kdw4Myg_RH88WRKJywxT7q5hSs7S-C_539CkZzhOWuXd-RrnoYkzJ8VzsVWcVzsZjFQd_qvrjBFJExuDo8dqn3-3TtIbIT39u4OcNOCdvg"/>
+</div>
+<button class="polaris-btn-secondary text-xs py-1.5">Change Avatar</button>
+</div>
+</div>
+</div>
+<div class="mb-6">
+<label class="block font-heading-md text-on-surface mb-1">Welcome Message</label>
+<textarea class="polaris-input w-full h-20 resize-none">Hi there! 👋 I'm Ava, your virtual assistant. How can I help you today?</textarea>
+</div>
+<div class="mb-6">
+<label class="block font-heading-md text-on-surface mb-1">Input Placeholder Text</label>
+<input class="polaris-input w-full" type="text" value="Type your message here..."/>
+</div>
+<div>
+<label class="block font-heading-md text-on-surface mb-2">Quick Reply Suggestions</label>
+<p class="text-sm text-on-surface-variant mb-3">Provide chips to help users start conversations quickly.</p>
+<div class="space-y-2">
+<div class="flex gap-2">
+<input class="polaris-input flex-1 text-sm" type="text" value="Where is my order?"/>
+<button class="p-2 text-on-surface-variant hover:text-error transition-colors rounded-lg hover:bg-surface-variant"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+</div>
+<div class="flex gap-2">
+<input class="polaris-input flex-1 text-sm" type="text" value="What is your return policy?"/>
+<button class="p-2 text-on-surface-variant hover:text-error transition-colors rounded-lg hover:bg-surface-variant"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+</div>
+<div class="flex gap-2">
+<input class="polaris-input flex-1 text-sm" type="text" value="Do you ship internationally?"/>
+<button class="p-2 text-on-surface-variant hover:text-error transition-colors rounded-lg hover:bg-surface-variant"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+</div>
+<button class="text-sm text-primary-container font-medium flex items-center gap-1 mt-2 hover:underline">
+<span class="material-symbols-outlined text-[16px]">add</span> Add suggestion
+                                </button>
+</div>
+</div>
+</div>
+<div class="h-12"></div> <!-- Bottom padding -->
+</div>
+<!-- Right Column: Live Preview Area (Sticky/Fixed visually) -->
+<div class="hidden lg:flex flex-col w-[500px] border-l border-outline-variant bg-surface-container-low relative shrink-0">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface">
+<h3 class="font-heading-md text-on-surface">Live Preview</h3>
+<div class="flex gap-2">
+<button class="p-1.5 bg-surface-variant rounded text-on-surface shadow-sm"><span class="material-symbols-outlined text-[18px]">desktop_windows</span></button>
+<button class="p-1.5 text-on-surface-variant hover:bg-surface-variant rounded transition-colors"><span class="material-symbols-outlined text-[18px]">smartphone</span></button>
+</div>
+</div>
+<div class="flex-1 p-6 relative overflow-hidden bg-surface-container-low flex flex-col items-center justify-center">
+<!-- Desktop Browser Mockup Container -->
+<div class="w-full h-full max-h-[700px] bg-white rounded-xl shadow-lg border border-outline-variant overflow-hidden flex flex-col relative">
+<!-- Browser Chrome -->
+<div class="h-8 bg-surface-variant flex items-center px-3 gap-2 border-b border-outline-variant shrink-0">
+<div class="flex gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-[#ED6A5E]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#F4BF4F]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#61C554]"></div>
+</div>
+<div class="bg-white/50 h-5 flex-1 rounded text-[10px] flex items-center px-2 text-on-surface-variant ml-2 font-mono">
+                                    your-store.myshopify.com
+                                </div>
+</div>
+<!-- Storefront Mockup (Background) -->
+<div class="flex-1 relative bg-[#F9F9F9] overflow-hidden">
+<!-- Dummy Store Header -->
+<div class="h-14 bg-white border-b border-outline-variant flex justify-between items-center px-6">
+<div class="font-bold text-lg tracking-widest uppercase">Lumina</div>
+<div class="flex gap-4 text-xs text-on-surface-variant uppercase tracking-wider">
+<span>Shop</span><span>New Arrivals</span><span>About</span>
+</div>
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-[20px]">search</span>
+<span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+</div>
+</div>
+<!-- Dummy Store Hero -->
+<div class="w-full h-64 bg-surface-variant relative">
+<img class="w-full h-full object-cover opacity-80" data-alt="A modern, high-end e-commerce fashion storefront banner showing a model wearing neutral minimalist clothing in a bright, airy studio with soft shadows, exuding luxury and calm." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5-6rM82Hj1qXdVYPmHnincivOSV0eoHyv01ilrYFpJ4QRDSrRQCxvGUIbkXUpEdWDxersQMoHtFjghP7Ke-MCAR7ge8ABsA1Qxa1A87jAyM-wzEeqRvANKmlRrPH-e9jY7mEw6FB2mlphdiyadV4LBnB-x88VmxVuPVUM47HdH71CVoSFNb9YQIdyQrl3OzTJCaB7R1jHkljeMauprSBU73IvhYSTitbkEgWBzxQrgH55wGYxPOMcRg"/>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<h2 class="text-3xl font-light text-white tracking-widest mb-2 shadow-sm">SUMMER COLLECTION</h2>
+<button class="bg-white text-black px-6 py-2 text-xs uppercase tracking-wider font-medium">Shop Now</button>
+</div>
+</div>
+<div class="p-6 grid grid-cols-3 gap-4">
+<div class="h-32 bg-white border border-outline-variant rounded p-2"><div class="h-20 bg-surface-variant mb-2"></div><div class="h-2 w-3/4 bg-surface-variant mb-1"></div><div class="h-2 w-1/4 bg-surface-variant"></div></div>
+<div class="h-32 bg-white border border-outline-variant rounded p-2"><div class="h-20 bg-surface-variant mb-2"></div><div class="h-2 w-3/4 bg-surface-variant mb-1"></div><div class="h-2 w-1/4 bg-surface-variant"></div></div>
+<div class="h-32 bg-white border border-outline-variant rounded p-2"><div class="h-20 bg-surface-variant mb-2"></div><div class="h-2 w-3/4 bg-surface-variant mb-1"></div><div class="h-2 w-1/4 bg-surface-variant"></div></div>
+</div>
+<!-- ACTUAL CHAT WIDGET PREVIEW OVERLAY -->
+<!-- Open Chat Window -->
+<div class="absolute bottom-20 right-6 w-[340px] h-[480px] bg-white rounded-xl shadow-2xl border border-outline-variant flex flex-col overflow-hidden z-20 transition-all duration-300">
+<!-- Widget Header -->
+<div class="bg-primary-container text-white px-4 py-3 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center overflow-hidden border border-white/30">
+<img class="w-full h-full object-cover" data-alt="A futuristic, sleek, and friendly looking AI robot avatar head, styled with smooth curves and a soft glowing green accent light on a crisp white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDv9vhzuaVx82A1jDntPrgaooz7qwWjXKQK2ZNw0d97-jtKUshzBWloF98FElMdW75BC9ra2Fly3o4TXbuRVftLiCCfdXAbDHh01Nq2qoa3P1aLLEnLUxZJpNb3y60sL6jpZSXFSG_1f_kd1vAr2QJemuwHGSmrZE2dtOl56lbjUp8z3rjq1GHrbP1cSqsFNLYX7UmE-HcarU9-CwG7Amyp3UyuluoqoG5GzsMcso49fwIIPx-hUYppDg"/>
+</div>
+<div>
+<div class="font-medium text-sm">Ava</div>
+<div class="text-[10px] text-white/80 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#5ddda5]"></span> Typically replies instantly
+                                                </div>
+</div>
+</div>
+<div class="flex gap-1">
+<button class="p-1 text-white/80 hover:text-white rounded hover:bg-white/10"><span class="material-symbols-outlined text-[18px]">more_horiz</span></button>
+<button class="p-1 text-white/80 hover:text-white rounded hover:bg-white/10"><span class="material-symbols-outlined text-[18px]">close</span></button>
+</div>
+</div>
+<!-- Chat History Area -->
+<div class="flex-1 p-4 overflow-y-auto bg-surface-bright flex flex-col gap-4">
+<div class="text-center text-xs text-on-surface-variant my-2">Today 9:41 AM</div>
+<!-- AI Message Bubble -->
+<div class="flex gap-2 max-w-[85%]">
+<div class="w-6 h-6 rounded-full bg-surface-variant shrink-0 mt-1 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A futuristic, sleek, and friendly looking AI robot avatar head, styled with smooth curves and a soft glowing green accent light on a crisp white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWVCj4nKR-pSxphVCw56lavPnv7XcCDXF4-LPRkU2cXoj-YuwrMUmCZt-iA3p0htnZan0qY_B9Dli-2tiUXg6SIuQYX_ymw6yE-ND75xvQlO4NpJbC_AS4RMn-SPEQo67dRCRNJBT_UOP4rfkmvJWaNNoExZyG7TkYMrjgJV4bUJq6lJlex2FLBhThC5waFl9cLHq6BFjKZW8Zp4orfbnAQQbVLVRpLpCcXRIQj5Np7W6FiJWdAFT9lw"/>
+</div>
+<div class="bg-[#EDEEEF] text-on-surface p-3 rounded-2xl rounded-tl-sm text-sm shadow-sm">
+                                                Hi there! 👋 I'm Ava, your virtual assistant. How can I help you today?
+                                            </div>
+</div>
+<!-- Quick Reply Chips -->
+<div class="flex flex-col items-end gap-2 mt-2 w-full pl-8">
+<button class="bg-white border border-primary-container text-primary-container px-3 py-1.5 rounded-full text-xs font-medium hover:bg-primary-container/5 transition-colors self-end shadow-sm">
+                                                Where is my order?
+                                            </button>
+<button class="bg-white border border-primary-container text-primary-container px-3 py-1.5 rounded-full text-xs font-medium hover:bg-primary-container/5 transition-colors self-end shadow-sm">
+                                                What is your return policy?
+                                            </button>
+<button class="bg-white border border-primary-container text-primary-container px-3 py-1.5 rounded-full text-xs font-medium hover:bg-primary-container/5 transition-colors self-end shadow-sm">
+                                                Do you ship internationally?
+                                            </button>
+</div>
+</div>
+<!-- Widget Input Area -->
+<div class="p-3 border-t border-outline-variant bg-white">
+<div class="relative flex items-center">
+<input class="w-full border-none bg-surface-container-lowest focus:ring-0 text-sm py-2 pl-3 pr-10" placeholder="Type your message here..." type="text"/>
+<button class="absolute right-2 text-primary-container p-1 rounded hover:bg-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px] font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+<div class="text-center mt-2">
+<span class="text-[9px] text-on-surface-variant flex items-center justify-center gap-1">Powered by <span class="font-bold text-primary">AIChat</span></span>
+</div>
+</div>
+</div>
+<!-- Launcher Icon -->
+<div class="absolute bottom-6 right-6 w-14 h-14 bg-primary-container rounded-full shadow-lg flex items-center justify-center text-white cursor-pointer hover:scale-105 transition-transform z-10">
+<span class="material-symbols-outlined text-[28px]">close</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

@@ -2,14 +2,28 @@ import type { OnboardingState, SyncStatus } from '@drsell/shared';
 import { apiFetch } from './api';
 
 export const EXTENSION_HANDLE = 'drsell-chat';
+/** Liquid block filename (without .liquid) — required by activateAppId deep links */
+export const EMBED_BLOCK_HANDLE = 'chat-embed';
 export const CLIENT_ID =
   process.env.NEXT_PUBLIC_SHOPIFY_API_KEY || '0b36b70772220b71b2fe296b3deba914';
 
+/** HTTPS Admin deep link — `shopify://` does nothing in embedded iframe without App Bridge. */
 export function buildEmbedDeepLink(
+  shop: string,
   clientId = CLIENT_ID,
-  handle = EXTENSION_HANDLE,
+  handle = EMBED_BLOCK_HANDLE,
 ) {
-  return `shopify://admin/themes/current/editor?context=apps&activateAppId=${clientId}/${handle}`;
+  const domain = shop.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  const storeHandle = domain.replace(/\.myshopify\.com$/i, '');
+  return `https://admin.shopify.com/store/${storeHandle}/themes/current/editor?context=apps&activateAppId=${clientId}/${handle}`;
+}
+
+/** Top-level navigation so the button works inside Shopify Admin iframe. */
+export function openEmbedDeepLink(shop: string) {
+  if (!shop || typeof window === 'undefined') return;
+  const url = buildEmbedDeepLink(shop);
+  const target = window.top ?? window;
+  target.location.assign(url);
 }
 
 export function fetchOnboarding(shop: string, token: string) {

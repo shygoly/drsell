@@ -16,7 +16,7 @@
 - ADP = single platform key `ADP_DEFAULT_APP_KEY`; no merchant ADP AppKey UI
 - App i18n follows Shopify admin locale (`zh-CN` / `en`); widget browser lang P0 in `drsell-chat.js`
 - MVP excludes in-wizard knowledge base (Step 4 → Settings later)
-- Extension handle: `drsell-chat`; client_id: `0b36b70772220b71b2fe296b3deba914`
+- Extension handle: `drsell-chat`; embed block handle (deep link): `chat-embed`; client_id: `0b36b70772220b71b2fe296b3deba914`
 - Do not block wizard on sync completion; async jobs with progress polling only
 
 ---
@@ -225,9 +225,10 @@ Run `pnpm --filter @drsell/web dev`; `/app` renders with Polaris typography.
 
 ```typescript
 export const EXTENSION_HANDLE = 'drsell-chat';
+export const EMBED_BLOCK_HANDLE = 'chat-embed';
 export const CLIENT_ID = process.env.NEXT_PUBLIC_SHOPIFY_API_KEY!;
 
-export function buildEmbedDeepLink(clientId = CLIENT_ID, handle = EXTENSION_HANDLE) {
+export function buildEmbedDeepLink(clientId = CLIENT_ID, handle = EMBED_BLOCK_HANDLE) {
   return `shopify://admin/themes/current/editor?context=apps&activateAppId=${clientId}/${handle}`;
 }
 ```
@@ -273,7 +274,8 @@ Load `/app/onboarding`; skip and continue paths update API.
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { useCallback, useEffect, useState } from 'react';
 
-export function useEmbedStatus(handle = 'drsell-chat') {
+export function useEmbedStatus() {
+  // Match extension handle `drsell-chat` or block handle `chat-embed`
   const shopify = useAppBridge();
   const [live, setLive] = useState(false);
   const [loading, setLoading] = useState(true);

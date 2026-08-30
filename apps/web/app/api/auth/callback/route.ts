@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       }),
     });
     return NextResponse.redirect(
-      `${process.env.SHOPIFY_APP_URL || 'https://drsell.szchada.top'}/app?shop=${session.shop}`,
+      `${process.env.SHOPIFY_APP_URL || 'https://drsell.szchada.top'}/widget-config?shop=${session.shop}`,
     );
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });

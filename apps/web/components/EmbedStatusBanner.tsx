@@ -1,10 +1,10 @@
 'use client';
 
-import { Banner, Button } from '@shopify/polaris';
+import { Banner } from '@shopify/polaris';
 import { useTranslations } from '@/components/AppProviders';
-import { buildEmbedDeepLink } from '@/lib/onboarding';
+import { openEmbedDeepLink } from '@/lib/onboarding';
 
-export function EmbedStatusBanner({ live }: { live: boolean }) {
+export function EmbedStatusBanner({ live, shop }: { live: boolean; shop: string }) {
   const t = useTranslations();
 
   if (live) {
@@ -14,7 +14,10 @@ export function EmbedStatusBanner({ live }: { live: boolean }) {
   return (
     <Banner
       tone="warning"
-      action={{ content: t('embed.banner.enable'), onAction: () => window.open(buildEmbedDeepLink(), '_top') }}
+      action={{
+        content: t('embed.banner.enable'),
+        onAction: () => openEmbedDeepLink(shop),
+      }}
     >
       {t('embed.banner.notDeployed')}
     </Banner>

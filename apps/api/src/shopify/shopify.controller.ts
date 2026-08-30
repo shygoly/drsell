@@ -36,6 +36,9 @@ class BotSettingDto {
   @IsOptional() @IsString() botId?: string;
   @IsOptional() @IsString() chatLogo?: string;
   @IsOptional() @IsString() chatAvatar?: string;
+  @IsOptional() @IsString() widgetPrimaryColor?: string;
+  @IsOptional() @IsString() widgetPosition?: string;
+  @IsOptional() @IsString() welcomeMessage?: string;
 }
 
 @Controller('shopify')

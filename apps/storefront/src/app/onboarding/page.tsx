@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, Bot, Lock, MessagesSquare, Package, SkipForward } from "lucide-react";
+import { ArrowRight, Bot, Lock, MessagesSquare, SkipForward, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const STEPS = 5;
 
 const VALUE_PROPS = [
   { icon: MessagesSquare, label: "24/7 AI auto-reply" },
-  { icon: Package, label: "Order & shipping answers" },
+  { icon: Truck, label: "Order & shipping answers" },
   { icon: Bot, label: "Unified conversations" },
 ];
 
@@ -16,7 +16,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(0);
 
   return (
-    <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center p-4 sm:p-8">
+    <div className="bg-background flex min-h-screen items-center justify-center p-4 sm:p-8">
       <div className="flex w-full max-w-[720px] flex-col gap-8">
         {/* 进度条 */}
         <div

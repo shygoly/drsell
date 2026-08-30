@@ -34,6 +34,9 @@ apps/api/prisma/*.db
 # IDE / tooling scratch
 .playwright-mcp
 .superpowers/sdd/progress.md
+.serena/
+.workbuddy/
+_tmp_*
 
 # Legacy Coze test scripts (pre-ADP monorepo)
 test-coze-*.js

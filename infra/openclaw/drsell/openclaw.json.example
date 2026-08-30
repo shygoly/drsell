@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.6.6"
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "deepseek-v4": {
+        "baseUrl": "https://api.deepseek.com/v1",
+        "apiKey": "REPLACE_WITH_DEEPSEEK_API_KEY",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "deepseek-v4-pro",
+            "name": "DeepSeek V4 Pro",
+            "reasoning": true,
+            "input": ["text"],
+            "contextWindow": 1048576,
+            "maxTokens": 8192
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "deepseek-v4/deepseek-v4-pro",
+        "fallbacks": []
+      },
+      "workspace": "/root/.openclaw/workspace-drsell",
+      "maxConcurrent": 4
+    }
+  },
+  "gateway": {
+    "port": 18790,
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "REPLACE_WITH_GATEWAY_TOKEN"
+    },
+    "http": {
+      "endpoints": {
+        "chatCompletions": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "mcp": {
+    "servers": {
+      "drsell-pg": {
+        "command": "node",
+        "args": [
+          "/usr/lib/node_modules/@modelcontextprotocol/server-postgres/dist/index.js",
+          "postgresql://adp_reader:REPLACE_ADP_READER_PASSWORD@127.0.0.1:5432/drsell?sslmode=disable"
+        ]
+      }
+    }
+  }
+}

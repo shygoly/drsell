@@ -23,6 +23,11 @@ const TOP_TABS = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
+  // Stitch onboarding_welcome 是独立欢迎屏，不含 Sidebar/TopBar。
+  if (pathname === "/onboarding") {
+    return <>{children}</>;
+  }
+
   return (
     <div className="flex h-screen overflow-hidden">
       <SidebarNav />

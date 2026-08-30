@@ -9,18 +9,21 @@ import {
   TextField,
   Text,
   BlockStack,
+  InlineStack,
 } from '@shopify/polaris';
 import { useTranslations } from '@/components/AppProviders';
-import { buildEmbedDeepLink } from '@/lib/onboarding';
+import { openEmbedDeepLink } from '@/lib/onboarding';
 import { useEmbedStatus } from '@/hooks/useEmbedStatus';
 
 export function WidgetStep({
+  shop,
   color,
   position,
   welcome,
   onChange,
   onLive,
 }: {
+  shop: string;
   color: string;
   position: 'bottom-right' | 'bottom-left';
   welcome: string;
@@ -37,11 +40,6 @@ export function WidgetStep({
   useEffect(() => {
     if (live) onLive();
   }, [live, onLive]);
-
-  const openThemeEditor = () => {
-    const url = buildEmbedDeepLink();
-    window.open(url, '_top');
-  };
 
   return (
     <Card>
@@ -70,9 +68,15 @@ export function WidgetStep({
           onChange={(v) => onChange({ welcome: v })}
           autoComplete="off"
         />
-        <Button variant="primary" onClick={openThemeEditor}>
-          {t('onboarding.step3.enable')}
-        </Button>
+        <Banner tone="info">{t('onboarding.step3.manualHint')}</Banner>
+        <InlineStack gap="300">
+          <Button variant="primary" onClick={() => openEmbedDeepLink(shop)}>
+            {t('onboarding.step3.enable')}
+          </Button>
+          {!live && (
+            <Button onClick={() => onLive()}>{t('onboarding.step3.confirmEnabled')}</Button>
+          )}
+        </InlineStack>
         {loading && !live && (
           <Banner tone="info">{t('onboarding.step3.waiting')}</Banner>
         )}

@@ -118,6 +118,9 @@ export class ShopifyService {
       botId?: string;
       chatLogo?: string;
       chatAvatar?: string;
+      widgetPrimaryColor?: string;
+      widgetPosition?: string;
+      welcomeMessage?: string;
     },
   ) {
     const setting = await this.getOrCreateBotSetting(shopDomain);

@@ -8,10 +8,17 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+const SHOPIFY_API_KEY =
+  process.env.NEXT_PUBLIC_SHOPIFY_API_KEY ||
+  "0b36b70772220b71b2fe296b3deba914";
+
 export const metadata: Metadata = {
   title: "AIChat Merchant Dashboard",
   description:
     "Shopify AI customer service dashboard — converted from Google Stitch via P0-P8 pipeline",
+  other: {
+    "shopify-api-key": SHOPIFY_API_KEY,
+  },
 };
 
 export default function RootLayout({
@@ -21,6 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* App Bridge 异步加载：避免阻塞 iframe 首帧渲染；需要桥接能力时再初始化 */}
+        <script
+          src="https://cdn.shopify.com/shopifycloud/app-bridge.js"
+          async
+        />
+      </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <AppShell>{children}</AppShell>
       </body>

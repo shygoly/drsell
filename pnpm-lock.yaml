@@ -20,6 +20,9 @@ importers:
       '@drsell/adp':
         specifier: workspace:*
         version: link:../../packages/adp
+      '@drsell/openclaw':
+        specifier: workspace:*
+        version: link:../../packages/openclaw
       '@drsell/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -212,6 +215,18 @@ importers:
       '@drsell/shared':
         specifier: workspace:*
         version: link:../shared
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@22.20.1)(ts-node@10.9.2)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/openclaw:
     devDependencies:
       '@types/node':
         specifier: ^22.15.21

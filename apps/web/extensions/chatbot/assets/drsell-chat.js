@@ -2,7 +2,7 @@
   var root = document.getElementById('drsell-chat-root');
   if (!root) return;
   var shop = root.getAttribute('data-shop') || '';
-  var apiBase = window.DRSELL_API_BASE || 'https://drsell.szchada.top/api/backend';
+  var apiBase = window.DRSELL_API_BASE || 'https://drsell.szchada.top/api';
   var lang = (navigator.language || 'en').toLowerCase().startsWith('zh') ? 'zh' : 'en';
   var UI = {
     zh: { title: 'Drsell 助手', placeholder: '输入问题…', send: '发送', me: '我', bot: '助手', system: '系统' },

@@ -29,7 +29,7 @@ function AppHomeInner() {
   return (
     <Page title="Drsell">
       <BlockStack gap="400">
-        <EmbedStatusBanner live={activated} />
+        <EmbedStatusBanner live={activated} shop={shop} />
         <Text as="p" tone="subdued">
           店铺：{shop || '—'}
         </Text>

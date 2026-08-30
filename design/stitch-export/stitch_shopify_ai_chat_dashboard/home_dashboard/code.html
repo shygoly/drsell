@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AIChat Merchant Dashboard</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary": "#ffffff",
+                    "on-primary-container": "#003421",
+                    "primary-fixed": "#7bfac0",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#5ddda5",
+                    "surface-bright": "#f6fafe",
+                    "surface-container-highest": "#dfe3e7",
+                    "on-primary-fixed": "#002113",
+                    "outline": "#6d7a71",
+                    "surface-container": "#ebeef3",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-container": "#3f6d5c",
+                    "primary-fixed-dim": "#5ddda5",
+                    "error-container": "#ffdad6",
+                    "surface-container-high": "#e5e8ed",
+                    "inverse-surface": "#2d3134",
+                    "tertiary-container": "#46a47c",
+                    "on-tertiary-fixed-variant": "#005237",
+                    "tertiary": "#006c4a",
+                    "on-error": "#ffffff",
+                    "on-primary-fixed-variant": "#005236",
+                    "primary": "#006c49",
+                    "on-secondary-fixed": "#002117",
+                    "surface": "#f6fafe",
+                    "tertiary-fixed": "#97f5c8",
+                    "secondary": "#396756",
+                    "on-background": "#181c1f",
+                    "on-tertiary-container": "#003421",
+                    "surface-tint": "#006c49",
+                    "error": "#ba1a1a",
+                    "surface-container-low": "#f1f4f8",
+                    "on-tertiary-fixed": "#002114",
+                    "outline-variant": "#bccac0",
+                    "secondary-fixed": "#bbedd7",
+                    "on-surface-variant": "#3d4a42",
+                    "tertiary-fixed-dim": "#7bd9ad",
+                    "primary-container": "#12a875",
+                    "inverse-on-surface": "#eef1f5",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#d7dadf",
+                    "secondary-container": "#bbedd7",
+                    "surface-variant": "#dfe3e7",
+                    "background": "#f6fafe",
+                    "on-secondary-fixed-variant": "#204f3f",
+                    "on-tertiary": "#ffffff",
+                    "secondary-fixed-dim": "#a0d1bc",
+                    "on-surface": "#181c1f"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sm": "8px",
+                    "gutter": "20px",
+                    "base": "4px",
+                    "lg": "24px",
+                    "xl": "32px",
+                    "md": "16px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["\"Inter\", -apple-system, system-ui"],
+                    "heading-md": ["\"Inter\", -apple-system, system-ui"],
+                    "heading-lg": ["\"Inter\", -apple-system, system-ui"],
+                    "display-lg": ["\"Inter\", -apple-system, system-ui"],
+                    "label-md": ["\"Inter\", -apple-system, system-ui"],
+                    "body-sm": ["\"Inter\", -apple-system, system-ui"]
+            },
+            "fontSize": {
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "heading-md": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "heading-lg": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-lg": ["28px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { background-color: #F6F7F9; }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        .polaris-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #E1E3E5;
+            box-shadow: none;
+        }
+        .polaris-btn-primary {
+            background-color: #12a875;
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .polaris-btn-primary:hover {
+            background-color: #0f8f63;
+        }
+        .polaris-btn-secondary {
+            background-color: transparent;
+            color: #12a875;
+            border: 1px solid #12a875;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .polaris-btn-secondary:hover {
+            background-color: rgba(18, 168, 117, 0.05);
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface h-screen overflow-hidden flex">
+<!-- SideNavBar (Shared Component) -->
+<nav class="bg-surface dark:bg-surface-dim h-screen w-64 border-r border-outline-variant flex flex-col hidden md:flex shrink-0">
+<div class="p-lg flex items-center gap-sm">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+</div>
+<div>
+<h1 class="font-heading-lg text-heading-lg font-bold text-on-primary-fixed">AIChat</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Green Tech AI</p>
+</div>
+</div>
+<div class="px-md pb-md">
+<button class="w-full flex items-center justify-center gap-sm bg-primary-container text-on-primary rounded-lg py-2 px-4 font-label-md text-label-md hover:bg-opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Automation
+            </button>
+</div>
+<div class="flex-1 overflow-y-auto py-sm">
+<ul class="space-y-1 px-md">
+<li>
+<a class="flex items-center gap-md px-3 py-2 rounded-lg text-primary font-heading-md border-r-4 border-primary bg-primary-container/10" href="#">
+<span class="material-symbols-outlined" data-icon="home" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home</span>
+                        Home
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+                        Inbox
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+                        AI Assistant
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+                        Widget Config
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+                        Customers
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+                        Analytics
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                        Settings
+                    </a>
+</li>
+</ul>
+</div>
+<div class="p-md border-t border-outline-variant">
+<ul class="space-y-1">
+<li>
+<a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                        Support
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+                        Documentation
+                    </a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar (Shared Component) -->
+<header class="bg-surface dark:bg-surface-dim border-b border-outline-variant flex justify-between items-center h-14 px-gutter w-full shrink-0">
+<div class="flex items-center gap-lg">
+<div class="md:hidden font-heading-md text-heading-md text-primary">AIChat</div>
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="pl-8 pr-3 py-1.5 rounded-lg border border-outline-variant focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 text-body-sm font-body-sm w-64 bg-surface-container-lowest" placeholder="Search..." type="text"/>
+</div>
+<nav class="hidden md:flex items-center gap-md h-full">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 h-full flex items-center mt-[2px]" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:text-primary transition-opacity opacity-80 hover:opacity-100 h-full flex items-center" href="#">History</a>
+<a class="text-on-surface-variant hover:text-primary transition-opacity opacity-80 hover:opacity-100 h-full flex items-center" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<button class="polaris-btn-secondary font-label-md text-label-md hidden md:block">Quick Settings</button>
+<button class="polaris-btn-primary font-label-md text-label-md hidden md:block">Test Widget</button>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<button class="p-1 hover:bg-surface-container-highest rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-1 hover:bg-surface-container-highest rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+</div>
+<img alt="Merchant Profile" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A small, circular avatar image showing a professional merchant profile picture. The lighting is bright and modern, conveying a trustworthy and clean aesthetic suited for a high-end e-commerce admin dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4nBr9vzskziQtaTztsuFBgQPt_oJHKIEaCDNtMBorFi_qDCiJg1tK_Lhl7nebthee9Cbw16zk6O4qJXXsiZtdFaVakhMAuOImbt_BTTR57rjSzf4ilgFCYrhJkqH6FfnpJCBX6mav2TkXydbqW3D4d45kw4IsTPscgmw_sgIhAq4W6TsjNM9iRPfAuyoylz4rWwe8S9djXfM-WD_BF3ppQltg6EdcBa0FinuPnKQY7VsOKfiFEmc49Q"/>
+</div>
+</header>
+<!-- StatusBanner (Shared Component) -->
+<div class="bg-secondary-container dark:bg-on-secondary-fixed-variant flex items-center justify-between py-2 px-gutter w-full shrink-0 border-b border-outline-variant">
+<div class="flex items-center gap-lg font-label-md text-label-md text-on-secondary-container dark:text-secondary-fixed">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-bold">Widget live</span>
+</div>
+<span class="text-on-surface-variant/50">•</span>
+<span>AI: Active</span>
+<span class="text-on-surface-variant/50">•</span>
+<span>42 conversations today</span>
+<span class="text-on-surface-variant/50">•</span>
+<span>68% AI resolution</span>
+</div>
+<div class="flex items-center gap-3 md:hidden">
+<button class="polaris-btn-secondary text-xs px-2 py-1">Quick Settings</button>
+<button class="polaris-btn-primary text-xs px-2 py-1">Test Widget</button>
+</div>
+</div>
+<!-- Dashboard Canvas -->
+<main class="flex-1 overflow-y-auto p-lg">
+<div class="max-w-[1600px] mx-auto space-y-lg">
+<!-- Header -->
+<div class="flex items-center justify-between">
+<h2 class="font-display-lg text-display-lg text-[#0A3D2E]">Overview</h2>
+<select class="border-outline-variant rounded-lg text-body-sm font-body-sm bg-surface-container-lowest focus:border-primary-container focus:ring-2 focus:ring-primary-container/20">
+<option>Today</option>
+<option>Last 7 days</option>
+<option>Last 30 days</option>
+</select>
+</div>
+<!-- Stats Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
+<!-- Stat 1 -->
+<div class="polaris-card p-md flex flex-col gap-sm">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">chat</span>
+<span class="font-body-sm text-body-sm">Today's conversations</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-heading-lg text-heading-lg text-[#0A3D2E] text-2xl">42</span>
+<span class="font-label-md text-label-md text-primary-container bg-primary-container/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> 12%
+                            </span>
+</div>
+</div>
+<!-- Stat 2 -->
+<div class="polaris-card p-md flex flex-col gap-sm">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+<span class="font-body-sm text-body-sm">AI resolution</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-heading-lg text-heading-lg text-[#0A3D2E] text-2xl">68%</span>
+<span class="font-label-md text-label-md text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
+                                Target: 70%
+                            </span>
+</div>
+</div>
+<!-- Stat 3 -->
+<div class="polaris-card p-md flex flex-col gap-sm">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">timer</span>
+<span class="font-body-sm text-body-sm">Avg first response</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-heading-lg text-heading-lg text-[#0A3D2E] text-2xl">12s</span>
+<span class="font-label-md text-label-md text-primary-container bg-primary-container/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_down</span> 2s
+                            </span>
+</div>
+</div>
+<!-- Stat 4 -->
+<div class="polaris-card p-md flex flex-col gap-sm">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">support_agent</span>
+<span class="font-body-sm text-body-sm">Pending takeover</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-heading-lg text-heading-lg text-[#ba1a1a] text-2xl">3</span>
+<span class="font-label-md text-label-md text-[#ba1a1a] bg-error-container px-2 py-0.5 rounded-full">
+                                Action needed
+                            </span>
+</div>
+</div>
+</div>
+<!-- Main Layout Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Left Column (2/3) -->
+<div class="lg:col-span-2 space-y-lg">
+<!-- Chart Card -->
+<div class="polaris-card p-lg flex flex-col gap-md">
+<div class="flex items-center justify-between">
+<h3 class="font-heading-md text-heading-md text-[#0A3D2E]">Conversation Volume (30 Days)</h3>
+<div class="flex items-center gap-4 font-body-sm text-body-sm">
+<div class="flex items-center gap-1">
+<div class="w-3 h-3 rounded bg-[#EDEEEF]"></div>
+<span class="text-on-surface-variant">Human</span>
+</div>
+<div class="flex items-center gap-1">
+<div class="w-3 h-3 rounded bg-primary-container"></div>
+<span class="text-on-surface-variant">AI Resolved</span>
+</div>
+</div>
+</div>
+<!-- Dummy Chart Area (CSS Styled) -->
+<div class="h-64 w-full relative mt-4 border-l border-b border-outline-variant/30 flex items-end justify-between px-2 pb-2 pt-8">
+<!-- Grid Lines -->
+<div class="absolute inset-0 flex flex-col justify-between opacity-10 pointer-events-none">
+<div class="border-b border-on-surface-variant w-full h-0"></div>
+<div class="border-b border-on-surface-variant w-full h-0"></div>
+<div class="border-b border-on-surface-variant w-full h-0"></div>
+<div class="border-b border-on-surface-variant w-full h-0"></div>
+<div class="border-b border-on-surface-variant w-full h-0"></div>
+</div>
+<!-- Bar 1 -->
+<div class="w-1/12 flex flex-col justify-end h-full gap-1 items-center z-10 group relative">
+<div class="w-4/5 bg-primary-container rounded-t-sm" style="height: 40%"></div>
+<div class="w-4/5 bg-[#EDEEEF] rounded-t-sm" style="height: 10%"></div>
+</div>
+<!-- Bar 2 -->
+<div class="w-1/12 flex flex-col justify-end h-full gap-1 items-center z-10 group relative">
+<div class="w-4/5 bg-primary-container rounded-t-sm" style="height: 55%"></div>
+<div class="w-4/5 bg-[#EDEEEF] rounded-t-sm" style="height: 15%"></div>
+</div>
+<!-- Bar 3 -->
+<div class="w-1/12 flex flex-col justify-end h-full gap-1 items-center z-10 group relative">
+<div class="w-4/5 bg-primary-container rounded-t-sm" style="height: 45%"></div>
+<div class="w-4/5 bg-[#EDEEEF] rounded-t-sm" style="height: 20%"></div>
+</div>
+<!-- Bar 4 -->
+<div class="w-1/12 flex flex-col justify-end h-full gap-1 items-center z-10 group relative">
+<div class="w-4/5 bg-primary-container rounded-t-sm" style="height: 70%"></div>
+<div class="w-4/5 bg-[#EDEEEF] rounded-t-sm" style="height: 5%"></div>
+</div>
+<!-- Bar 5 -->
+<div class="w-1/12 flex flex-col justify-end h-full gap-1 items-center z-10 group relative">
+<div class="w-4/5 bg-primary-container rounded-t-sm" style="height: 60%"></div>
+<div class="w-4/5 bg-[#EDEEEF] rounded-t-sm" style="height: 25%"></div>
+</div>
+<!-- Bar 6 -->
+<div class="w-1/12 flex flex-col justify-end h-full gap-1 items-center z-10 group relative">
+<div class="w-4/5 bg-primary-container rounded-t-sm" style="height: 80%"></div>
+<div class="w-4/5 bg-[#EDEEEF] rounded-t-sm" style="height: 10%"></div>
+</div>
+<!-- Bar 7 -->
+<div class="w-1/12 flex flex-col justify-end h-full gap-1 items-center z-10 group relative">
+<div class="w-4/5 bg-primary-container rounded-t-sm" style="height: 90%"></div>
+<div class="w-4/5 bg-[#EDEEEF] rounded-t-sm" style="height: 5%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column (1/3) -->
+<div class="lg:col-span-1 space-y-lg">
+<!-- AI Suggestion Card -->
+<div class="polaris-card p-lg bg-surface-bright border-primary-container/30 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary-container/5 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-start gap-md relative z-10">
+<div class="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center text-primary-container shrink-0 mt-1">
+<span class="material-symbols-outlined text-[18px]">lightbulb</span>
+</div>
+<div class="flex flex-col gap-2">
+<h4 class="font-heading-md text-heading-md text-[#0A3D2E]">Knowledge Base Optimization</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Your knowledge base lacks a returns policy answer — add it to resolve ~15% more questions automatically.</p>
+<button class="polaris-btn-primary self-start mt-2 text-sm py-1.5">Add now</button>
+</div>
+</div>
+</div>
+<!-- Live Conversations List -->
+<div class="polaris-card flex flex-col">
+<div class="p-md border-b border-outline-variant/50 flex justify-between items-center">
+<h3 class="font-heading-md text-heading-md text-[#0A3D2E] flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#12A875] animate-pulse"></span>
+                                    Live Conversations
+                                </h3>
+<a class="font-label-md text-label-md text-primary-container hover:underline" href="#">View all</a>
+</div>
+<div class="flex flex-col divide-y divide-outline-variant/30">
+<!-- Row 1 -->
+<div class="p-md hover:bg-surface-container-lowest/50 cursor-pointer transition-colors flex items-start gap-3 relative group">
+<div class="w-8 h-8 rounded-full bg-[#E1E3E5] flex items-center justify-center font-heading-md text-heading-md text-on-surface-variant shrink-0">
+                                        JS
+                                    </div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<span class="font-heading-md text-heading-md text-on-surface truncate pr-2">John Smith</span>
+<span class="font-label-md text-label-md text-on-surface-variant/70 shrink-0">Just now</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">storefront</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Where is my order #10294?</p>
+</div>
+</div>
+<div class="w-2 h-2 rounded-full bg-primary-container absolute right-md top-1/2 -translate-y-1/2 opacity-100 group-hover:scale-110 transition-transform"></div>
+</div>
+<!-- Row 2 -->
+<div class="p-md hover:bg-surface-container-lowest/50 cursor-pointer transition-colors flex items-start gap-3 relative">
+<div class="w-8 h-8 rounded-full bg-[#E1E3E5] flex items-center justify-center font-heading-md text-heading-md text-on-surface-variant shrink-0">
+                                        AL
+                                    </div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<span class="font-heading-md text-heading-md text-on-surface truncate pr-2">Amanda Lee</span>
+<span class="font-label-md text-label-md text-on-surface-variant/70 shrink-0">2m ago</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">smartphone</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Do you ship to Canada?</p>
+</div>
+</div>
+<div class="w-2 h-2 rounded-full bg-primary-container absolute right-md top-1/2 -translate-y-1/2 opacity-100"></div>
+</div>
+<!-- Row 3 -->
+<div class="p-md hover:bg-surface-container-lowest/50 cursor-pointer transition-colors flex items-start gap-3 relative">
+<div class="w-8 h-8 rounded-full bg-[#E1E3E5] flex items-center justify-center font-heading-md text-heading-md text-on-surface-variant shrink-0">
+                                        MK
+                                    </div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<span class="font-heading-md text-heading-md text-on-surface truncate pr-2 opacity-70">Mike Kowalski</span>
+<span class="font-label-md text-label-md text-on-surface-variant/70 shrink-0">5m ago</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">mail</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate opacity-70">Can I exchange for a larger size?</p>
+</div>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="p-md hover:bg-surface-container-lowest/50 cursor-pointer transition-colors flex items-start gap-3 relative">
+<div class="w-8 h-8 rounded-full bg-[#E1E3E5] flex items-center justify-center font-heading-md text-heading-md text-on-surface-variant shrink-0">
+                                        SJ
+                                    </div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<span class="font-heading-md text-heading-md text-on-surface truncate pr-2 opacity-70">Sarah Jones</span>
+<span class="font-label-md text-label-md text-on-surface-variant/70 shrink-0">12m ago</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">storefront</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate opacity-70">Thanks for the quick reply!</p>
+</div>
+</div>
+</div>
+<!-- Row 5 -->
+<div class="p-md hover:bg-surface-container-lowest/50 cursor-pointer transition-colors flex items-start gap-3 relative">
+<div class="w-8 h-8 rounded-full bg-[#ba1a1a]/10 flex items-center justify-center font-heading-md text-heading-md text-[#ba1a1a] shrink-0">
+                                        !
+                                    </div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<span class="font-heading-md text-heading-md text-[#ba1a1a] truncate pr-2">Guest 992</span>
+<span class="font-label-md text-label-md text-on-surface-variant/70 shrink-0">15m ago</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">storefront</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate font-medium">Agent takeover requested</p>
+</div>
+</div>
+<div class="w-2 h-2 rounded-full bg-[#ba1a1a] absolute right-md top-1/2 -translate-y-1/2 opacity-100"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

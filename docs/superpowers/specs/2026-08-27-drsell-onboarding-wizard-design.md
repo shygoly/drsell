@@ -91,9 +91,9 @@ flowchart LR
 1. Save widget prefs via `PATCH /shopify/onboarding`
 2. **Enable widget** → App Bridge deep link to theme editor App Embed:
    ```
-   shopify://admin/themes/current/editor?context=apps&activateAppId={client_id}/drsell-chat
+   shopify://admin/themes/current/editor?context=apps&activateAppId={client_id}/chat-embed
    ```
-3. Poll `shopify.app.extensions()` until `drsell-chat` activation = live
+3. Poll `shopify.app.extensions()` until `drsell-chat` or `chat-embed` activation = live
 4. On live: set `embedLiveAt`, mark activated, proceed to Step 5
 
 **Homepage banner (persistent):** Live (green) / Not deployed (orange) + deep link CTA.
@@ -184,8 +184,8 @@ Auth: existing shop session JWT from embedded app (replace dev manual shop login
 
 ### Embed status detection
 
-1. **Client:** `useAppBridge()` → `shopify.app.extensions()` — check `drsell-chat` theme extension activation on published theme
-2. **Deep link:** `activateAppId={SHOPIFY_API_KEY}/drsell-chat` (extension handle from `shopify.extension.toml`)
+1. **Client:** `useAppBridge()` → `shopify.app.extensions()` — check `drsell-chat` (extension) or `chat-embed` (block) activation on published theme
+2. **Deep link:** `activateAppId={SHOPIFY_API_KEY}/chat-embed` (Liquid block filename, not extension name)
 3. **Server mirror (optional P1):** Admin GraphQL `themeAppExtensions` for analytics
 
 ### Internationalization

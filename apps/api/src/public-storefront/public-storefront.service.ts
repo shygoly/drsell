@@ -19,7 +19,6 @@ export class PublicStorefrontService {
       (await this.prisma.botSetting.create({
         data: { shopId: shop.id, shopName: shop.shopDomain },
       }));
-    // Never return adpAppKey to the browser
     return {
       shopId: shop.shopDomain,
       shopName: setting.shopName,
@@ -52,10 +51,6 @@ export class PublicStorefrontService {
     });
   }
 
-  async resolveAppKey(_shopDomain: string) {
-    return process.env.ADP_DEFAULT_APP_KEY || '';
-  }
-
   chat(params: {
     shopDomain: string;
     text: string;
@@ -64,15 +59,13 @@ export class PublicStorefrontService {
     onChunk: (c: string) => void;
     signal?: AbortSignal;
   }) {
-    return this.resolveAppKey(params.shopDomain).then((appKey) =>
-      this.adp.proxyChatSse({
-        appKey,
-        visitorId: params.visitorId,
-        text: params.text,
-        conversationId: params.conversationId,
-        onChunk: params.onChunk,
-        signal: params.signal,
-      }),
-    );
+    return this.adp.proxyChatSse({
+      shopDomain: params.shopDomain,
+      visitorId: params.visitorId,
+      text: params.text,
+      conversationId: params.conversationId,
+      onChunk: params.onChunk,
+      signal: params.signal,
+    });
   }
 }
