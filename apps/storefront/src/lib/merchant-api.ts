@@ -24,7 +24,12 @@ export type BotSettingRecord = {
   id: string;
   shopName: string | null;
   widgetPrimaryColor: string | null;
+  widgetHeaderColor: string | null;
   widgetPosition: string | null;
+  widgetWindowSize: string | null;
+  widgetLauncherStyle: string | null;
+  widgetVisible: boolean | null;
+  widgetQuickReplies: string[] | null;
   welcomeMessage: string | null;
 };
 
@@ -41,7 +46,12 @@ export async function saveBotSettings(
   data: {
     shopName?: string;
     widgetPrimaryColor?: string;
+    widgetHeaderColor?: string;
     widgetPosition?: string;
+    widgetWindowSize?: string;
+    widgetLauncherStyle?: string;
+    widgetVisible?: boolean;
+    widgetQuickReplies?: string[];
     welcomeMessage?: string;
   },
 ) {

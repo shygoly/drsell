@@ -85,9 +85,24 @@ function WidgetConfigInner() {
           s.welcomeMessage || "Hi! I'm Ava. How can I help you today?",
         );
         setPrimaryColor(s.widgetPrimaryColor || "#006c49");
+        setHeaderColor(s.widgetHeaderColor || s.widgetPrimaryColor || "#006c49");
         setPosition(
           s.widgetPosition === "bottom-left" ? "bottom-left" : "bottom-right",
         );
+        setWindowSize(
+          s.widgetWindowSize === "small" || s.widgetWindowSize === "large"
+            ? s.widgetWindowSize
+            : "medium",
+        );
+        setLauncherStyle(
+          s.widgetLauncherStyle === "question" || s.widgetLauncherStyle === "custom"
+            ? s.widgetLauncherStyle
+            : "chat",
+        );
+        setShowWidget(s.widgetVisible ?? true);
+        if (Array.isArray(s.widgetQuickReplies) && s.widgetQuickReplies.length > 0) {
+          setQuickReplies(s.widgetQuickReplies);
+        }
       })
       .catch(() => {
         // Embedded/offline preview: saved settings may be unreachable; keep defaults.
@@ -106,7 +121,12 @@ function WidgetConfigInner() {
         shopName: widgetName,
         welcomeMessage: welcomeMsg,
         widgetPrimaryColor: primaryColor,
+        widgetHeaderColor: headerColor,
         widgetPosition: position,
+        widgetWindowSize: windowSize,
+        widgetLauncherStyle: launcherStyle,
+        widgetVisible: showWidget,
+        widgetQuickReplies: quickReplies,
       });
       setStatus("Configuration saved.");
     } catch (e) {

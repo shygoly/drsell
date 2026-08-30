@@ -19,6 +19,9 @@ export class PublicStorefrontService {
       (await this.prisma.botSetting.create({
         data: { shopId: shop.id, shopName: shop.shopDomain },
       }));
+    const quickReplies = Array.isArray(setting.widgetQuickReplies)
+      ? setting.widgetQuickReplies.filter((x): x is string => typeof x === 'string')
+      : [];
     return {
       shopId: shop.shopDomain,
       shopName: setting.shopName,
@@ -26,7 +29,12 @@ export class PublicStorefrontService {
       chatLogo: setting.chatLogo,
       chatAvatar: setting.chatAvatar,
       widgetPrimaryColor: setting.widgetPrimaryColor ?? '#008060',
+      widgetHeaderColor: setting.widgetHeaderColor ?? setting.widgetPrimaryColor ?? '#008060',
       widgetPosition: setting.widgetPosition ?? 'bottom-right',
+      widgetWindowSize: setting.widgetWindowSize ?? 'medium',
+      widgetLauncherStyle: setting.widgetLauncherStyle ?? 'chat',
+      widgetVisible: setting.widgetVisible ?? true,
+      widgetQuickReplies: quickReplies,
       welcomeMessage: setting.welcomeMessage,
     };
   }
@@ -37,7 +45,12 @@ export class PublicStorefrontService {
       shopDomain: base.shopId,
       shopName: base.shopName,
       widgetPrimaryColor: base.widgetPrimaryColor,
+      widgetHeaderColor: base.widgetHeaderColor,
       widgetPosition: base.widgetPosition,
+      widgetWindowSize: base.widgetWindowSize,
+      widgetLauncherStyle: base.widgetLauncherStyle,
+      widgetVisible: base.widgetVisible,
+      widgetQuickReplies: base.widgetQuickReplies,
       welcomeMessage: base.welcomeMessage,
     };
   }

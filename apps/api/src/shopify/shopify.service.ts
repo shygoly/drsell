@@ -3,6 +3,7 @@ import '@shopify/shopify-api/adapters/node';
 import { ApiVersion, shopifyApi } from '@shopify/shopify-api';
 import { verifyShopifyWebhookHmac, shopifyGraphql } from '@drsell/shopify';
 import { Decimal } from '@prisma/client/runtime/library';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantService } from '../tenant/tenant.service';
 import { AuthService } from '../auth/auth.service';
@@ -162,14 +163,24 @@ export class ShopifyService {
       chatLogo?: string;
       chatAvatar?: string;
       widgetPrimaryColor?: string;
+      widgetHeaderColor?: string;
       widgetPosition?: string;
+      widgetWindowSize?: string;
+      widgetLauncherStyle?: string;
+      widgetVisible?: boolean;
+      widgetQuickReplies?: string[];
       welcomeMessage?: string;
     },
   ) {
     const setting = await this.getOrCreateBotSetting(shopDomain);
     return this.prisma.botSetting.update({
       where: { id: setting.id },
-      data,
+      data: {
+        ...data,
+        widgetQuickReplies: data.widgetQuickReplies
+          ? (data.widgetQuickReplies as Prisma.InputJsonValue)
+          : undefined,
+      },
     });
   }
 

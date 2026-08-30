@@ -108,3 +108,11 @@
 - [x] API 增加 `@shopify/shopify-api` 依赖，用 `decodeSessionToken` 校验 App Bridge session token，并补充 Node adapter。
 - [x] 修复 app-bridge-types 全局 JSX 对 `Button` `variant` 属性的类型冲突（Button 类型改为 `Omit<..., "variant">`）。
 - [x] Admin Widget Config 验证通过：显示 `Store: chatbotdomaintest.myshopify.com`、`● Live`，无 Preview mode。
+
+## Round 6 进展（Widget 配置 → 访客提问全链路）
+- [x] BotSetting 扩展字段：widgetHeaderColor / widgetWindowSize / widgetLauncherStyle / widgetVisible / widgetQuickReplies，并新增迁移。
+- [x] API 保存/读取全量 widget 配置，公开 `/api/public/widget-config` 返回新字段。
+- [x] storefront Widget Config 保存/回填全部新配置项。
+- [x] 重写 `drsell-chat.js`：支持 launcher、开合、headerColor、windowSize、quickReplies、widgetVisible、流式输出。
+- [x] 线上 API 实测：保存全量配置成功；公开 widget-config 返回新字段；`/public/chat` 经 OpenClaw 回答订单问题成功。
+- [ ] 注意：theme app extension 资产 `drsell-chat.js` 的线上生效需要单独执行 `shopify app deploy`（当前部署脚本不发布扩展）。

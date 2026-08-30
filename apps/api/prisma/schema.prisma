@@ -66,7 +66,12 @@ model BotSetting {
   onboardingCompletedAt DateTime?
   embedLiveAt           DateTime?
   widgetPrimaryColor    String?   @default("#008060")
+  widgetHeaderColor     String?   @default("#008060")
   widgetPosition        String?   @default("bottom-right")
+  widgetWindowSize      String?   @default("medium")
+  widgetLauncherStyle   String?   @default("chat")
+  widgetVisible         Boolean?  @default(true)
+  widgetQuickReplies    Json?
   welcomeMessage        String?
   welcomeMessageI18n    Json?
   syncProductsEnabled   Boolean   @default(true)

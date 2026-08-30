@@ -11,7 +11,7 @@ import {
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
-import { IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
 import { Auth } from '../common/auth.decorators';
@@ -42,7 +42,12 @@ class BotSettingDto {
   @IsOptional() @IsString() chatLogo?: string;
   @IsOptional() @IsString() chatAvatar?: string;
   @IsOptional() @IsString() widgetPrimaryColor?: string;
+  @IsOptional() @IsString() widgetHeaderColor?: string;
   @IsOptional() @IsString() widgetPosition?: string;
+  @IsOptional() @IsString() widgetWindowSize?: string;
+  @IsOptional() @IsString() widgetLauncherStyle?: string;
+  @IsOptional() @IsBoolean() widgetVisible?: boolean;
+  @IsOptional() @IsArray() @IsString({ each: true }) widgetQuickReplies?: string[];
   @IsOptional() @IsString() welcomeMessage?: string;
 }
 
