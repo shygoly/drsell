@@ -7,21 +7,23 @@ REMOTE="${REMOTE_DIR:-/opt/drsell-run}"
 
 cd "$ROOT"
 
-echo "==> Build packages + api + web"
+echo "==> Build packages + api + storefront"
 pnpm --filter @drsell/shared build
 pnpm --filter @drsell/shopify build
 pnpm --filter @drsell/adp build
+pnpm --filter @drsell/openclaw build
 pnpm --filter @drsell/api exec prisma generate
 pnpm --filter @drsell/api build
+
 # shellcheck disable=SC1091
 set -a
-# load keys for next build if present
-[[ -f apps/web/.env ]] && . apps/web/.env || true
+[[ -f apps/storefront/.env ]] && . apps/storefront/.env || true
+export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://drsell.szchada.top/api}"
 set +a
-pnpm --filter @drsell/web build
+pnpm --filter @drsell/storefront build
 
 echo "==> Prepare remote layout"
-ssh "$HOST" "mkdir -p ${REMOTE}/apps/api ${REMOTE}/apps/web ${REMOTE}/packages/{shared,shopify,adp} ${REMOTE}/node_modules"
+ssh "$HOST" "mkdir -p ${REMOTE}/apps/api ${REMOTE}/apps/storefront ${REMOTE}/packages/{shared,shopify,adp,openclaw} ${REMOTE}/node_modules"
 
 # Sync runtime artifacts (not full monorepo node_modules)
 rsync -az --delete \
@@ -29,23 +31,24 @@ rsync -az --delete \
 rsync -az \
   "$ROOT/apps/api/package.json" "$ROOT/apps/api/prisma/" \
   "${HOST}:${REMOTE}/apps/api/"
-# prisma needs schema at apps/api/prisma
 rsync -az --delete "$ROOT/apps/api/prisma/" "${HOST}:${REMOTE}/apps/api/prisma/"
 
-for pkg in shared shopify adp; do
+for pkg in shared shopify adp openclaw; do
   rsync -az "$ROOT/packages/$pkg/package.json" "${HOST}:${REMOTE}/packages/$pkg/package.json"
   rsync -az --delete "$ROOT/packages/$pkg/dist/" "${HOST}:${REMOTE}/packages/$pkg/dist/"
 done
 
 # Next standalone already bundles deps
-rsync -az --delete "$ROOT/apps/web/.next/standalone/" "${HOST}:${REMOTE}/apps/web/standalone/"
-mkdir -p "$ROOT/apps/web/.next/static"
-rsync -az --delete "$ROOT/apps/web/.next/static/" "${HOST}:${REMOTE}/apps/web/standalone/apps/web/.next/static/"
-rsync -az --delete "$ROOT/apps/web/public/" "${HOST}:${REMOTE}/apps/web/standalone/apps/web/public/" 2>/dev/null || true
+rsync -az --delete "$ROOT/apps/storefront/.next/standalone/" "${HOST}:${REMOTE}/apps/storefront/standalone/"
+mkdir -p "$ROOT/apps/storefront/.next/static"
+rsync -az --delete "$ROOT/apps/storefront/.next/static/" "${HOST}:${REMOTE}/apps/storefront/standalone/apps/storefront/.next/static/"
+rsync -az --delete "$ROOT/apps/storefront/public/" "${HOST}:${REMOTE}/apps/storefront/standalone/apps/storefront/public/" 2>/dev/null || true
 
 # Env files
 rsync -az "$ROOT/apps/api/.env" "${HOST}:${REMOTE}/apps/api/.env"
-rsync -az "$ROOT/apps/web/.env" "${HOST}:${REMOTE}/apps/web/.env"
+if [[ -f apps/storefront/.env ]]; then
+  rsync -az "$ROOT/apps/storefront/.env" "${HOST}:${REMOTE}/apps/storefront/.env"
+fi
 
 # Workspace stubs for pnpm install of api deps only
 rsync -az "$ROOT/package.json" "$ROOT/pnpm-workspace.yaml" "$ROOT/pnpm-lock.yaml" "${HOST}:${REMOTE}/"
@@ -55,39 +58,36 @@ ssh "$HOST" bash -s <<EOF
 set -euo pipefail
 cd ${REMOTE}
 
-# Point DATABASE_URL at host-mapped postgres (cb_postgres :5432)
-# Override docker hostname if present
 if grep -q 'postgres:5432' apps/api/.env; then
   sed -i 's|@postgres:5432|@127.0.0.1:5432|g' apps/api/.env
 fi
-# Ensure API listens on 5011
 grep -q '^PORT=' apps/api/.env && sed -i 's/^PORT=.*/PORT=5011/' apps/api/.env || echo 'PORT=5011' >> apps/api/.env
+grep -q '^STOREFRONT_DEFAULT_SHOP=' apps/api/.env || echo 'STOREFRONT_DEFAULT_SHOP=' >> apps/api/.env
 
-# Rewrite workspace deps so pnpm can install on server
 cd ${REMOTE}
 corepack enable
 corepack prepare pnpm@8.15.4 --activate
 pnpm install --prod --filter @drsell/api... --frozen-lockfile || pnpm install --prod --filter @drsell/api...
 
 cd apps/api
-export \$(grep -v '^#' .env | xargs)
-pnpm exec prisma migrate deploy || pnpm exec prisma db push --accept-data-loss
+export DATABASE_URL=\$(grep '^DATABASE_URL=' .env | cut -d= -f2- | tr -d '"' | tr -d "'")
+pnpm dlx prisma@6.9.0 migrate deploy
 
-# pm2
 pm2 delete drsell-api 2>/dev/null || true
 pm2 delete drsell-web 2>/dev/null || true
+pm2 delete drsell-storefront 2>/dev/null || true
 cd ${REMOTE}/apps/api
 pm2 start dist/main.js --name drsell-api --env production
-cd ${REMOTE}/apps/web/standalone/apps/web
-PORT=5010 HOSTNAME=127.0.0.1 pm2 start server.js --name drsell-web
+cd ${REMOTE}/apps/storefront/standalone/apps/storefront
+PORT=5010 HOSTNAME=127.0.0.1 pm2 start server.js --name drsell-storefront
 pm2 save
 pm2 status
 curl -sf http://127.0.0.1:5011/api/health && echo
-curl -sf -o /dev/null -w "web:%{http_code}\n" http://127.0.0.1:5010/ || true
+curl -sf -o /dev/null -w "storefront:%{http_code}\n" http://127.0.0.1:5010/ || true
 EOF
 
 echo "==> Reload nginx vhost"
 ssh "$HOST" 'docker exec webrtc-ws-proxy nginx -t && docker exec webrtc-ws-proxy nginx -s reload && echo nginx_ok'
 
 echo "Done."
-echo "App URL should be https://drsell.szchada.top (set Cloudflare A → 163.7.7.160 orange cloud)"
+echo "App URL: https://drsell.szchada.top (storefront on :5010, api on :5011)"
