@@ -38,11 +38,8 @@ apps/api/prisma/*.db
 # Legacy Coze test scripts (pre-ADP monorepo)
 test-coze-*.js
 
-# Legacy root docs (Coze/Java era)
-/BACKEND_STARTUP_TEST_REPORT.md
-/COZE_API_TEST_RESULTS.md
-/FINAL_SUMMARY.md
-/README_COZE_API_TESTING.md
-
 # TypeScript build info
 *.tsbuildinfo
+
+# 沙箱内使用的本地 pnpm store（避免写全局 store）
+.pnpm-store
