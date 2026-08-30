@@ -31,6 +31,11 @@ class ShopLoginDto {
   scopes?: string;
 }
 
+class AppBridgeLoginDto {
+  @IsString()
+  sessionToken!: string;
+}
+
 class BotSettingDto {
   @IsOptional() @IsString() shopName?: string;
   @IsOptional() @IsString() botId?: string;
@@ -48,6 +53,11 @@ export class ShopifyController {
   @Post('auth/login')
   login(@Body() body: ShopLoginDto) {
     return this.shopify.login(body);
+  }
+
+  @Post('auth/app-bridge')
+  appBridgeLogin(@Body() body: AppBridgeLoginDto) {
+    return this.shopify.loginWithAppBridgeSessionToken(body.sessionToken);
   }
 
   @Auth()

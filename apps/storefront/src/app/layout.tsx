@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/app-shell";
+import { ShopifyBridgeProvider } from "@/components/business/shopify-bridge";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -36,7 +37,9 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <AppShell>{children}</AppShell>
+        <ShopifyBridgeProvider>
+          <AppShell>{children}</AppShell>
+        </ShopifyBridgeProvider>
       </body>
     </html>
   );

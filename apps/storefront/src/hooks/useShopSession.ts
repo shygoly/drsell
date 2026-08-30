@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useShopifyBridge } from "@/components/business/shopify-bridge";
 
 const TOKEN_KEY = "drsell_shop_token";
 const SHOP_KEY = "drsell_shop";
@@ -22,6 +23,7 @@ function safeStorageSet(key: string, value: string): void {
 }
 
 export function useShopSession() {
+  const bridge = useShopifyBridge();
   const [shop, setShop] = useState("");
   const [token, setToken] = useState("");
   const [ready, setReady] = useState(false);
@@ -60,12 +62,51 @@ export function useShopSession() {
     return data.accessToken;
   }, [shop]);
 
+  const loginWithAppBridge = useCallback(async () => {
+    if (!bridge || !shop) return;
+    const sessionToken = await bridge.idToken();
+    const api =
+      process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+    const res = await fetch(`${api}/shopify/auth/app-bridge`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionToken }),
+    });
+    if (!res.ok) {
+      throw new Error(`App Bridge login failed (${res.status})`);
+    }
+    const data = (await res.json()) as { accessToken: string };
+    safeStorageSet(SHOP_KEY, shop);
+    safeStorageSet(TOKEN_KEY, data.accessToken);
+    setToken(data.accessToken);
+    return data.accessToken;
+  }, [bridge, shop]);
+
   useEffect(() => {
-    // 每次进入都刷新一次 shop session，避免 localStorage 里的旧 token 失效后
-    // 导致后续 merchantFetch 401（Admin iframe 内常见）。
+    // 每次进入都刷新 shop session：
+    // Admin embedded 优先用 App Bridge session token 换发 JWT；
+    // 公开站/桥接不可用时回退到 shop 参数 + /auth/login。
     if (!ready || !shop) return;
-    void login(shop).catch(() => undefined);
-  }, [ready, shop, login]);
+    const refresh = async () => {
+      try {
+        if (bridge) {
+          await loginWithAppBridge();
+        } else {
+          await login(shop);
+        }
+      } catch {
+        // 桥接失败时回退到传统 login（例如公开站或 token 尚未就绪）
+        if (bridge) {
+          try {
+            await login(shop);
+          } catch {
+            // ignore
+          }
+        }
+      }
+    };
+    void refresh();
+  }, [ready, shop, bridge, login, loginWithAppBridge]);
 
   const startOAuth = useCallback((shopDomain: string) => {
     const normalized = shopDomain.includes(".")

@@ -1,4 +1,6 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import '@shopify/shopify-api/adapters/node';
+import { ApiVersion, shopifyApi } from '@shopify/shopify-api';
 import { verifyShopifyWebhookHmac, shopifyGraphql } from '@drsell/shopify';
 import { Decimal } from '@prisma/client/runtime/library';
 import { PrismaService } from '../prisma/prisma.service';
@@ -87,6 +89,17 @@ export class ShopifyService {
     return process.env.SHOPIFY_API_SECRET || '';
   }
 
+  private shopifyClient() {
+    return shopifyApi({
+      apiKey: process.env.SHOPIFY_API_KEY || '',
+      apiSecretKey: this.secret(),
+      scopes: [],
+      hostName: 'drsell.szchada.top',
+      apiVersion: ApiVersion.April25,
+      isEmbeddedApp: true,
+    });
+  }
+
   async login(params: { shop: string; accessToken?: string; scopes?: string }) {
     if (!params.shop) throw new BadRequestException('shop required');
     const shop = await this.tenants.ensureShopTenant(
@@ -94,6 +107,36 @@ export class ShopifyService {
       params.accessToken,
       params.scopes,
     );
+    const token = this.auth.signShopSession({
+      shop: shop.shopDomain,
+      tenantId: shop.tenantId,
+      shopRecordId: shop.id,
+    });
+    return { shop, ...token };
+  }
+
+  /**
+   * App Bridge session token 换发本服务 JWT。
+   * 前端通过 @shopify/app-bridge-react 的 `shopify.idToken()` 获取 token，
+   * 后端用 @shopify/shopify-api 的 decodeSessionToken 校验。
+   */
+  async loginWithAppBridgeSessionToken(sessionToken: string) {
+    if (!sessionToken) throw new BadRequestException('sessionToken required');
+    let payload;
+    try {
+      payload = await this.shopifyClient().session.decodeSessionToken(
+        sessionToken,
+        { checkAudience: true },
+      );
+    } catch (error) {
+      throw new UnauthorizedException(
+        `Invalid Shopify session token: ${(error as Error).message}`,
+      );
+    }
+    const shopDomain = payload.dest
+      .replace(/^https?:\/\//, '')
+      .replace(/\/$/, '');
+    const shop = await this.tenants.ensureShopTenant(shopDomain);
     const token = this.auth.signShopSession({
       shop: shop.shopDomain,
       tenantId: shop.tenantId,

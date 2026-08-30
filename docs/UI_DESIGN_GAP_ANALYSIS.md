@@ -101,3 +101,10 @@
 - [x] Admin `/widget-config` 的 “Preview mode — showing default settings.” 消失，改为加载真实 store 配置；Deployment/Appearance/Window Size/Launcher/Live Preview 完整渲染。
 - [x] 前端与后端 API 链路在 Admin iframe 内打通（login + botSettings GET）。
 - [ ] 剩余：Customers/Analytics/Settings/Support/Documentation/History 占位页；App Bridge session token 的正式接入可继续优化。
+
+## Round 5 进展（正式接入 @shopify/app-bridge-react）
+- [x] storefront 增加 `@shopify/app-bridge-react` 依赖，并在布局中通过 `ShopifyBridgeProvider` 接入 `useAppBridge`（仅在 window.shopify 存在时挂载，公开站不受影响）。
+- [x] `useShopSession` 优先使用 `shopify.idToken()` 换取 session token，再调用新后端接口 `POST /api/shopify/auth/app-bridge` 换发本服务 JWT；桥接不可用时回退到原 `/auth/login`。
+- [x] API 增加 `@shopify/shopify-api` 依赖，用 `decodeSessionToken` 校验 App Bridge session token，并补充 Node adapter。
+- [x] 修复 app-bridge-types 全局 JSX 对 `Button` `variant` 属性的类型冲突（Button 类型改为 `Omit<..., "variant">`）。
+- [x] Admin Widget Config 验证通过：显示 `Store: chatbotdomaintest.myshopify.com`、`● Live`，无 Preview mode。

@@ -50,6 +50,9 @@ importers:
       '@prisma/client':
         specifier: ^6.9.0
         version: 6.19.3(prisma@6.19.3)(typescript@5.9.3)
+      '@shopify/shopify-api':
+        specifier: ^11.14.1
+        version: 11.14.1
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.3
@@ -129,6 +132,9 @@ importers:
       '@radix-ui/react-tabs':
         specifier: ^1.1.12
         version: 1.1.21(@types/react-dom@19.2.5)(@types/react@19.2.18)(react-dom@19.2.8)(react@19.2.8)
+      '@shopify/app-bridge-react':
+        specifier: ^4.2.13
+        version: 4.2.13(react-dom@19.2.8)(react@19.2.8)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
