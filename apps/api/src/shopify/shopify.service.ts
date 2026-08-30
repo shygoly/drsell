@@ -311,7 +311,8 @@ export class ShopifyService {
 
   async syncCatalog(shopDomain: string, kind: 'products' | 'orders' | 'customers') {
     const shop = await this.tenants.getByShopDomain(shopDomain);
-    if (!shop?.accessToken) {
+    const accessToken = shop ? this.tenants.getShopAccessToken(shop) : null;
+    if (!shop || !accessToken) {
       throw new BadRequestException('shop missing access token');
     }
 
@@ -341,7 +342,7 @@ export class ShopifyService {
         };
       }>({
         shop: shop.shopDomain,
-        accessToken: shop.accessToken,
+        accessToken,
         query: PRODUCT_QUERY,
         variables: { first },
       });
@@ -423,7 +424,7 @@ export class ShopifyService {
         };
       }>({
         shop: shop.shopDomain,
-        accessToken: shop.accessToken,
+        accessToken,
         query: ORDER_QUERY,
         variables: { first },
       });
@@ -497,7 +498,7 @@ export class ShopifyService {
       };
     }>({
       shop: shop.shopDomain,
-      accessToken: shop.accessToken,
+      accessToken,
       query: CUSTOMER_QUERY,
       variables: { first },
     });
@@ -540,16 +541,16 @@ export class ShopifyService {
     shopDomain: string,
     tenantId: string,
     kind: string,
-    nodes: unknown[],
+    _nodes: unknown[],
   ) {
-    const content = JSON.stringify(nodes, null, 2);
-    return this.adp.syncKnowledge({
-      shopDomain,
-      appKey: process.env.ADP_DEFAULT_APP_KEY || '',
-      title: `${shopDomain}-${kind}`,
-      content,
-      externalId: `${tenantId}:${kind}`,
-      kind,
+    await this.prisma.knowledgeSyncJob.create({
+      data: {
+        shopDomain,
+        kind,
+        externalId: `${tenantId}:${kind}`,
+        status: 'skipped',
+        payload: 'ADP 知识库同步已停用：智能体改为直连 PG 实时查询（ADR-7）',
+      },
     });
   }
 

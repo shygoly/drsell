@@ -99,16 +99,22 @@ export class AdpClient {
     return state.text;
   }
 
-  async upsertKnowledgeDocument(params: {
+  /**
+   * 知识库文档上传。
+   *
+   * 已停用：ADP 智能体改为经 adp_reader 角色直连 PG 实时查询（ADR-7），
+   * 商品知识不再向 ADP 单向同步。调用方应改为不再调用本方法。
+   */
+  async upsertKnowledgeDocument(_params: {
     appKey: string;
     title: string;
     content: string;
     externalId: string;
-  }): Promise<{ ok: true; externalId: string }> {
-    if (!params.appKey || !params.content) {
-      throw new Error('ADP upsertKnowledgeDocument requires appKey and content');
-    }
-    return { ok: true, externalId: params.externalId };
+  }): Promise<never> {
+    throw new Error(
+      'ADP 知识库上传已停用：智能体改为直连 PG 实时查询（见 ADR-7）。' +
+        '此前的实现从不发送请求却返回成功，属误导，已移除。',
+    );
   }
 }
 
