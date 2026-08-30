@@ -1,8 +1,8 @@
-import { Bot, Globe, Mail, MessageSquare, Smartphone } from "lucide-react";
+import { Globe, Mail, MessageSquare, Smartphone } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { Conversation } from "@/lib/types";
 
 const CHANNEL_ICON = {
@@ -12,10 +12,14 @@ const CHANNEL_ICON = {
   whatsapp: MessageSquare,
 } as const;
 
-const STATUS_BADGE = {
-  ai: { label: "AI handling", variant: "success" as const },
-  pending: { label: "Pending", variant: "warning" as const },
-  human: { label: "Human", variant: "info" as const },
+/**
+ * 稿中每行右侧不是徽章，而是一枚状态圆点（多数为绿、待接管为红）。
+ * 保留 label 供屏幕阅读器使用，避免为了像素还原丢掉可访问性。
+ */
+const STATUS_DOT = {
+  ai: { label: "AI handling", className: "bg-primary-container" },
+  pending: { label: "Pending takeover", className: "bg-destructive" },
+  human: { label: "Human handling", className: "bg-info" },
 } as const;
 
 interface LiveConversationsProps {
@@ -24,74 +28,92 @@ interface LiveConversationsProps {
   onNewConversation?: () => void;
 }
 
-/** 会话列表 — Stitch Live Conversations 卡片 → shadcn Card/Badge/Avatar/Button */
+/**
+ * 会话列表 — 对齐 Stitch home_dashboard 的 Live Conversations 卡片。
+ *
+ * 稿中实测：卡片 padding 0、行间分隔线、头像 32px 灰底、姓名 16/24/600、
+ * 预览 13/18、时间 12/16/500、View all 为 12px 文字链接（primary-container 色）、
+ * 待接管行姓名为 destructive 色。
+ */
 export function LiveConversations({
   conversations,
   onNewConversation,
 }: LiveConversationsProps) {
   return (
-    <Card className="gap-4 rounded-lg p-6">
-      <CardHeader className="flex-row items-center justify-between px-0">
-        <CardTitle className="text-accent-deep text-base">
-          Live Conversations
-        </CardTitle>
-        <Button variant="outline" size="sm">
+    <Card className="gap-0 overflow-hidden rounded-lg p-0">
+      <div className="flex items-center justify-between px-4 py-4">
+        <div className="flex items-center gap-2">
+          <span
+            className="bg-primary-container h-2 w-2 rounded-full"
+            aria-hidden="true"
+          />
+          <h3 className="text-accent-deep text-base font-semibold">
+            Live Conversations
+          </h3>
+        </div>
+        <a
+          href="/inbox"
+          className="text-primary-container text-xs font-medium hover:underline"
+        >
           View all
-        </Button>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-1 px-0">
-        {conversations.length === 0 ? (
-          <div className="text-muted-foreground flex flex-col items-center gap-3 py-10 text-sm">
-            <Bot className="text-muted-foreground h-8 w-8" aria-hidden="true" />
-            <p>No live conversations right now.</p>
-            <Button size="sm" onClick={onNewConversation}>
-              Start a conversation
-            </Button>
-          </div>
-        ) : (
-          conversations.map((c) => {
+        </a>
+      </div>
+
+      {conversations.length === 0 ? (
+        <div className="text-muted-foreground flex flex-col items-center gap-3 border-t py-10 text-sm">
+          <p>No live conversations right now.</p>
+          <Button size="sm" onClick={onNewConversation}>
+            Start a conversation
+          </Button>
+        </div>
+      ) : (
+        <ul className="divide-y border-t">
+          {conversations.map((c) => {
             const ChannelIcon = CHANNEL_ICON[c.channel];
-            const badge = STATUS_BADGE[c.status];
+            const dot = STATUS_DOT[c.status];
+            const alerting = c.status === "pending";
             return (
-              <div
+              <li
                 key={c.id}
-                className="hover:bg-muted/60 flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors"
+                className="hover:bg-muted/40 flex items-start gap-3 px-4 py-4 transition-colors"
               >
-                <Avatar className="h-9 w-9">
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-border text-muted-foreground text-xs font-semibold">
                     {c.avatarInitials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-medium">
+                  <div className="flex items-start justify-between gap-2">
+                    <span
+                      className={cn(
+                        "truncate font-semibold",
+                        alerting ? "text-destructive" : "text-foreground",
+                      )}
+                    >
                       {c.customer}
                     </span>
+                    <span className="text-muted-foreground/70 shrink-0 text-xs font-medium">
+                      {c.time}
+                    </span>
+                  </div>
+                  <div className="text-muted-foreground text-stat mt-0.5 flex items-center gap-1.5">
                     <ChannelIcon
-                      className="text-muted-foreground h-3.5 w-3.5 shrink-0"
+                      className="h-3.5 w-3.5 shrink-0"
                       aria-label={c.channel}
                     />
-                    {c.unread ? (
-                      <span className="bg-primary text-primary-foreground flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold">
-                        {c.unread}
-                      </span>
-                    ) : null}
+                    <span className="truncate">{c.preview}</span>
                   </div>
-                  <p className="text-muted-foreground truncate text-[13px]">
-                    {c.preview}
-                  </p>
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <Badge variant={badge.variant}>{badge.label}</Badge>
-                  <span className="text-muted-foreground hidden text-xs sm:inline">
-                    {c.time}
-                  </span>
-                </div>
-              </div>
+                <span
+                  className={`mt-7 h-2 w-2 shrink-0 rounded-full ${dot.className}`}
+                  role="img"
+                  aria-label={dot.label}
+                />
+              </li>
             );
-          })
-        )}
-      </CardContent>
+          })}
+        </ul>
+      )}
     </Card>
   );
 }

@@ -16,12 +16,12 @@ interface StatCardProps {
 export function StatCard({ icon, label, value, delta, alert }: StatCardProps) {
   return (
     <Card className="gap-2 rounded-lg p-4 shadow-xs">
-      <div className="text-muted-foreground flex items-center gap-2 text-[13px]">
+      <div className="text-muted-foreground text-stat flex items-center gap-2">
         {icon}
         <span>{label}</span>
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="text-accent-deep text-2xl font-bold">{value}</span>
+        <span className="text-accent-deep text-xl font-semibold">{value}</span>
         {delta && (
           <span
             className={cn(

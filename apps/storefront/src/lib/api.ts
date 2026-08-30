@@ -64,12 +64,63 @@ export const FALLBACK_CHART: ChartPoint[] = [
   { label: "8/29", ai: 90, human: 5 },
 ];
 
-export const FALLBACK_CONVERSATIONS: Conversation[] = [];
+export const FALLBACK_CONVERSATIONS: Conversation[] = [
+  {
+    id: "c1",
+    customer: "John Smith",
+    avatarInitials: "JS",
+    topic: "Order status",
+    preview: "Where is my order #10294?",
+    status: "ai",
+    channel: "web",
+    time: "Just now",
+  },
+  {
+    id: "c2",
+    customer: "Amanda Lee",
+    avatarInitials: "AL",
+    topic: "Shipping",
+    preview: "Do you ship to Canada?",
+    status: "ai",
+    channel: "instagram",
+    time: "2m ago",
+  },
+  {
+    id: "c3",
+    customer: "Mike Kowalski",
+    avatarInitials: "MK",
+    topic: "Exchange",
+    preview: "Can I exchange for a larger size?",
+    status: "ai",
+    channel: "email",
+    time: "5m ago",
+  },
+  {
+    id: "c4",
+    customer: "Sarah Jones",
+    avatarInitials: "SJ",
+    topic: "Follow-up",
+    preview: "Thanks for the quick reply!",
+    status: "ai",
+    channel: "web",
+    time: "12m ago",
+  },
+  {
+    id: "c5",
+    customer: "Guest 992",
+    avatarInitials: "!",
+    topic: "Takeover",
+    preview: "Agent takeover requested",
+    status: "pending",
+    channel: "web",
+    time: "15m ago",
+  },
+];
 
 export const FALLBACK_SUGGESTION: KnowledgeBaseSuggestion = {
   title: "Knowledge Base Optimization",
   description:
-    "Add 3 missing articles about international shipping to reduce human takeover by ~15%.",
+    "Your knowledge base lacks a returns policy answer — add it to resolve ~15% more questions automatically.",
   impact: "-15% takeovers",
 };
 

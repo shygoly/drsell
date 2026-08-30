@@ -17,99 +17,102 @@
 :root {
   --radius: 0.5rem;
 
-  --background: 246 250 254; /* surface #f6fafe */
-  --foreground: 24 28 31; /* on-surface #181c1f */
+  --background: #f6fafe; /* surface #f6fafe */
+  --foreground: #181c1f; /* on-surface #181c1f */
 
-  --card: 255 255 255; /* surface-container-lowest */
-  --card-foreground: 24 28 31;
+  --card: #ffffff; /* surface-container-lowest */
+  --card-foreground: #181c1f;
 
-  --popover: 255 255 255;
-  --popover-foreground: 24 28 31;
+  --popover: #ffffff;
+  --popover-foreground: #181c1f;
 
-  --primary: 0 108 73; /* primary #006c49 */
-  --primary-foreground: 255 255 255; /* on-primary */
+  --primary: #006c49; /* primary #006c49 */
+  --primary-foreground: #ffffff; /* on-primary */
+  /* Stitch primary-container：品牌图标块 / New Automation 按钮 / 激活态淡底 */
+  --primary-container: #12a875; /* primary-container #12A875 */
 
-  --secondary: 241 244 248; /* surface-container-low #f1f4f8 */
-  --secondary-foreground: 31 45 39; /* 深绿墨色，用于次要按钮文字 */
+  --secondary: #f1f4f8; /* surface-container-low #f1f4f8 */
+  --secondary-foreground: #1f2d27; /* 深绿墨色，用于次要按钮文字 */
 
-  --muted: 235 238 243; /* surface-container #ebeef3 */
-  --muted-foreground: 61 74 66; /* on-surface-variant #3d4a42 */
+  --muted: #ebeef3; /* surface-container #ebeef3 */
+  --muted-foreground: #3d4a42; /* on-surface-variant #3d4a42 */
 
-  --accent: 187 237 215; /* secondary-container #bbedd7 */
-  --accent-foreground: 0 52 33; /* on-primary-container #003421 */
+  --accent: #bbedd7; /* secondary-container #bbedd7 */
+  --accent-foreground: #003421; /* on-primary-container #003421 */
 
-  --destructive: 186 26 26; /* error #ba1a1a */
-  --destructive-foreground: 255 255 255;
+  --destructive: #ba1a1a; /* error #ba1a1a */
+  --destructive-foreground: #ffffff;
 
-  --border: 225 227 229; /* DESIGN.md 卡片边框 #E1E3E5 */
-  --input: 201 204 207; /* DESIGN.md 输入框边框 #C9CCCF */
-  --ring: 18 168 117; /* primary-container #12a875（焦点色） */
+  --border: #e1e3e5; /* DESIGN.md 卡片边框 #E1E3E5 */
+  --input: #c9cccf; /* DESIGN.md 输入框边框 #C9CCCF */
+  --ring: #12a875; /* primary-container #12a875（焦点色） */
 
   /* 业务语义色（状态徽章，10% 透明底 + 全饱和文字，见 DESIGN.md Chips） */
-  --success: 0 108 73;
+  --success: #006c49;
   /* 警告色下调亮度：#AE7C14 在 10% 底色上仅 3.5:1，不满足 AA 4.5:1；#8A5D0A 达 5.7:1 */
-  --warning: 138 93 10;
-  --warning-container: 253 244 214;
-  --info: 26 96 191;
-  --info-container: 219 233 254;
+  --warning: #8a5d0a;
+  --warning-container: #fdf4d6;
+  --info: #1a60bf;
+  --info-container: #dbe9fe;
 
   /* 图表色（30 天会话量图表） */
-  --chart-1: 0 108 73; /* #006c49 */
-  --chart-2: 70 164 124; /* tertiary-container #46a47c */
-  --chart-3: 57 103 86; /* secondary #396756 */
-  --chart-4: 93 221 165; /* inverse-primary #5ddda5 */
-  --chart-5: 188 202 192; /* outline-variant #bccac0 */
+  --chart-1: #006c49; /* #006c49 */
+  --chart-2: #46a47c; /* tertiary-container #46a47c */
+  --chart-3: #396756; /* secondary #396756 */
+  --chart-4: #5ddda5; /* inverse-primary #5ddda5 */
+  --chart-5: #bccac0; /* outline-variant #bccac0 */
 
   /* 深强调色（侧边栏选中 / 关键指标，DESIGN.md Deep Accents） */
-  --accent-deep: 10 61 46; /* #0A3D2E */
+  --accent-deep: #0a3d2e; /* #0A3D2E */
 
-  --sidebar: 255 255 255;
-  --sidebar-foreground: 24 28 31;
-  --sidebar-primary: 0 108 73;
-  --sidebar-primary-foreground: 255 255 255;
-  --sidebar-accent: 235 238 243;
-  --sidebar-accent-foreground: 24 28 31;
-  --sidebar-border: 225 227 229;
-  --sidebar-ring: 18 168 117;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #181c1f;
+  --sidebar-primary: #006c49;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ebeef3;
+  --sidebar-accent-foreground: #181c1f;
+  --sidebar-border: #e1e3e5;
+  --sidebar-ring: #12a875;
 }
 
 .dark {
-  --background: 45 49 52; /* inverse-surface #2d3134 */
-  --foreground: 238 241 245; /* inverse-on-surface */
+  --background: #2d3134; /* inverse-surface #2d3134 */
+  --foreground: #eef1f5; /* inverse-on-surface */
 
-  --card: 34 38 41;
-  --card-foreground: 238 241 245;
+  --card: #222629;
+  --card-foreground: #eef1f5;
 
-  --popover: 34 38 41;
-  --popover-foreground: 238 241 245;
+  --popover: #222629;
+  --popover-foreground: #eef1f5;
 
-  --primary: 93 221 165; /* inverse-primary #5ddda5 */
-  --primary-foreground: 0 52 33;
+  --primary: #5ddda5; /* inverse-primary #5ddda5 */
+  --primary-foreground: #003421;
+  --primary-container: #5ddda5;
 
-  --secondary: 52 57 60;
-  --secondary-foreground: 238 241 245;
+  --secondary: #34393c;
+  --secondary-foreground: #eef1f5;
 
-  --muted: 52 57 60;
-  --muted-foreground: 188 202 192;
+  --muted: #34393c;
+  --muted-foreground: #bccac0;
 
-  --accent: 0 82 54;
-  --accent-foreground: 151 245 200;
+  --accent: #005236;
+  --accent-foreground: #97f5c8;
 
-  --destructive: 255 218 214;
-  --destructive-foreground: 147 0 10;
+  --destructive: #ffdad6;
+  --destructive-foreground: #93000a;
 
-  --border: 64 70 73;
-  --input: 84 91 94;
-  --ring: 18 168 117;
+  --border: #404649;
+  --input: #545b5e;
+  --ring: #12a875;
 
-  --sidebar: 34 38 41;
-  --sidebar-foreground: 238 241 245;
-  --sidebar-primary: 93 221 165;
-  --sidebar-primary-foreground: 0 52 33;
-  --sidebar-accent: 52 57 60;
-  --sidebar-accent-foreground: 238 241 245;
-  --sidebar-border: 64 70 73;
-  --sidebar-ring: 18 168 117;
+  --sidebar: #222629;
+  --sidebar-foreground: #eef1f5;
+  --sidebar-primary: #5ddda5;
+  --sidebar-primary-foreground: #003421;
+  --sidebar-accent: #34393c;
+  --sidebar-accent-foreground: #eef1f5;
+  --sidebar-border: #404649;
+  --sidebar-ring: #12a875;
 }
 
 @theme inline {
@@ -121,6 +124,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-container: var(--primary-container);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -148,6 +152,14 @@
   --radius-md: var(--radius); /* 8px 按钮/输入框（DESIGN.md Primary Elements） */
   --radius-lg: 0.75rem; /* 12px 卡片（DESIGN.md Containers） */
   --radius-xl: 1rem; /* 16px 会话气泡（DESIGN.md Conversational Elements） */
+
+  /* 稿中统计卡标签实测 13px / 行高 18px，Tailwind 无此默认档 */
+  --text-stat: 0.8125rem;
+  --text-stat--line-height: 1.125rem;
+
+  /* 稿中 display-lg：Overview 标题实测 28px / 行高 32px，Tailwind 无此默认档 */
+  --text-display-lg: 1.75rem;
+  --text-display-lg--line-height: 2rem;
 
   --font-sans: var(--font-inter), Inter, -apple-system, system-ui, sans-serif;
 

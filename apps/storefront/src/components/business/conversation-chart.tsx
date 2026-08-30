@@ -57,14 +57,6 @@ export function ConversationChart({ data }: ConversationChartProps) {
             </div>
           ))}
         </div>
-        {/* X 轴标签独立成行，避免绝对定位溢出卡片；字号 12px 保证可读性 */}
-        <div className="text-muted-foreground mt-2 flex justify-between px-2 text-xs">
-          {data.map((point) => (
-            <span key={point.label} className="w-1/12 text-center">
-              {point.label}
-            </span>
-          ))}
-        </div>
       </CardContent>
     </Card>
   );
