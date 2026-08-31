@@ -7,7 +7,9 @@ import { SidebarNav } from "./sidebar-nav";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useShopSession } from "@/hooks/useShopSession";
+import { AuthGuard } from "@/components/business/auth-guard";
 import { OnboardingGuard } from "@/components/business/onboarding-guard";
+import { StoreSwitcher } from "@/components/business/store-switcher";
 
 /**
  * AppShell — 由 Stitch 导出 HTML 的 SideNavBar + TopNavBar 提炼的共享布局。
@@ -24,7 +26,7 @@ const TOP_TABS = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { userEmail, logout } = useShopSession();
+  const { userEmail, userToken, bridge, logout } = useShopSession();
 
   // Stitch onboarding_welcome 是独立欢迎屏，不含 Sidebar/TopBar。
   // /login 也是独立认证页，不套后台壳。
@@ -34,6 +36,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <AuthGuard />
       <OnboardingGuard />
       <div className="flex h-screen overflow-hidden">
       <SidebarNav />
@@ -78,6 +81,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-4">
+            {!bridge && userToken ? <StoreSwitcher /> : null}
             <Button variant="outline" size="sm" className="hidden md:inline-flex">
               Quick Settings
             </Button>

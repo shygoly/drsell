@@ -32,6 +32,7 @@ model Shop {
   inboxUsers  InboxUser[]
   sessions    Session[]
   subscriptions Subscription[]
+  memberships   Membership[]
   products    Product[]
   orders      Order[]
   customers   Customer[]
@@ -100,8 +101,25 @@ model AdminUser {
   email        String   @unique
   passwordHash String
   role         String   @default("admin")
+  memberships  Membership[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+/// 账号 ↔ 店铺归属。唯一决定「谁能操作哪家店」。
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  /// owner = 安装者；member = 被邀请的坐席
+  role      String   @default("owner")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, shopId])
+  @@index([shopId])
 }
 
 model Subscription {
@@ -111,6 +129,10 @@ model Subscription {
   planCode  String
   status    String
   trialEnds DateTime?
+  /// 组内唯一收全额的店；其余店建 $0 charge
+  isBillingShop  Boolean @default(false)
+  shopifyChargeId String?
+  seats          Int     @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

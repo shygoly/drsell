@@ -38,10 +38,26 @@ export function useShopSession() {
         ? new URLSearchParams(window.location.search).get("shop") || ""
         : "";
     const storedShop = safeStorageGet(SHOP_KEY);
-    const storedToken = safeStorageGet(TOKEN_KEY);
     const storedUserToken = safeStorageGet(USER_TOKEN_KEY);
     const storedUserEmail = safeStorageGet(USER_EMAIL_KEY);
     const nextShop = fromUrl || storedShop || "";
+
+    // OAuth 回调用 fragment 下发 shop JWT（唯一的非 App Bridge 取得途径），
+    // 读到后立刻从地址栏抹掉。
+    let fragmentToken = "";
+    if (typeof window !== "undefined" && window.location.hash.includes("shop_token=")) {
+      const params = new URLSearchParams(window.location.hash.slice(1));
+      fragmentToken = params.get("shop_token") || "";
+      if (fragmentToken) {
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+    }
+    const storedToken = fragmentToken || safeStorageGet(TOKEN_KEY);
+    if (fragmentToken && nextShop) {
+      safeStorageSet(SHOP_KEY, nextShop);
+      safeStorageSet(TOKEN_KEY, fragmentToken);
+    }
+
     setShop(nextShop);
     if (storedToken) setToken(storedToken);
     if (storedUserToken) setUserToken(storedUserToken);
@@ -117,27 +133,6 @@ export function useShopSession() {
     setToken("");
   }, []);
 
-  const login = useCallback(async (shopDomain?: string) => {
-    const target = shopDomain || shop;
-    if (!target) return;
-    const api =
-      process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
-    const res = await fetch(`${api}/shopify/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ shop: target }),
-    });
-    if (!res.ok) {
-      throw new Error(`Login failed (${res.status})`);
-    }
-    const data = (await res.json()) as { accessToken: string };
-    safeStorageSet(SHOP_KEY, target);
-    safeStorageSet(TOKEN_KEY, data.accessToken);
-    setShop(target);
-    setToken(data.accessToken);
-    return data.accessToken;
-  }, [shop]);
-
   const loginWithAppBridge = useCallback(async () => {
     if (!bridge || !shop) return;
     const sessionToken = await bridge.idToken();
@@ -159,44 +154,82 @@ export function useShopSession() {
   }, [bridge, shop]);
 
   useEffect(() => {
-    // 每次进入都刷新 shop session：
-    // Admin embedded 优先用 App Bridge session token 换发 JWT；
-    // 公开站/桥接不可用时回退到 shop 参数 + /auth/login。
-    if (!ready || !shop) return;
-    const refresh = async () => {
-      try {
-        if (bridge) {
-          await loginWithAppBridge();
-        } else {
-          await login(shop);
-        }
-      } catch {
-        // 桥接失败时回退到传统 login（例如公开站或 token 尚未就绪）
-        if (bridge) {
-          try {
-            await login(shop);
-          } catch {
-            // ignore
-          }
-        }
-      }
-    };
-    void refresh();
-  }, [ready, shop, bridge, login, loginWithAppBridge]);
+    // Admin embedded：每次进入都用 App Bridge session token 换发 JWT。
+    // 非嵌入场景没有店铺归属证明，只能用 OAuth 回调下发并已落盘的 token，
+    // 不再允许「给个 shop 域名就换 token」。
+    if (!ready || !shop || !bridge) return;
+    void loginWithAppBridge().catch(() => {
+      // token 尚未就绪时静默失败，下次渲染重试
+    });
+  }, [ready, shop, bridge, loginWithAppBridge]);
 
-  const startOAuth = useCallback((shopDomain: string) => {
-    const normalized = shopDomain.includes(".")
-      ? shopDomain
-      : `${shopDomain}.myshopify.com`;
-    window.location.href = `/api/auth?shop=${encodeURIComponent(normalized)}`;
-  }, []);
+  const startOAuth = useCallback(
+    (shopDomain: string) => {
+      const normalized = shopDomain.includes(".")
+        ? shopDomain
+        : `${shopDomain}.myshopify.com`;
+      const u = userToken ? `&u=${encodeURIComponent(userToken)}` : "";
+      window.location.href = `/api/auth?shop=${encodeURIComponent(normalized)}${u}`;
+    },
+    [userToken],
+  );
+
+  const listShops = useCallback(async () => {
+    if (!userToken) return [];
+    const api =
+      process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+    const res = await fetch(`${api}/membership/shops`, {
+      headers: { Authorization: `Bearer ${userToken}` },
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`List shops failed: ${text.slice(0, 160)}`);
+    }
+    return (await res.json()) as Array<{
+      role: string;
+      shop: {
+        id: string;
+        shopDomain: string;
+        tenantId: string;
+        uninstalledAt: string | null;
+      };
+    }>;
+  }, [userToken]);
+
+  const switchShop = useCallback(
+    async (shopDomain: string) => {
+      const api =
+        process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+      const res = await fetch(`${api}/membership/switch`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({ shopDomain }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(
+          text ? `Switch failed: ${text.slice(0, 160)}` : `Switch failed (${res.status})`,
+        );
+      }
+      const data = (await res.json()) as { accessToken: string };
+      safeStorageSet(SHOP_KEY, shopDomain);
+      safeStorageSet(TOKEN_KEY, data.accessToken);
+      setShop(shopDomain);
+      setToken(data.accessToken);
+      return data.accessToken;
+    },
+    [userToken],
+  );
 
   return {
     shop,
     token,
     userToken,
     userEmail,
-    login,
+    bridge,
     loginWithPassword,
     register,
     startGoogleLogin,
@@ -205,5 +238,7 @@ export function useShopSession() {
     ready,
     setShop,
     startOAuth,
+    listShops,
+    switchShop,
   };
 }

@@ -14,7 +14,9 @@ import {
 import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
-import { Auth } from '../common/auth.decorators';
+import type { JwtPayload } from '../auth/auth.service';
+import { Auth, CurrentUser } from '../common/auth.decorators';
+import { ShopScopeService } from '../common/shop-scope.service';
 import { ShopifyService } from './shopify.service';
 import { PatchOnboardingDto } from './dto/onboarding.dto';
 
@@ -53,10 +55,24 @@ class BotSettingDto {
 
 @Controller('shopify')
 export class ShopifyController {
-  constructor(private readonly shopify: ShopifyService) {}
+  constructor(
+    private readonly shopify: ShopifyService,
+    private readonly scope: ShopScopeService,
+  ) {}
 
+  /**
+   * 仅供 OAuth callback 服务端调用（apps/web）。
+   * 公开暴露等于「传任意 shop 域名即换发该店 JWT」，故强制内部密钥。
+   */
   @Post('auth/login')
-  login(@Body() body: ShopLoginDto) {
+  login(
+    @Headers('x-internal-key') internalKey: string | undefined,
+    @Body() body: ShopLoginDto,
+  ) {
+    const expected = process.env.INTERNAL_API_KEY;
+    if (!expected || internalKey !== expected) {
+      throw new UnauthorizedException('invalid internal key');
+    }
     return this.shopify.login(body);
   }
 
@@ -67,69 +83,121 @@ export class ShopifyController {
 
   @Auth()
   @Get('botSettings/shop/:shopDomain')
-  getBot(@Param('shopDomain') shopDomain: string) {
-    return this.shopify.getOrCreateBotSetting(shopDomain);
+  async getBot(
+    @CurrentUser() user: JwtPayload,
+    @Param('shopDomain') shopDomain: string,
+  ) {
+    return this.shopify.getOrCreateBotSetting(
+      await this.scope.resolveShopDomain(user, shopDomain),
+    );
   }
 
   @Auth()
   @Put('botSettings/shop/:shopDomain')
-  putBot(@Param('shopDomain') shopDomain: string, @Body() body: BotSettingDto) {
-    return this.shopify.updateBotSetting(shopDomain, body);
+  async putBot(
+    @CurrentUser() user: JwtPayload,
+    @Param('shopDomain') shopDomain: string,
+    @Body() body: BotSettingDto,
+  ) {
+    return this.shopify.updateBotSetting(
+      await this.scope.resolveShopDomain(user, shopDomain),
+      body,
+    );
   }
 
   @Auth()
   @Post('sync/batch')
-  batchSync(@Query('shop') shop: string) {
-    return this.shopify.startBatchSync(shop);
+  async batchSync(
+    @CurrentUser() user: JwtPayload,
+    @Query('shop') shop?: string,
+  ) {
+    return this.shopify.startBatchSync(
+      await this.scope.resolveShopDomain(user, shop),
+    );
   }
 
   @Auth()
   @Post('sync/:kind')
-  sync(
+  async sync(
+    @CurrentUser() user: JwtPayload,
     @Param('kind') kind: 'products' | 'orders' | 'customers',
-    @Query('shop') shop: string,
+    @Query('shop') shop?: string,
   ) {
-    return this.shopify.syncCatalog(shop, kind);
+    return this.shopify.syncCatalog(
+      await this.scope.resolveShopDomain(user, shop),
+      kind,
+    );
   }
 
   @Auth()
   @Get('onboarding')
-  getOnboarding(@Query('shop') shop: string) {
-    return this.shopify.getOnboardingState(shop);
+  async getOnboarding(
+    @CurrentUser() user: JwtPayload,
+    @Query('shop') shop?: string,
+  ) {
+    return this.shopify.getOnboardingState(
+      await this.scope.resolveShopDomain(user, shop),
+    );
   }
 
   @Auth()
   @Patch('onboarding')
-  patchOnboarding(@Query('shop') shop: string, @Body() body: PatchOnboardingDto) {
-    return this.shopify.patchOnboardingState(shop, body);
+  async patchOnboarding(
+    @CurrentUser() user: JwtPayload,
+    @Body() body: PatchOnboardingDto,
+    @Query('shop') shop?: string,
+  ) {
+    return this.shopify.patchOnboardingState(
+      await this.scope.resolveShopDomain(user, shop),
+      body,
+    );
   }
 
   @Auth()
   @Get('sync/status')
-  syncStatus(@Query('shop') shop: string) {
-    return this.shopify.getSyncStatus(shop);
+  async syncStatus(
+    @CurrentUser() user: JwtPayload,
+    @Query('shop') shop?: string,
+  ) {
+    return this.shopify.getSyncStatus(
+      await this.scope.resolveShopDomain(user, shop),
+    );
   }
 
   @Auth()
   @Get('chat-stats/today')
-  today(@Query('shop') shop: string) {
-    return this.shopify.todayChatStats(shop);
+  async today(@CurrentUser() user: JwtPayload, @Query('shop') shop?: string) {
+    return this.shopify.todayChatStats(
+      await this.scope.resolveShopDomain(user, shop),
+    );
   }
 
   @Auth()
   @Get('products')
-  products(@Query('tenantId') tenantId: string, @Query('take') take?: string) {
-    return this.shopify.listProducts(tenantId, take ? Number(take) : 50);
+  async products(
+    @CurrentUser() user: JwtPayload,
+    @Query('tenantId') tenantId?: string,
+    @Query('take') take?: string,
+  ) {
+    return this.shopify.listProducts(
+      await this.scope.resolveTenantId(user, tenantId),
+      take ? Number(take) : 50,
+    );
   }
 
   @Auth()
   @Get('orders')
-  orders(
-    @Query('tenantId') tenantId: string,
+  async orders(
+    @CurrentUser() user: JwtPayload,
+    @Query('tenantId') tenantId?: string,
     @Query('customerId') customerId?: string,
     @Query('take') take?: string,
   ) {
-    return this.shopify.listOrders(tenantId, customerId, take ? Number(take) : 50);
+    return this.shopify.listOrders(
+      await this.scope.resolveTenantId(user, tenantId),
+      customerId,
+      take ? Number(take) : 50,
+    );
   }
 
   @Post('webhooks')

@@ -7,6 +7,8 @@ import { ShopifyModule } from './shopify/shopify.module';
 import { AdpModule } from './adp/adp.module';
 import { PublicStorefrontModule } from './public-storefront/public-storefront.module';
 import { StorefrontDashboardModule } from './storefront-dashboard/storefront-dashboard.module';
+import { MembershipModule } from './membership/membership.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 import { HealthController } from './health.controller';
 
 /** MVP: Subscription / Mail / Admin deferred — see docs/MVP_SCOPE.md */
@@ -20,6 +22,8 @@ import { HealthController } from './health.controller';
     AdpModule,
     PublicStorefrontModule,
     StorefrontDashboardModule,
+    MembershipModule,
+    SubscriptionModule,
   ],
   controllers: [HealthController],
 })

@@ -35,32 +35,7 @@ function visitorInitials(visitorId: string): string {
 export class StorefrontDashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async resolveShopDomain(shop?: string): Promise<string | null> {
-    if (shop?.trim()) return shop.trim();
-    const env = process.env.STOREFRONT_DEFAULT_SHOP?.trim();
-    if (env) return env;
-    const first = await this.prisma.shop.findFirst({
-      where: { uninstalledAt: null },
-      orderBy: { installedAt: 'asc' },
-      select: { shopDomain: true },
-    });
-    return first?.shopDomain ?? null;
-  }
-
-  async getStats(shop?: string) {
-    const shopDomain = await this.resolveShopDomain(shop);
-    if (!shopDomain) {
-      return {
-        conversationsToday: 0,
-        conversationsTrendPct: 0,
-        aiResolution: 0,
-        aiResolutionTarget: 70,
-        avgFirstResponseSec: 0,
-        avgResponseTrendSec: 0,
-        pendingTakeover: 0,
-      };
-    }
-
+  async getStats(shopDomain: string) {
     const today = startOfUtcDay(new Date());
     const yesterday = new Date(today);
     yesterday.setUTCDate(yesterday.getUTCDate() - 1);
@@ -106,10 +81,7 @@ export class StorefrontDashboardService {
     };
   }
 
-  async getChart(shop?: string) {
-    const shopDomain = await this.resolveShopDomain(shop);
-    if (!shopDomain) return [];
-
+  async getChart(shopDomain: string) {
     const since = startOfUtcDay(new Date());
     since.setUTCDate(since.getUTCDate() - 29);
 
@@ -148,10 +120,7 @@ export class StorefrontDashboardService {
     });
   }
 
-  async getConversations(shop?: string) {
-    const shopDomain = await this.resolveShopDomain(shop);
-    if (!shopDomain) return [];
-
+  async getConversations(shopDomain: string) {
     const threads = await this.prisma.chatThread.findMany({
       where: { shopDomain },
       orderBy: { updatedAt: 'desc' },
@@ -171,7 +140,7 @@ export class StorefrontDashboardService {
     }));
   }
 
-  async getSuggestion(_shop?: string) {
+  async getSuggestion(_shopDomain: string) {
     return {
       title: 'Knowledge Base Optimization',
       description:
@@ -180,8 +149,7 @@ export class StorefrontDashboardService {
     };
   }
 
-  async getThreadMessages(threadId: string, shop?: string) {
-    const shopDomain = await this.resolveShopDomain(shop);
+  async getThreadMessages(threadId: string, shopDomain: string) {
     const thread = await this.prisma.chatThread.findUnique({
       where: { id: threadId },
       include: {
@@ -189,7 +157,7 @@ export class StorefrontDashboardService {
       },
     });
     if (!thread) throw new NotFoundException('thread not found');
-    if (shopDomain && thread.shopDomain !== shopDomain) {
+    if (thread.shopDomain !== shopDomain) {
       throw new NotFoundException('thread not found');
     }
     return thread.messages.map((m) => ({

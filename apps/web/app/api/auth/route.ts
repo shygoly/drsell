@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getShopify } from '@/lib/shopify';
+import { sealInstallUserToken } from '@/lib/oauth-state';
 
 export async function GET(req: NextRequest) {
   const shop = req.nextUrl.searchParams.get('shop');
@@ -57,6 +58,18 @@ export async function GET(req: NextRequest) {
     setCookies.forEach((c) => res.headers.append('Set-Cookie', c));
   } else if (setCookies) {
     res.headers.set('Set-Cookie', setCookies);
+  }
+
+  // 已登录的平台用户发起安装时，把 admin JWT 密封进 HttpOnly cookie，
+  // 回调端验签后交给 API 建立 Membership（见 lib/oauth-state.ts）。
+  const userToken = req.nextUrl.searchParams.get('u') || '';
+  if (userToken) {
+    const secret = process.env.SHOPIFY_API_SECRET || '';
+    const sealed = sealInstallUserToken(userToken, secret);
+    res.headers.append(
+      'Set-Cookie',
+      `drsell_install_u=${encodeURIComponent(sealed)}; Path=/api/auth/callback; HttpOnly; SameSite=Lax; Secure; Max-Age=600`,
+    );
   }
   return res;
 }

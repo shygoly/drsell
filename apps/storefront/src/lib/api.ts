@@ -1,3 +1,4 @@
+import { merchantFetch } from "./merchant-api";
 import type {
   ChartPoint,
   ChatMessage,
@@ -8,151 +9,42 @@ import type {
 
 /**
  * API 客户端 — 对接 NestJS storefront dashboard 模块。
- * API 不可达时回退到内置种子数据（仅开发演示）；生产空库返回真实空数组。
+ *
+ * 全部请求都带会话 token：店铺范围由后端从 token 解析（见 apps/api/src/common/shop-scope.ts），
+ * 前端不再传 shop 参数，也不再有「拿不到数据就显示种子数据」的兜底——
+ * 未授权就应当看到空态，而不是别人的或编造的数字。
  */
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
-
-const DEFAULT_SHOP = process.env.NEXT_PUBLIC_DEFAULT_SHOP?.trim() ?? "";
-
-function shopQuery(): string {
-  return DEFAULT_SHOP ? `?shop=${encodeURIComponent(DEFAULT_SHOP)}` : "";
-}
-
-async function getJson<T>(path: string, fallback: T): Promise<T> {
-  try {
-    const res = await fetch(`${API_BASE}${path}`, {
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) throw new Error(`API ${res.status}`);
-    return (await res.json()) as T;
-  } catch {
-    return fallback;
-  }
-}
-
-async function getJsonNoFallback<T>(path: string): Promise<T | null> {
-  try {
-    const res = await fetch(`${API_BASE}${path}`, {
-      cache: "no-store",
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
-  }
-}
-
-export const FALLBACK_STATS: DashboardStats = {
-  conversationsToday: 42,
-  conversationsTrendPct: 12,
-  aiResolution: 68,
+/** 未加载/无会话时的零值，避免 UI 渲染出不存在的业务数字 */
+export const EMPTY_STATS: DashboardStats = {
+  conversationsToday: 0,
+  conversationsTrendPct: 0,
+  aiResolution: 0,
   aiResolutionTarget: 70,
-  avgFirstResponseSec: 12,
-  avgResponseTrendSec: 2,
-  pendingTakeover: 3,
+  avgFirstResponseSec: 0,
+  avgResponseTrendSec: 0,
+  pendingTakeover: 0,
 };
 
-export const FALLBACK_CHART: ChartPoint[] = [
-  { label: "8/1", ai: 40, human: 10 },
-  { label: "8/6", ai: 55, human: 15 },
-  { label: "8/11", ai: 45, human: 20 },
-  { label: "8/16", ai: 70, human: 5 },
-  { label: "8/21", ai: 60, human: 25 },
-  { label: "8/26", ai: 80, human: 10 },
-  { label: "8/29", ai: 90, human: 5 },
-];
-
-export const FALLBACK_CONVERSATIONS: Conversation[] = [
-  {
-    id: "c1",
-    customer: "John Smith",
-    avatarInitials: "JS",
-    topic: "Order status",
-    preview: "Where is my order #10294?",
-    status: "ai",
-    channel: "web",
-    time: "Just now",
-  },
-  {
-    id: "c2",
-    customer: "Amanda Lee",
-    avatarInitials: "AL",
-    topic: "Shipping",
-    preview: "Do you ship to Canada?",
-    status: "ai",
-    channel: "instagram",
-    time: "2m ago",
-  },
-  {
-    id: "c3",
-    customer: "Mike Kowalski",
-    avatarInitials: "MK",
-    topic: "Exchange",
-    preview: "Can I exchange for a larger size?",
-    status: "ai",
-    channel: "email",
-    time: "5m ago",
-  },
-  {
-    id: "c4",
-    customer: "Sarah Jones",
-    avatarInitials: "SJ",
-    topic: "Follow-up",
-    preview: "Thanks for the quick reply!",
-    status: "ai",
-    channel: "web",
-    time: "12m ago",
-  },
-  {
-    id: "c5",
-    customer: "Guest 992",
-    avatarInitials: "!",
-    topic: "Takeover",
-    preview: "Agent takeover requested",
-    status: "pending",
-    channel: "web",
-    time: "15m ago",
-  },
-];
-
-export const FALLBACK_SUGGESTION: KnowledgeBaseSuggestion = {
-  title: "Knowledge Base Optimization",
-  description:
-    "Your knowledge base lacks a returns policy answer — add it to resolve ~15% more questions automatically.",
-  impact: "-15% takeovers",
-};
-
-const q = shopQuery();
-
-export async function fetchStats() {
-  return getJson<DashboardStats>(`/storefront/stats${q}`, FALLBACK_STATS);
+export function fetchStats(token: string) {
+  return merchantFetch<DashboardStats>("/storefront/stats", token);
 }
 
-export async function fetchChart() {
-  return getJson<ChartPoint[]>(`/storefront/chart${q}`, FALLBACK_CHART);
+export function fetchChart(token: string) {
+  return merchantFetch<ChartPoint[]>("/storefront/chart", token);
 }
 
-export async function fetchConversations() {
-  return getJson<Conversation[]>(
-    `/storefront/conversations${q}`,
-    FALLBACK_CONVERSATIONS,
-  );
+export function fetchConversations(token: string) {
+  return merchantFetch<Conversation[]>("/storefront/conversations", token);
 }
 
-export async function fetchSuggestion() {
-  return getJson<KnowledgeBaseSuggestion>(
-    `/storefront/suggestion${q}`,
-    FALLBACK_SUGGESTION,
-  );
+export function fetchSuggestion(token: string) {
+  return merchantFetch<KnowledgeBaseSuggestion>("/storefront/suggestion", token);
 }
 
-export async function fetchThreadMessages(threadId: string) {
-  const suffix = DEFAULT_SHOP
-    ? `?shop=${encodeURIComponent(DEFAULT_SHOP)}`
-    : "";
-  return getJsonNoFallback<ChatMessage[]>(
-    `/storefront/inbox/${threadId}/messages${suffix}`,
+export function fetchThreadMessages(threadId: string, token: string) {
+  return merchantFetch<ChatMessage[]>(
+    `/storefront/inbox/${encodeURIComponent(threadId)}/messages`,
+    token,
   );
 }

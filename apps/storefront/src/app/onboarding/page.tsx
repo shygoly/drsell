@@ -109,6 +109,7 @@ function SyncStatusCard({
   syncStarted: boolean;
   onSyncNow: () => void;
 }) {
+  const { userToken } = useShopSession();
   const running =
     syncStarted ||
     Boolean(
@@ -163,8 +164,11 @@ function SyncStatusCard({
               variant="outline"
               onClick={() => {
                 const target = window.top ?? window;
+                const u = userToken
+                  ? `&u=${encodeURIComponent(userToken)}`
+                  : "";
                 target.location.assign(
-                  `/api/auth?shop=${encodeURIComponent(shop)}`,
+                  `/api/auth?shop=${encodeURIComponent(shop)}${u}`,
                 );
               }}
             >

@@ -9,14 +9,27 @@ import { PrismaService } from '../prisma/prisma.service';
 export class TenantService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async ensureShopTenant(shopDomain: string, accessToken?: string, scopes?: string) {
+  /**
+   * 确保店铺 + 租户存在。
+   * 传入 tenantId（来自发起安装的账号已有租户）时复用，不再为每家店无脑建租户。
+   */
+  async ensureShopTenant(
+    shopDomain: string,
+    accessToken?: string,
+    scopes?: string,
+    tenantId?: string,
+  ) {
     const domain = shopDomain.replace(/^https?:\/\//, '').replace(/\/$/, '');
     let shop = await this.prisma.shop.findUnique({ where: { shopDomain: domain } });
     const storedToken = accessToken ? encryptShopAccessToken(accessToken) : undefined;
     if (!shop) {
-      const tenant = await this.prisma.tenant.create({
-        data: { name: domain },
-      });
+      const tenant =
+        (tenantId
+          ? await this.prisma.tenant.findUnique({ where: { id: tenantId } })
+          : null) ??
+        (await this.prisma.tenant.create({
+          data: { name: domain },
+        }));
       try {
         shop = await this.prisma.shop.create({
           data: {
@@ -52,6 +65,13 @@ export class TenantService {
     const domain = shopDomain.replace(/^https?:\/\//, '').replace(/\/$/, '');
     return this.prisma.shop.findUnique({
       where: { shopDomain: domain },
+      include: { tenant: true, botSetting: true },
+    });
+  }
+
+  getById(id: string) {
+    return this.prisma.shop.findUnique({
+      where: { id },
       include: { tenant: true, botSetting: true },
     });
   }

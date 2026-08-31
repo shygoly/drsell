@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchThreadMessages } from "@/lib/api";
+import { useShopSession } from "@/hooks/useShopSession";
 import type { ChatMessage, Conversation, ConversationStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -145,6 +146,7 @@ type InboxClientProps = {
 };
 
 export function InboxClient({ initialConversations }: InboxClientProps) {
+  const { token } = useShopSession();
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [resolvedIds, setResolvedIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("open");
@@ -181,21 +183,27 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
       setMessages([]);
       return;
     }
+    if (!token) {
+      setMessages([]);
+      return;
+    }
     let cancelled = false;
     setLoadingMessages(true);
-    void fetchThreadMessages(selectedId).then((data) => {
-      if (cancelled) return;
-      const found = conversations.find((c) => c.id === selectedId);
-      setMessages(
-        data && data.length > 0 ? data : found ? buildFallbackMessages(found) : [],
-      );
-      setLoadingMessages(false);
-    });
+    void fetchThreadMessages(selectedId, token)
+      .catch(() => null)
+      .then((data) => {
+        if (cancelled) return;
+        const found = conversations.find((c) => c.id === selectedId);
+        setMessages(
+          data && data.length > 0 ? data : found ? buildFallbackMessages(found) : [],
+        );
+        setLoadingMessages(false);
+      });
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId]);
+  }, [selectedId, token]);
 
   function handleTakeOver() {
     if (!selected) return;

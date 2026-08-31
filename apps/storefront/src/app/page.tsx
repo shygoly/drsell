@@ -1,20 +1,15 @@
+"use client";
+
 import { Headset, MessagesSquare, Timer, Bot } from "lucide-react";
 import { ConversationChart } from "@/components/business/conversation-chart";
 import { KnowledgeBaseCard } from "@/components/business/knowledge-base-card";
 import { LiveConversations } from "@/components/business/live-conversations";
 import { StatCard } from "@/components/business/stat-card";
 import { StatusBanner } from "@/components/business/status-banner";
-import { fetchChart, fetchConversations, fetchStats, fetchSuggestion } from "@/lib/api";
+import { useDashboardData } from "@/hooks/useDashboardData";
 
-export const dynamic = "force-dynamic";
-
-export default async function DashboardPage() {
-  const [stats, chart, conversations, suggestion] = await Promise.all([
-    fetchStats(),
-    fetchChart(),
-    fetchConversations(),
-    fetchSuggestion(),
-  ]);
+export default function DashboardPage() {
+  const { stats, chart, conversations, suggestion, error } = useDashboardData();
 
   return (
     <div className="flex flex-col gap-6">
@@ -22,6 +17,12 @@ export default async function DashboardPage() {
       <div className="-mx-6 -mt-6">
         <StatusBanner stats={stats} />
       </div>
+
+      {error ? (
+        <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border px-4 py-3 text-sm">
+          无法加载数据：{error}
+        </div>
+      ) : null}
 
       <div className="flex items-center justify-between">
         <h1 className="text-accent-deep text-display-lg font-bold">Overview</h1>
@@ -70,7 +71,7 @@ export default async function DashboardPage() {
           <ConversationChart data={chart} />
         </div>
         <div className="space-y-6">
-          <KnowledgeBaseCard suggestion={suggestion} />
+          {suggestion ? <KnowledgeBaseCard suggestion={suggestion} /> : null}
           <LiveConversations conversations={conversations} />
         </div>
       </div>

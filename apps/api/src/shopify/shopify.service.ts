@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantService } from '../tenant/tenant.service';
 import { AuthService } from '../auth/auth.service';
 import { AdpService } from '../adp/adp.service';
+import { BillingService } from '../subscription/billing.service';
 
 const PRODUCT_QUERY = `
   query SyncProducts($first: Int!) {
@@ -84,6 +85,7 @@ export class ShopifyService {
     private readonly tenants: TenantService,
     private readonly auth: AuthService,
     private readonly adp: AdpService,
+    private readonly billing: BillingService,
   ) {}
 
   private secret() {
@@ -355,11 +357,32 @@ export class ShopifyService {
   async handleUninstall(shopDomain: string) {
     const shop = await this.tenants.getByShopDomain(shopDomain);
     if (!shop) return { ok: true };
+    const billingSub = await this.prisma.subscription.findFirst({
+      where: { shopId: shop.id, isBillingShop: true },
+    });
     await this.prisma.shop.update({
       where: { id: shop.id },
       data: { accessToken: null, uninstalledAt: new Date() },
     });
     await this.prisma.session.deleteMany({ where: { shopId: shop.id } });
+    if (billingSub) {
+      // billing shop 卸载：把计费转移到组内下一家店；失败留痕不静默吞掉。
+      await this.billing
+        .reassign(shop.tenantId, shop.id)
+        .catch(async (e) => {
+          await this.prisma.knowledgeSyncJob
+            .create({
+              data: {
+                shopDomain: shop.shopDomain,
+                kind: 'billing:reassign-failed',
+                externalId: `${shop.shopDomain}:reassign:${Date.now()}`,
+                status: 'failed',
+                payload: String(e),
+              },
+            })
+            .catch(() => undefined);
+        });
+    }
     return { ok: true };
   }
 
