@@ -116,3 +116,12 @@
 - [x] 重写 `drsell-chat.js`：支持 launcher、开合、headerColor、windowSize、quickReplies、widgetVisible、流式输出。
 - [x] 线上 API 实测：保存全量配置成功；公开 widget-config 返回新字段；`/public/chat` 经 OpenClaw 回答订单问题成功。
 - [ ] 注意：theme app extension 资产 `drsell-chat.js` 的线上生效需要单独执行 `shopify app deploy`（当前部署脚本不发布扩展）。
+
+## Round 7 进展（Widget 视觉层彻底对齐）
+- [x] `drsell-chat.js` 按 Live Preview / 设计稿重写视觉：浅色面板、头像字母、AI 名字（shopName）、状态行「● Typically replies instantly」、时间戳、消息气泡（用户右/助手左）、快捷问题 chips、圆形发送按钮、「Powered by AIChat」品牌栏。
+- [x] 修复 cssText 拼接 bug：改用逐属性赋值 `el.style[k]=v`，此前 camelCase 属性（flexDirection/alignSelf/borderRadius/maxWidth 等）经 style.cssText 解析被全部丢弃，面板/气泡一直按 row 布局渲染。
+- [x] 修复流式回复误删用户消息：流式期间只原地更新机器人气泡，不再删除 log 最后一个子节点。
+- [x] 修复用户气泡角色判断大小写问题（`role==='me'` 与 `'Me'` 不匹配），改传固定角色 `'me'/'bot'`。
+- [x] Live Preview 改为加载真实 `drsell-chat.js`（新增 `/widget-preview` 路由 + `window.DRSELL_CONFIG` 注入，storefront prebuild 自动从扩展资产同步到 `public/drsell-chat.js`），配置页预览即真实渲染。
+- [x] 部署：Shopify 扩展 drseller-alpha-22；storefront 定向部署 wjclaw 并重启。
+- [x] 线上验证：chatbotdomaintest 前台与 drsell.szchada.top/widget-config 预览视觉一致（白底面板、头像 Ava、气泡左右对齐、品牌栏），聊天流式回复正常。

@@ -54,7 +54,7 @@
         "command": "node",
         "args": [
           "/usr/lib/node_modules/@modelcontextprotocol/server-postgres/dist/index.js",
-          "postgresql://adp_reader:REPLACE_ADP_READER_PASSWORD@127.0.0.1:5432/drsell?sslmode=disable"
+          "postgresql://adp_reader:REPLACE_ADP_READER_PASSWORD@127.0.0.1:5433/drsell?sslmode=disable"
         ]
       }
     }

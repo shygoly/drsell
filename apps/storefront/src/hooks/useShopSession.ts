@@ -5,6 +5,8 @@ import { useShopifyBridge } from "@/components/business/shopify-bridge";
 
 const TOKEN_KEY = "drsell_shop_token";
 const SHOP_KEY = "drsell_shop";
+const USER_TOKEN_KEY = "drsell_user_token";
+const USER_EMAIL_KEY = "drsell_user_email";
 
 function safeStorageGet(key: string): string {
   try {
@@ -26,6 +28,8 @@ export function useShopSession() {
   const bridge = useShopifyBridge();
   const [shop, setShop] = useState("");
   const [token, setToken] = useState("");
+  const [userToken, setUserToken] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -35,10 +39,82 @@ export function useShopSession() {
         : "";
     const storedShop = safeStorageGet(SHOP_KEY);
     const storedToken = safeStorageGet(TOKEN_KEY);
+    const storedUserToken = safeStorageGet(USER_TOKEN_KEY);
+    const storedUserEmail = safeStorageGet(USER_EMAIL_KEY);
     const nextShop = fromUrl || storedShop || "";
     setShop(nextShop);
     if (storedToken) setToken(storedToken);
+    if (storedUserToken) setUserToken(storedUserToken);
+    if (storedUserEmail) setUserEmail(storedUserEmail);
     setReady(true);
+  }, []);
+
+  const applyUserSession = useCallback((accessToken: string, email: string) => {
+    safeStorageSet(USER_TOKEN_KEY, accessToken);
+    safeStorageSet(USER_EMAIL_KEY, email);
+    setUserToken(accessToken);
+    setUserEmail(email);
+  }, []);
+
+  const loginWithPassword = useCallback(
+    async (email: string, password: string) => {
+      const api =
+        process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+      const res = await fetch(`${api}/auth/admin/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(
+          text ? `Login failed: ${text.slice(0, 160)}` : `Login failed (${res.status})`,
+        );
+      }
+      const data = (await res.json()) as { accessToken: string };
+      applyUserSession(data.accessToken, email);
+      return data.accessToken;
+    },
+    [applyUserSession],
+  );
+
+  const register = useCallback(
+    async (email: string, password: string) => {
+      const api =
+        process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+      const res = await fetch(`${api}/auth/admin/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(
+          text ? `Registration failed: ${text.slice(0, 160)}` : `Registration failed (${res.status})`,
+        );
+      }
+      const data = (await res.json()) as { accessToken: string };
+      applyUserSession(data.accessToken, email);
+      return data.accessToken;
+    },
+    [applyUserSession],
+  );
+
+  const startGoogleLogin = useCallback(() => {
+    const api =
+      process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+    window.location.href = `${api}/auth/google`;
+  }, []);
+
+  const logout = useCallback(() => {
+    safeStorageSet(USER_TOKEN_KEY, "");
+    safeStorageSet(USER_EMAIL_KEY, "");
+    safeStorageSet(SHOP_KEY, "");
+    safeStorageSet(TOKEN_KEY, "");
+    setUserToken("");
+    setUserEmail("");
+    setShop("");
+    setToken("");
   }, []);
 
   const login = useCallback(async (shopDomain?: string) => {
@@ -115,5 +191,19 @@ export function useShopSession() {
     window.location.href = `/api/auth?shop=${encodeURIComponent(normalized)}`;
   }, []);
 
-  return { shop, token, login, ready, setShop, startOAuth };
+  return {
+    shop,
+    token,
+    userToken,
+    userEmail,
+    login,
+    loginWithPassword,
+    register,
+    startGoogleLogin,
+    applyUserSession,
+    logout,
+    ready,
+    setShop,
+    startOAuth,
+  };
 }

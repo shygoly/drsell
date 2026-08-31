@@ -17,14 +17,28 @@ export class TenantService {
       const tenant = await this.prisma.tenant.create({
         data: { name: domain },
       });
-      shop = await this.prisma.shop.create({
-        data: {
-          shopDomain: domain,
-          tenantId: tenant.id,
-          accessToken: storedToken,
-          scopes,
-        },
-      });
+      try {
+        shop = await this.prisma.shop.create({
+          data: {
+            shopDomain: domain,
+            tenantId: tenant.id,
+            accessToken: storedToken,
+            scopes,
+          },
+        });
+      } catch (e) {
+        // 并发首次登录可能同时创建，撞唯一约束时重取已存在的记录
+        if ((e as { code?: string }).code === 'P2002') {
+          shop = await this.prisma.shop.findUnique({
+            where: { shopDomain: domain },
+          });
+        } else {
+          throw e;
+        }
+      }
+      if (!shop) {
+        throw new Error(`Failed to resolve shop tenant for ${domain}`);
+      }
     } else if (storedToken) {
       shop = await this.prisma.shop.update({
         where: { id: shop.id },

@@ -1,6 +1,6 @@
 "use client";
 
-import { Component, useEffect, useState, type ReactNode } from "react";
+import { Component, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   Check,
   ExternalLink,
@@ -13,12 +13,10 @@ import {
   Rocket,
   Save,
   Search,
-  Send,
   ShoppingBag,
   Smartphone,
   Trash2,
   Upload,
-  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -142,6 +140,45 @@ function WidgetConfigInner() {
     setShop(domain);
     startOAuth(domain);
   }
+
+  const previewSrc = useMemo(() => {
+    const params = new URLSearchParams({
+      name: widgetName || "Ava",
+      primary: primaryColor,
+      header: headerColor,
+      position,
+      size: windowSize,
+      launcher: launcherStyle,
+      visible: showWidget ? "1" : "0",
+      welcome: welcomeMsg,
+      shop: shop || "your-store.myshopify.com",
+    });
+    const replies = quickReplies.filter(Boolean);
+    if (replies.length > 0) {
+      params.set("replies", replies.join("|"));
+    }
+    return `/widget-preview?${params.toString()}`;
+  }, [
+    widgetName,
+    primaryColor,
+    headerColor,
+    position,
+    windowSize,
+    launcherStyle,
+    showWidget,
+    welcomeMsg,
+    shop,
+    quickReplies,
+  ]);
+
+  const previewSize =
+    windowSize === "small"
+      ? { w: 280, h: 380 }
+      : windowSize === "large"
+        ? { w: 360, h: 520 }
+        : { w: 320, h: 440 };
+  const previewScale =
+    windowSize === "small" ? 0.8 : windowSize === "large" ? 0.6 : 0.7;
 
   return (
     <div className="flex flex-col gap-6">
@@ -564,84 +601,27 @@ function WidgetConfigInner() {
                     </div>
                   )}
 
-                  {/* Chat widget overlay */}
-                  {showWidget ? (
-                    <div
-                      className={cn(
-                        "absolute flex flex-col overflow-hidden rounded-xl border bg-card shadow-lg",
-                        position === "bottom-right" ? "right-3" : "left-3",
-                        previewDevice === "desktop"
-                          ? "bottom-3 w-56"
-                          : "right-2 bottom-2 left-2 w-auto",
-                      )}
+                  {/* Chat widget overlay — rendered by the real drsell-chat.js */}
+                  <div
+                    className="pointer-events-none absolute bottom-3 overflow-hidden"
+                    style={{
+                      right: position === "bottom-right" ? 12 : undefined,
+                      left: position === "bottom-left" ? 12 : undefined,
+                      width: previewSize.w,
+                      height: previewSize.h,
+                    }}
+                  >
+                    <iframe
+                      title="Chat widget live preview"
+                      src={previewSrc}
+                      className="h-full w-full border-0"
                       style={{
-                        width: previewDevice === "mobile" ? undefined : windowSize === "small" ? 200 : windowSize === "large" ? 260 : 224,
+                        transform: `scale(${previewScale})`,
+                        transformOrigin:
+                          position === "bottom-left" ? "bottom left" : "bottom right",
                       }}
-                    >
-                      <div
-                        className="flex items-center justify-between px-3 py-2 text-white"
-                        style={{ backgroundColor: headerColor }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[8px]">
-                            {widgetName.slice(0, 1).toUpperCase()}
-                          </span>
-                          <div>
-                            <p className="text-[10px] leading-tight font-semibold">
-                              {widgetName}
-                            </p>
-                            <p className="text-[8px] leading-tight opacity-80">
-                              ● Typically replies instantly
-                            </p>
-                          </div>
-                        </div>
-                        <X className="h-3 w-3" aria-hidden="true" />
-                      </div>
-                      <div className="flex flex-col gap-2 p-2">
-                        <span className="text-muted-foreground text-center text-[8px]">
-                          Today 9:41 AM
-                        </span>
-                        <div className="bg-muted max-w-[90%] rounded-lg rounded-bl-sm px-2 py-1.5 text-[9px]">
-                          {welcomeMsg}
-                        </div>
-                        {quickReplies.filter(Boolean).map((reply) => (
-                          <span
-                            key={reply}
-                            className="border-primary/40 text-primary ml-auto rounded-full border px-2 py-0.5 text-[8px]"
-                          >
-                            {reply}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-1 border-t px-2 py-1.5">
-                        <span className="text-muted-foreground flex-1 text-[9px]">
-                          Type your message here…
-                        </span>
-                        <Send className="text-primary h-3 w-3" aria-hidden="true" />
-                      </div>
-                      <p className="text-muted-foreground border-t py-1 text-center text-[7px]">
-                        Powered by AIChat
-                      </p>
-                    </div>
-                  ) : null}
-
-                  {/* Launcher */}
-                  {!showWidget ? (
-                    <button
-                      type="button"
-                      className="absolute bottom-3 flex h-9 w-9 items-center justify-center rounded-full text-white shadow"
-                      style={{ backgroundColor: primaryColor, right: position === "bottom-right" ? 12 : undefined, left: position === "bottom-left" ? 12 : undefined }}
-                      aria-label="Widget launcher"
-                    >
-                      {launcherStyle === "chat" ? (
-                        <MessageSquare className="h-4 w-4" aria-hidden="true" />
-                      ) : launcherStyle === "question" ? (
-                        <HelpCircle className="h-4 w-4" aria-hidden="true" />
-                      ) : (
-                        <Upload className="h-4 w-4" aria-hidden="true" />
-                      )}
-                    </button>
-                  ) : null}
+                    />
+                  </div>
                 </div>
               </div>
               <p className="text-muted-foreground text-xs">

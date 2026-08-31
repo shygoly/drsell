@@ -6,6 +6,8 @@ import { Bell, HelpCircle, Search } from "lucide-react";
 import { SidebarNav } from "./sidebar-nav";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useShopSession } from "@/hooks/useShopSession";
+import { OnboardingGuard } from "@/components/business/onboarding-guard";
 
 /**
  * AppShell — 由 Stitch 导出 HTML 的 SideNavBar + TopNavBar 提炼的共享布局。
@@ -22,14 +24,18 @@ const TOP_TABS = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { userEmail, logout } = useShopSession();
 
   // Stitch onboarding_welcome 是独立欢迎屏，不含 Sidebar/TopBar。
-  if (pathname === "/onboarding") {
+  // /login 也是独立认证页，不套后台壳。
+  if (pathname === "/onboarding" || pathname === "/login") {
     return <>{children}</>;
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <>
+      <OnboardingGuard />
+      <div className="flex h-screen overflow-hidden">
       <SidebarNav />
       <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
         <header className="bg-card flex h-14 w-full shrink-0 items-center justify-between border-b px-5">
@@ -95,13 +101,35 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </button>
             </div>
             {/* 稿中此处为外链头像图；改用首字母头像，避免依赖外部图片资源 */}
-            <div className="bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full border text-xs font-medium">
-              MC
-            </div>
+            {userEmail ? (
+              <div className="flex items-center gap-2">
+                <div className="bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full border text-xs font-medium">
+                  {userEmail.slice(0, 1).toUpperCase()}
+                </div>
+                <span className="text-muted-foreground hidden max-w-[160px] truncate text-xs lg:inline">
+                  {userEmail}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    logout();
+                    window.location.href = "/login";
+                  }}
+                >
+                  Log out
+                </Button>
+              </div>
+            ) : (
+              <Button size="sm" asChild>
+                <Link href="/login">Log in</Link>
+              </Button>
+            )}
           </div>
         </header>
         <main className="bg-background flex-1 overflow-y-auto p-6">{children}</main>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

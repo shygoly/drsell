@@ -1,5 +1,13 @@
 # Drsell Onboarding Wizard — Design Spec
 
+> **实现状态（2026-08-31）**：本规格已在 storefront 应用落地为 4 步向导
+> （/onboarding：Welcome → Sync → Widget → Done），设计令牌沿用当前项目
+> Stitch→shadcn 体系（primary #006c49 / accent-deep #0a3d2e / chart-2 等），
+> 而非原计划的 Polaris。首次进入守卫（OnboardingGuard）会在
+> `onboardingStep !== 'done'` 时把店铺跳转到 /onboarding；Step 3 通过
+> App Bridge `shopify.app.extensions()` 自动探测 embed 激活，并支持
+> 「Enable in theme」深链与手动确认。已部署 drsell.szchada.top 并线上验证。
+
 **Date:** 2026-08-27  
 **Status:** Approved  
 **Reference:** Taylor Sicard Shopify App onboarding benchmark (≤5 steps, activation by step 3–4)

@@ -78,6 +78,12 @@ export class ShopifyController {
   }
 
   @Auth()
+  @Post('sync/batch')
+  batchSync(@Query('shop') shop: string) {
+    return this.shopify.startBatchSync(shop);
+  }
+
+  @Auth()
   @Post('sync/:kind')
   sync(
     @Param('kind') kind: 'products' | 'orders' | 'customers',
@@ -96,12 +102,6 @@ export class ShopifyController {
   @Patch('onboarding')
   patchOnboarding(@Query('shop') shop: string, @Body() body: PatchOnboardingDto) {
     return this.shopify.patchOnboardingState(shop, body);
-  }
-
-  @Auth()
-  @Post('sync/batch')
-  batchSync(@Query('shop') shop: string) {
-    return this.shopify.startBatchSync(shop);
   }
 
   @Auth()

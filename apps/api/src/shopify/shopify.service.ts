@@ -262,6 +262,13 @@ export class ShopifyService {
 
   async startBatchSync(shopDomain: string) {
     const setting = await this.getOrCreateBotSetting(shopDomain);
+    const shop = await this.tenants.getByShopDomain(shopDomain);
+    const accessToken = shop ? this.tenants.getShopAccessToken(shop) : null;
+    if (!shop || !accessToken) {
+      throw new BadRequestException(
+        'shop missing access token: complete Shopify authorization first',
+      );
+    }
     const kinds: Array<'products' | 'orders' | 'customers'> = [];
     if (setting.syncProductsEnabled) kinds.push('products');
     if (setting.syncOrdersEnabled) kinds.push('orders');
@@ -269,6 +276,10 @@ export class ShopifyService {
 
     const started: string[] = [];
     for (const kind of kinds) {
+      const running = await this.prisma.knowledgeSyncJob.findFirst({
+        where: { shopDomain, kind, status: 'running' },
+      });
+      if (running) continue;
       const job = await this.prisma.knowledgeSyncJob.create({
         data: {
           shopDomain,
@@ -317,7 +328,9 @@ export class ShopifyService {
 
     for (const kind of kinds) {
       const latest = await this.prisma.knowledgeSyncJob.findFirst({
-        where: { shopDomain, kind },
+        // pushKnowledge 每次同步后都会追加一条 skipped 记录，过滤掉它，
+        // 让状态反映真实的同步结果（done / failed / idle）。
+        where: { shopDomain, kind, status: { not: 'skipped' } },
         orderBy: { createdAt: 'desc' },
       });
       let count: number | undefined;

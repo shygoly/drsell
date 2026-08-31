@@ -45,8 +45,8 @@ source /root/.openclaw-drsell/drsell-secrets.env
 openclaw --profile drsell gateway call health --token "$OPENCLAW_GATEWAY_TOKEN"
 
 # PG 隔离
-ADMIN_DSN="postgres://medusa@127.0.0.1:5432/drsell" \
-ADP_DSN="postgres://adp_reader:${ADP_READER_PASSWORD}@127.0.0.1:5432/drsell" \
+ADMIN_DSN="postgres://medusa@127.0.0.1:5433/drsell" \
+ADP_DSN="postgres://adp_reader:${ADP_READER_PASSWORD}@127.0.0.1:5433/drsell" \
 SHOP_A="<店铺域名>" \
 bash scripts/verify-adp-isolation.sh
 

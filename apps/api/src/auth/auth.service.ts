@@ -1,6 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { randomBytes } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 
 export type JwtPayload = {
@@ -24,6 +29,41 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Invalid credentials');
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) throw new UnauthorizedException('Invalid credentials');
+    return this.signAdmin(user);
+  }
+
+  async registerAdmin(email: string, password: string) {
+    const normalized = email.toLowerCase().trim();
+    const existing = await this.prisma.adminUser.findUnique({
+      where: { email: normalized },
+    });
+    if (existing) throw new ConflictException('Account already exists');
+    const passwordHash = await bcrypt.hash(password, 12);
+    const user = await this.prisma.adminUser.create({
+      data: { email: normalized, passwordHash, role: 'admin' },
+    });
+    return this.signAdmin(user);
+  }
+
+  async exchangeGoogle(params: { email: string }) {
+    const email = params.email.toLowerCase().trim();
+    let user = await this.prisma.adminUser.findUnique({ where: { email } });
+    if (!user) {
+      // Google-created accounts have no usable password.
+      const passwordHash = await bcrypt.hash(randomBytes(24).toString('hex'), 12);
+      user = await this.prisma.adminUser.create({
+        data: { email, passwordHash, role: 'owner' },
+      });
+    }
+    return this.signAdmin(user);
+  }
+
+  private signAdmin(user: {
+    id: string;
+    email: string;
+    tenantId?: string | null;
+    role: string;
+  }) {
     return this.sign({
       sub: user.id,
       email: user.email,
