@@ -27,6 +27,17 @@ const VIEWPORT = { width: 1440, height: 2400 };
 // 冻结时钟：倒计时每天都在变，不冻结就无法复现
 const FROZEN_NOW = Date.parse('2026-09-01T00:00:00.000Z');
 
+/** 中间件与 AuthGate 都会解 JWT 的 exp，所以 fixture token 必须是结构合法的 JWT */
+const FIXTURE_TOKEN = (() => {
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
+  return `${b64({ alg: 'none', typ: 'JWT' })}.${b64({
+    sub: 'stitch-phase-c',
+    role: 'superadmin',
+    typ: 'admin',
+    exp: Math.floor(Date.now() / 1000) + 86400,
+  })}.stitch`;
+})();
+
 const fixtures = JSON.parse(readFileSync(join(ROOT, '.stitch/fixtures.json'), 'utf8'));
 
 const PAGES = [
@@ -49,6 +60,7 @@ const ctx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1 
 
 // 冻结 Date.now / new Date()，让倒计时可复现
 await ctx.addInitScript(`(() => {
+  const FIXTURE_TOKEN = ${JSON.stringify(FIXTURE_TOKEN)};
   const FROZEN = ${FROZEN_NOW};
   const RealDate = Date;
   class FrozenDate extends RealDate {
@@ -56,8 +68,12 @@ await ctx.addInitScript(`(() => {
     static now() { return FROZEN; }
   }
   window.Date = FrozenDate;
-  try { localStorage.setItem('ops_token', 'stitch-phase-c-fixture-token'); } catch {}
+  try { localStorage.setItem('ops_token', FIXTURE_TOKEN); } catch {}
 })()`);
+
+await ctx.addCookies([
+  { name: 'ops_token', value: FIXTURE_TOKEN, url: BASE, sameSite: 'Lax' },
+]);
 
 await ctx.route('**/api/ops/**', async (route) => {
   const body = fixtureFor(route.request().url());
