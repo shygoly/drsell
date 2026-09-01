@@ -101,6 +101,72 @@
   --color-rule-2: var(--rule-2);
   --color-rule-3: var(--rule-3);
 
+  /* ── Stitch 语义名（阶段 B 移植：class 字符串逐字不变，skill 阶段0 规则 6）──
+     ⚠️ 标注的 6 个是重映射：Stitch 原值在 storefront 令牌集里，照收即撞 DS-8。 */
+  --color-ink: var(--ink);
+  --color-page-bg: var(--stock);
+  --color-card-surface: var(--sheet);
+  --color-surface: var(--sheet-3);
+  --color-surface-bright: var(--sheet-3);
+  --color-surface-container: var(--sheet-4);
+  --color-surface-container-low: var(--st-surface-container-low);
+  --color-surface-container-high: var(--st-surface-container-high);
+  --color-surface-container-highest: var(--rule-2);
+  --color-surface-variant: var(--rule-2);
+  --color-surface-dim: var(--st-surface-dim);
+  --color-on-surface: var(--ink-alt);
+  --color-on-surface-variant: var(--ink-3);
+  --color-outline: var(--st-outline);
+  --color-outline-variant: var(--rule-3);
+  --color-primary: var(--st-primary);
+  --color-primary-container: var(--ink);
+  --color-on-primary: var(--sheet);                      /* ⚠️ 原 #ffffff */
+  --color-on-primary-container: var(--st-on-primary-container);
+  --color-secondary: var(--st-secondary);
+  --color-secondary-container: var(--st-secondary-container);
+  --color-on-secondary: var(--sheet);                    /* ⚠️ 原 #ffffff */
+  --color-on-secondary-container: var(--st-on-secondary-container);
+  --color-trial-accent: var(--trial);
+  --color-frozen-accent: var(--frozen);
+  --color-error: var(--lost);                            /* ⚠️ 原 #ba1a1a */
+  --color-error-container: var(--st-error-container);    /* ⚠️ 原 #ffdad6 */
+  --color-on-error: var(--sheet);                        /* ⚠️ 原 #ffffff */
+  --color-on-error-container: var(--lost);               /* ⚠️ 原 #93000a */
+  --color-tertiary-fixed: var(--st-tertiary-fixed);
+
+  /* Stitch 字号阶（fontSize 名与 fontFamily 名同名，Tailwind v4 下分别注册） */
+  --text-data-mono: 13px;
+  --text-data-mono--line-height: 1.4;
+  --text-data-mono--letter-spacing: -0.01em;
+  --text-data-mono--font-weight: 500;
+  --text-label-caps: 11px;
+  --text-label-caps--line-height: 1;
+  --text-label-caps--font-weight: 700;
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 1.1;
+  --text-headline-lg--letter-spacing: -0.02em;
+  --text-headline-lg--font-weight: 800;
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 1.2;
+  --text-headline-md--font-weight: 700;
+  --text-headline-sm: 18px;
+  --text-headline-sm--line-height: 1.2;
+  --text-headline-sm--font-weight: 700;
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 1.5;
+  --text-body-lg--font-weight: 400;
+  --text-body-md: 14px;
+  --text-body-md--line-height: 1.5;
+  --text-body-md--font-weight: 400;
+
+  --font-data-mono: var(--f-data);
+  --font-label-caps: var(--f-data);
+  --font-headline-lg: var(--f-display);
+  --font-headline-md: var(--f-display);
+  --font-headline-sm: var(--f-display);
+  --font-body-lg: var(--f-display);
+  --font-body-md: var(--f-display);
+
   --font-sans: var(--f-body);
   --font-display: var(--f-display);
   --font-mono: var(--f-data);
