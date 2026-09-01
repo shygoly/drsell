@@ -12,8 +12,12 @@ type Props = {
   meta?: string;
   /** Stitch 稿自带页头与内边距的页面传 false，由页面自己排版 */
   padded?: boolean;
-  /** 保留参数（历史调用兼容）。壳本身不再叠加第二层顶栏。 */
-  chrome?: boolean;
+  /**
+   * 顶部装饰。稿子四屏各不相同，实测：
+   * 屏 05 只有 32px 审计条（main mt-8）；屏 08 只有 48px 顶栏（main mt-row-height-standard）；
+   * 屏 02 两者都有；屏 07 用自己的横幅。固定 80px 会让每屏都错位。
+   */
+  chrome?: 'topbar' | 'audit' | 'both';
   /**
    * 置顶通栏。稿子屏 07 把冒名横幅放在全局顶栏**之上**（y 0-63），
    * 其余层依次下移；有 banner 时不再叠加 REC 审计条（稿子 07 也没有）。
@@ -26,9 +30,10 @@ type Props = {
  * 全局审计条 —— 对齐 Stitch 屏 05 的 h-8 REC LIVE AUDIT SESSION。
  * 超管面每一次登录都会写审计（INV-3），这条常驻红点条是视觉锚。
  */
-function GlobalAuditBar() {
+function GlobalAuditBar({ offsetTop = 0 }: { offsetTop?: number }) {
   return (
-    <div className="bg-primary-container border-outline-variant fixed top-[48px] z-[55] flex h-8 w-full items-center justify-center border-b">
+    <div className="bg-primary-container border-outline-variant fixed z-[55] flex h-8 w-full items-center justify-center border-b"
+      style={{ top: offsetTop }}>
       <div className="flex items-center gap-2">
         <span className="bg-error blinking-rec h-2 w-2 rounded-full" />
         <span className="text-error font-label-caps text-label-caps uppercase tracking-wider">
@@ -112,20 +117,30 @@ function GlobalTopBar({ offsetTop = 0 }: { offsetTop?: number }) {
   );
 }
 
-export function OpsShell({ active, title, subtitle, meta, padded = true, banner, children }: Props) {
+export function OpsShell({
+  active,
+  title,
+  subtitle,
+  meta,
+  padded = true,
+  chrome = 'both',
+  banner,
+  children,
+}: Props) {
+  const showTopBar = !banner && (chrome === 'topbar' || chrome === 'both');
+  const showAudit = !banner && (chrome === 'audit' || chrome === 'both');
+  const offset = banner ? 112 : (showTopBar ? 48 : 0) + (showAudit ? 32 : 0);
   return (
     <div className="bg-background min-h-screen">
       {banner ? (
         <div className="fixed top-0 z-[70] h-16 w-full">{banner}</div>
       ) : null}
-      <div className={banner ? 'top-16' : 'top-0'} data-topbar-slot>
-        <GlobalTopBar offsetTop={banner ? 64 : 0} />
-      </div>
-      {banner ? null : <GlobalAuditBar />}
-      <OpsSidebar active={active} offsetTop={banner ? 112 : 80} />
+      {banner || showTopBar ? <GlobalTopBar offsetTop={banner ? 64 : 0} /> : null}
+      {showAudit ? <GlobalAuditBar offsetTop={showTopBar ? 48 : 0} /> : null}
+      <OpsSidebar active={active} offsetTop={offset} />
       <div
         className="ml-[240px] flex min-h-screen min-w-0 flex-col"
-        style={{ paddingTop: banner ? 112 : 80 }}
+        style={{ paddingTop: offset }}
       >
         <main
           className={

@@ -57,7 +57,7 @@ export default function AuditPage() {
 
   return (
     <AuthGate>
-      <OpsShell active="audit" padded={false} chrome={false}>
+      <OpsShell active="audit" padded={false} chrome="audit">
         {/* 稿子的 h-16 里同时装标题与检索，不是两层 */}
         <header className="border-outline-variant bg-card-surface flex h-16 items-center justify-between gap-4 border-b px-[16px]">
           <h1 className="font-headline-md text-headline-md text-on-surface m-0">审计日志</h1>

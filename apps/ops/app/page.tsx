@@ -78,7 +78,7 @@ export default function HomePage() {
 
   return (
     <AuthGate>
-      <OpsShell active="queue" padded={false} chrome={false}>
+      <OpsShell active="queue" padded={false} chrome="audit">
         <header className="border-outline-variant bg-card-surface flex h-16 items-center justify-between border-b px-[16px]">
           <h1 className="font-headline-md text-headline-md text-on-surface m-0">到期队列</h1>
           <div className="flex items-center gap-4">

@@ -86,6 +86,7 @@ export default function AccountsPage() {
   return (
     <AuthGate>
       <OpsShell
+        chrome="both"
         active="accounts"
         title="Account Search & Directory"
         subtitle="Global directory for merchant accounts, cross-store roles, and billing designation."
