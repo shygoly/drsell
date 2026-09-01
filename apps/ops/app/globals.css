@@ -122,8 +122,12 @@
   --color-primary-container: var(--ink);
   --color-on-primary: var(--sheet);                      /* ⚠️ 原 #ffffff */
   --color-on-primary-container: var(--st-on-primary-container);
-  /* Stitch 的 secondary 是紫色阶，与 shadcn 的 secondary（次要表面）同名不同义。
-     注册它会把侧栏选中态染成紫色，正是「健康不给颜色」要避免的 —— 故不注册。 */
+  /* Stitch 的 secondary（实心紫 #5a4fb8）与 shadcn 的 secondary（次要表面）同名不同义，
+     注册它会把主按钮染成紫色 —— 不注册。
+     但 secondary-container（淡紫）只用于侧栏导航选中态：那是导航状态，
+     与订阅健康态正交，不违反「健康不给颜色」，故注册。 */
+  --color-secondary-container: var(--st-secondary-container);
+  --color-on-secondary-container: var(--st-on-secondary-container);
   --color-trial-accent: var(--trial);
   --color-frozen-accent: var(--frozen);
   --color-error: var(--lost);                            /* ⚠️ 原 #ba1a1a */

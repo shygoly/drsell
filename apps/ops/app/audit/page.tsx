@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ListFilter, Search } from 'lucide-react';
+import { Bell, ListFilter, Search, Settings } from 'lucide-react';
 import { AuthGate } from '@/app/components/auth-gate';
 import { OpsShell } from '@/app/components/shell';
 import { formatAuditAction, getToken, opsFetch, type AuditLogPage } from '@/lib/api';
@@ -61,16 +61,45 @@ export default function AuditPage() {
 
   return (
     <AuthGate>
-      <OpsShell active="audit" padded={false}>
-        <header className="border-ink bg-card-surface flex h-16 items-center justify-between border-b px-[16px]">
+      <OpsShell active="audit" padded={false} chrome={false}>
+        {/* 稿子的 h-16 里同时装标题与检索，不是两层 */}
+        <header className="border-ink bg-card-surface flex h-16 items-center justify-between gap-4 border-b px-[16px]">
           <h1 className="font-headline-md text-headline-md text-ink m-0">审计日志</h1>
+          <div className="flex items-center gap-3">
+            <label className="relative flex items-center">
+              <Search
+                className="text-on-surface-variant pointer-events-none absolute left-2.5 h-4 w-4"
+                aria-hidden="true"
+              />
+              <span className="sr-only">全局检索</span>
+              <input
+                type="search"
+                placeholder="搜索店铺、账号或操作记录"
+                className="bg-surface border-ink font-data-mono text-data-mono focus:ring-ink h-8 w-64 border py-1 pl-8 pr-3 focus:outline-none focus:ring-1"
+              />
+            </label>
+            <button
+              type="button"
+              aria-label="通知"
+              className="text-on-surface-variant hover:text-ink flex h-8 w-8 items-center justify-center transition-colors"
+            >
+              <Bell className="h-4 w-4" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label="设置"
+              className="text-on-surface-variant hover:text-ink flex h-8 w-8 items-center justify-center transition-colors"
+            >
+              <Settings className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 overflow-auto p-[16px]">
+        <div className="flex flex-1 flex-col gap-[16px] overflow-auto p-[16px]">
           {error ? <p className="text-error m-0 text-sm">{error}</p> : null}
 
-          {/* 筛选条 */}
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          {/* 筛选条 —— 稿子把它包在 bg-card-surface border border-ink p-tight 的容器里 */}
+          <div className="bg-card-surface border-ink flex flex-wrap items-center justify-between gap-2 border p-2">
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative">
                 <Search
@@ -133,11 +162,11 @@ export default function AuditPage() {
             <table className="w-full min-w-[800px] border-collapse text-left">
               <thead>
                 <tr className="bg-surface-container-highest border-ink border-b-2">
-                  <th className={`${TH} w-40`}>时间</th>
-                  <th className={TH}>操作者</th>
-                  <th className={TH}>动作</th>
-                  <th className={TH}>对象店铺</th>
-                  <th className={`${TH} w-24 text-center`}>结果</th>
+                  <th className={`${TH} w-40`}>时间 (Time)</th>
+                  <th className={TH}>操作者 (Operator)</th>
+                  <th className={TH}>动作 (Action)</th>
+                  <th className={TH}>对象店铺 (Target Shop)</th>
+                  <th className={`${TH} w-24 text-center`}>结果 (Result)</th>
                   <th className={`${TH} w-32`}>IP</th>
                 </tr>
               </thead>
@@ -171,7 +200,7 @@ export default function AuditPage() {
                           {failed ? '失败' : '成功'}
                         </span>
                       </td>
-                      <td className="ops-cell">{row.ip ?? '—'}</td>
+                      <td className="ops-cell text-outline-variant">{row.ip ?? '—'}</td>
                     </tr>
                   );
                 })}
@@ -186,8 +215,8 @@ export default function AuditPage() {
             </table>
           </div>
 
-          {/* 分页 */}
-          <div className="text-on-surface-variant flex items-center justify-between text-[13px]">
+          {/* 分页 —— 稿子用 mt-auto 钉在内容区底部 */}
+          <div className="border-ink bg-card-surface text-on-surface-variant mt-auto flex flex-col items-center justify-between gap-2 border p-2 text-[13px] sm:flex-row">
             <span className="font-data-mono text-data-mono">共 {total.toLocaleString()} 条</span>
             <div className="flex items-center gap-1">
               <button

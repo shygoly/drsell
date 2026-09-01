@@ -91,7 +91,7 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
   return (
     <AuthGate>
       <OpsShell active="shops" padded={false}>
-        <div className="max-w-[1280px] mx-auto flex w-full flex-1 flex-col gap-6 overflow-auto p-[16px] md:p-6 lg:p-8">
+        <div className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-6 overflow-auto p-[16px] md:p-6 lg:p-8">
           {error ? <p className="text-error text-sm">{error}</p> : null}
 
           {/* Header */}
@@ -138,7 +138,7 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
             {/* 计费 */}
             <div className={`${PANEL} border-ink border-b md:border-b-0 md:border-r`}>
               <div className={PANEL_HEAD}>
-                <ReceiptText className="h-4 w-4" aria-hidden="true" />
+                <ReceiptText className="h-6 w-6" aria-hidden="true" />
                 <h2 className={PANEL_TITLE}>计费</h2>
               </div>
               <div className="flex flex-1 flex-col justify-center gap-3">
@@ -169,7 +169,7 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
             {/* 本周期用量 */}
             <div className={`${PANEL} border-ink border-b lg:border-b-0 lg:border-r`}>
               <div className={PANEL_HEAD}>
-                <Activity className="h-4 w-4" aria-hidden="true" />
+                <Activity className="h-6 w-6" aria-hidden="true" />
                 <h2 className={PANEL_TITLE}>本周期用量</h2>
               </div>
               <div className="flex flex-1 flex-col justify-center gap-4">
@@ -195,7 +195,7 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
             {/* 可用期 */}
             <div className={PANEL}>
               <div className={PANEL_HEAD}>
-                <Hourglass className="h-4 w-4" aria-hidden="true" />
+                <Hourglass className="h-6 w-6" aria-hidden="true" />
                 <h2 className={PANEL_TITLE}>可用期</h2>
               </div>
               <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
@@ -228,14 +228,18 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
             </div>
           </div>
 
-          {domain ? (
+        </div>
+
+        {/* 稿子里动作条是 main 的直接子元素，贴底满宽，不在内容容器的内边距里 */}
+        {domain ? (
+          <div className="border-ink bg-card-surface sticky bottom-0 z-20 mt-auto shrink-0 border-t">
             <ShopActions
               domain={domain}
               onDone={reload}
               widgetVisible={shop?.widgetVisible !== false}
             />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </OpsShell>
     </AuthGate>
   );
