@@ -203,6 +203,14 @@
     font-variant-numeric: tabular-nums;
   }
 
+
+  /* Stitch 稿的 .table-cell（原稿是 1px solid #14211e + 8px 12px）。
+     hex 走令牌，DS-7 要求 ops 源码零 hex。 */
+  .ops-cell {
+    border: 1px solid var(--ink);
+    padding: 8px 12px;
+  }
+
   .runway-hatch-frozen {
     background: repeating-linear-gradient(
       -45deg,
