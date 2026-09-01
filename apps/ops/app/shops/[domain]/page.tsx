@@ -1,11 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Hourglass, Mail, ReceiptText, Activity } from 'lucide-react';
 import { AuthGate } from '@/app/components/auth-gate';
 import { OpsShell } from '@/app/components/shell';
 import { ShopActions } from '@/app/shops/[domain]/actions';
-import { opsFetch, type ShopDetail } from '@/lib/api';
+import { formatAuditAction, opsFetch, type AuditLogPage, type ShopDetail } from '@/lib/api';
 
 const PANEL = 'bg-card-surface flex h-full flex-col gap-4 p-5';
 const PANEL_HEAD = 'border-outline-variant flex items-center gap-2 border-b pb-2';
@@ -49,6 +50,7 @@ function Meter({ label, used, limit }: { label: string; used: number; limit: num
 export default function ShopDetailPage({ params }: { params: Promise<{ domain: string }> }) {
   const [domain, setDomain] = useState('');
   const [shop, setShop] = useState<ShopDetail | null>(null);
+  const [audit, setAudit] = useState<AuditLogPage | null>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -60,6 +62,11 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
     opsFetch<ShopDetail>(`/ops/shops/${encodeURIComponent(domain)}`)
       .then(setShop)
       .catch((e) => setError(String(e.message ?? e)));
+    opsFetch<AuditLogPage>(
+      `/ops/audit-logs?q=${encodeURIComponent(domain)}&limit=8&offset=0`,
+    )
+      .then(setAudit)
+      .catch(() => undefined);
   }, [domain]);
 
   useEffect(reload, [reload]);
@@ -228,6 +235,47 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
             </div>
           </div>
 
+          {/* Stitch 08 的 Recent Sync Events：没有 sync-event 表，用该店的审计事件流代替 */}
+          <div className="bg-card-surface border-outline-variant shrink-0 border">
+            <div className="border-outline-variant flex items-center justify-between border-b px-4 py-2">
+              <h2 className="font-label-caps text-label-caps text-on-surface m-0 flex items-center gap-2 uppercase">
+                <Activity className="h-4 w-4" aria-hidden="true" />
+                最近店铺事件
+              </h2>
+              <Link href={`/audit?q=${encodeURIComponent(domain)}`} className="font-label-caps text-on-surface-variant text-[10px] uppercase">
+                全部
+              </Link>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[720px] border-collapse text-left">
+                <thead className="bg-surface-container-low border-outline-variant border-b">
+                  <tr>
+                    <th className="text-on-surface-variant font-label-caps px-3 py-2 text-[10px] uppercase">时间</th>
+                    <th className="text-on-surface-variant font-label-caps px-3 py-2 text-[10px] uppercase">操作者</th>
+                    <th className="text-on-surface-variant font-label-caps px-3 py-2 text-[10px] uppercase">动作</th>
+                    <th className="text-on-surface-variant font-label-caps px-3 py-2 text-right text-[10px] uppercase">结果</th>
+                  </tr>
+                </thead>
+                <tbody className="font-data-mono text-on-surface text-[12px]">
+                  {(audit?.items ?? []).map((row) => (
+                    <tr key={row.id} className="border-outline-variant hover:bg-surface-container-high border-b transition-colors">
+                      <td className="px-3 py-2">{row.createdAt.slice(0, 19).replace('T', ' ')}</td>
+                      <td className="px-3 py-2">{row.actorEmail}</td>
+                      <td className="px-3 py-2">{formatAuditAction(row.action)}</td>
+                      <td className="px-3 py-2 text-right">
+                        <span className={row.result === 'ok' ? 'text-on-surface-variant' : 'text-error font-bold'}>
+                          {row.result === 'ok' ? '成功' : '失败'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {!audit?.items.length ? (
+                    <tr><td colSpan={4} className="text-on-surface-variant px-3 py-2 text-center">暂无事件</td></tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         {/* 稿子里动作条是 main 的直接子元素，贴底满宽，不在内容容器的内边距里 */}
