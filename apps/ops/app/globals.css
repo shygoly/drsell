@@ -196,6 +196,14 @@
 }
 
 @layer components {
+  .blinking-rec {
+    animation: blink-rec 1.6s ease-in-out infinite;
+  }
+
+  @keyframes blink-rec {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
   .font-display {
     font-family: var(--f-display);
   }
