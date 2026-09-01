@@ -8,9 +8,9 @@ import { ShopActions } from '@/app/shops/[domain]/actions';
 import { opsFetch, type ShopDetail } from '@/lib/api';
 
 const PANEL = 'bg-card-surface flex h-full flex-col gap-4 p-5';
-const PANEL_HEAD = 'border-ink flex items-center gap-2 border-b pb-2';
+const PANEL_HEAD = 'border-outline-variant flex items-center gap-2 border-b pb-2';
 const PANEL_TITLE = 'font-label-caps text-label-caps m-0 font-bold uppercase tracking-widest';
-const KV = 'border-ink/10 flex items-end justify-between border-b pb-1';
+const KV = 'border-outline-variant/10 flex items-end justify-between border-b pb-1';
 const KV_KEY = 'font-data-mono text-on-surface-variant text-[11px] uppercase';
 const KV_VAL = 'font-data-mono text-[13px]';
 
@@ -34,11 +34,11 @@ function Meter({ label, used, limit }: { label: string; used: number; limit: num
         className={
           over
             ? 'bg-error-container border-error h-2 w-full overflow-hidden border'
-            : 'bg-surface border-ink h-2 w-full overflow-hidden border'
+            : 'bg-surface border-outline-variant h-2 w-full overflow-hidden border'
         }
       >
         <div
-          className={over ? 'bg-error h-full w-full' : 'bg-ink h-full'}
+          className={over ? 'bg-error h-full w-full' : 'bg-primary h-full'}
           style={over ? undefined : { width: `${pct}%` }}
         />
       </div>
@@ -95,10 +95,10 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
           {error ? <p className="text-error text-sm">{error}</p> : null}
 
           {/* Header */}
-          <div className="border-ink flex flex-col items-start justify-between gap-4 border-b pb-4 md:flex-row md:items-end">
+          <div className="border-outline-variant flex flex-col items-start justify-between gap-4 border-b pb-4 md:flex-row md:items-end">
             <div>
               <div className="mb-1 flex items-center gap-3">
-                <h1 className="font-headline-lg text-headline-lg text-ink m-0 font-bold tracking-tight">
+                <h1 className="font-headline-lg text-headline-lg text-on-surface m-0 font-bold tracking-tight">
                   {domain || '…'}
                 </h1>
                 {shop ? (
@@ -108,7 +108,7 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
                         ? 'bg-surface border-frozen-accent text-frozen-accent font-label-caps text-label-caps inline-flex items-center border px-2 py-0.5'
                         : terminal
                           ? 'bg-surface border-error text-error font-label-caps text-label-caps inline-flex items-center border px-2 py-0.5 line-through'
-                          : 'bg-surface border-ink text-on-surface-variant font-label-caps text-label-caps inline-flex items-center border px-2 py-0.5'
+                          : 'bg-surface border-outline-variant text-on-surface-variant font-label-caps text-label-caps inline-flex items-center border px-2 py-0.5'
                     }
                   >
                     {shop.status.toUpperCase()}
@@ -126,17 +126,17 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
                 <span className="font-data-mono text-on-surface-variant text-[10px] uppercase">
                   组内计费店
                 </span>
-                <span className="font-data-mono text-data-mono bg-surface border-ink border px-2 py-1">
+                <span className="font-data-mono text-data-mono bg-surface border-outline-variant border px-2 py-1">
                   收全额
                 </span>
               </div>
             ) : null}
           </div>
 
-          {/* 三栏面板：格线靠父级 bg-ink 透出 */}
-          <div className="border-ink bg-ink grid shrink-0 grid-cols-1 gap-0 border md:grid-cols-2 lg:grid-cols-3">
+          {/* 三栏面板：格线靠父级 bg-primary 透出 */}
+          <div className="border-outline-variant bg-primary grid shrink-0 grid-cols-1 gap-0 border md:grid-cols-2 lg:grid-cols-3">
             {/* 计费 */}
-            <div className={`${PANEL} border-ink border-b md:border-b-0 md:border-r`}>
+            <div className={`${PANEL} border-outline-variant border-b md:border-b-0 md:border-r`}>
               <div className={PANEL_HEAD}>
                 <ReceiptText className="h-6 w-6" aria-hidden="true" />
                 <h2 className={PANEL_TITLE}>计费</h2>
@@ -167,7 +167,7 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
             </div>
 
             {/* 本周期用量 */}
-            <div className={`${PANEL} border-ink border-b lg:border-b-0 lg:border-r`}>
+            <div className={`${PANEL} border-outline-variant border-b lg:border-b-0 lg:border-r`}>
               <div className={PANEL_HEAD}>
                 <Activity className="h-6 w-6" aria-hidden="true" />
                 <h2 className={PANEL_TITLE}>本周期用量</h2>
@@ -205,7 +205,7 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
                   >
                     剩余
                   </div>
-                  <div className="font-headline-lg text-ink text-[52px] font-black leading-none tracking-tighter">
+                  <div className="font-headline-lg text-on-surface text-[52px] font-black leading-none tracking-tighter">
                     {daysLeft ?? '—'} 天
                   </div>
                 </div>
@@ -214,9 +214,9 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
                     <span>{frozen ? '冻结中' : '当前周期'}</span>
                     <span>{frozen ? '订阅终止' : '下次扣费'}</span>
                   </div>
-                  <div className="bg-surface border-ink flex h-3 w-full border">
+                  <div className="bg-surface border-outline-variant flex h-3 w-full border">
                     <div
-                      className={`border-ink h-full border-r ${frozen ? 'bg-frozen-accent' : 'bg-on-surface-variant'}`}
+                      className={`border-outline-variant h-full border-r ${frozen ? 'bg-frozen-accent' : 'bg-on-surface-variant'}`}
                       style={{ width: `${spent}%` }}
                     />
                     <div className="relative h-full flex-1 overflow-hidden bg-transparent">
@@ -232,7 +232,7 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
 
         {/* 稿子里动作条是 main 的直接子元素，贴底满宽，不在内容容器的内边距里 */}
         {domain ? (
-          <div className="border-ink bg-card-surface sticky bottom-0 z-20 mt-auto shrink-0 border-t p-4 md:p-[16px]">
+          <div className="border-outline-variant bg-card-surface sticky bottom-0 z-20 mt-auto shrink-0 border-t p-4 md:p-[16px]">
             <ShopActions
               domain={domain}
               onDone={reload}

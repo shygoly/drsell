@@ -25,8 +25,8 @@ const RANGE_OPTIONS = [
 const PAGE_SIZE = 50;
 
 const SELECT =
-  'bg-surface border-ink text-label-caps font-label-caps text-ink h-8 appearance-none border pl-2 pr-8 focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink';
-const TH = 'ops-cell font-label-caps text-label-caps text-ink';
+  'bg-surface border-outline-variant text-label-caps font-label-caps text-on-surface h-8 appearance-none border pl-2 pr-8 focus:border-outline-variant focus:outline-none focus:ring-1 focus:ring-ink';
+const TH = 'ops-cell font-label-caps text-label-caps text-on-surface';
 
 export default function AuditPage() {
   const [data, setData] = useState<AuditLogPage | null>(null);
@@ -59,8 +59,8 @@ export default function AuditPage() {
     <AuthGate>
       <OpsShell active="audit" padded={false} chrome={false}>
         {/* 稿子的 h-16 里同时装标题与检索，不是两层 */}
-        <header className="border-ink bg-card-surface flex h-16 items-center justify-between gap-4 border-b px-[16px]">
-          <h1 className="font-headline-md text-headline-md text-ink m-0">审计日志</h1>
+        <header className="border-outline-variant bg-card-surface flex h-16 items-center justify-between gap-4 border-b px-[16px]">
+          <h1 className="font-headline-md text-headline-md text-on-surface m-0">审计日志</h1>
           <div className="flex items-center gap-3">
             <label className="relative flex items-center">
               <Search
@@ -71,20 +71,20 @@ export default function AuditPage() {
               <input
                 type="search"
                 placeholder="搜索店铺、账号或操作记录"
-                className="bg-surface border-ink font-data-mono text-data-mono focus:ring-ink h-8 w-64 border py-1 pl-8 pr-3 focus:outline-none focus:ring-1"
+                className="bg-surface border-outline-variant font-data-mono text-data-mono focus:ring-ink h-8 w-64 border py-1 pl-8 pr-3 focus:outline-none focus:ring-1"
               />
             </label>
             <button
               type="button"
               aria-label="通知"
-              className="text-on-surface-variant hover:text-ink flex h-8 w-8 items-center justify-center transition-colors"
+              className="text-on-surface-variant hover:text-on-surface flex h-8 w-8 items-center justify-center transition-colors"
             >
               <Bell className="h-4 w-4" aria-hidden="true" />
             </button>
             <button
               type="button"
               aria-label="设置"
-              className="text-on-surface-variant hover:text-ink flex h-8 w-8 items-center justify-center transition-colors"
+              className="text-on-surface-variant hover:text-on-surface flex h-8 w-8 items-center justify-center transition-colors"
             >
               <Settings className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -94,8 +94,8 @@ export default function AuditPage() {
         <div className="flex flex-1 flex-col gap-[16px] overflow-auto p-[16px]">
           {error ? <p className="text-error m-0 text-sm">{error}</p> : null}
 
-          {/* 筛选条 —— 稿子把它包在 bg-card-surface border border-ink p-tight 的容器里 */}
-          <div className="bg-card-surface border-ink flex flex-wrap items-center justify-between gap-2 border p-2">
+          {/* 筛选条 —— 稿子把它包在 bg-card-surface border border-outline-variant p-tight 的容器里 */}
+          <div className="bg-card-surface border-outline-variant flex flex-wrap items-center justify-between gap-2 border p-2">
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative">
                 <Search
@@ -109,7 +109,7 @@ export default function AuditPage() {
                     setOffset(0);
                   }}
                   placeholder="搜索操作者或店铺"
-                  className="bg-surface border-ink font-data-mono text-data-mono text-ink focus:border-ink focus:ring-ink h-8 w-48 border pl-8 pr-2 focus:outline-none focus:ring-1"
+                  className="bg-surface border-outline-variant font-data-mono text-data-mono text-on-surface focus:border-outline-variant focus:ring-ink h-8 w-48 border pl-8 pr-2 focus:outline-none focus:ring-1"
                 />
               </div>
               <select
@@ -146,7 +146,7 @@ export default function AuditPage() {
             <button
               type="button"
               onClick={() => setOffset(0)}
-              className="bg-surface-container-high border-ink text-ink font-label-caps text-label-caps hover:bg-surface-variant flex h-8 items-center gap-1 border px-[16px] transition-colors"
+              className="bg-surface-container-high border-outline-variant text-on-surface font-label-caps text-label-caps hover:bg-surface-variant flex h-8 items-center gap-1 border px-[16px] transition-colors"
             >
               <ListFilter className="h-4 w-4" aria-hidden="true" />
               筛选
@@ -154,10 +154,10 @@ export default function AuditPage() {
           </div>
 
           {/* 表格 */}
-          <div className="bg-card-surface border-ink overflow-x-auto border">
+          <div className="bg-card-surface border-outline-variant overflow-x-auto border">
             <table className="w-full min-w-[800px] border-collapse text-left">
               <thead>
-                <tr className="bg-surface-container-highest border-ink border-b-2">
+                <tr className="bg-surface-container-highest border-outline-variant border-b-2">
                   <th className={`${TH} w-40`}>时间 (Time)</th>
                   <th className={TH}>操作者 (Operator)</th>
                   <th className={TH}>动作 (Action)</th>
@@ -190,7 +190,7 @@ export default function AuditPage() {
                           className={
                             failed
                               ? 'border-error bg-surface text-error inline-block border px-1 text-[10px] font-bold'
-                              : 'border-ink bg-surface text-ink inline-block border px-1 text-[10px]'
+                              : 'border-outline-variant bg-surface text-on-surface inline-block border px-1 text-[10px]'
                           }
                         >
                           {failed ? '失败' : '成功'}
@@ -212,14 +212,14 @@ export default function AuditPage() {
           </div>
 
           {/* 分页 —— 稿子用 mt-auto 钉在内容区底部 */}
-          <div className="border-ink bg-card-surface text-on-surface-variant mt-auto flex flex-col items-center justify-between gap-2 border p-2 text-[13px] sm:flex-row">
+          <div className="border-outline-variant bg-card-surface text-on-surface-variant mt-auto flex flex-col items-center justify-between gap-2 border p-2 text-[13px] sm:flex-row">
             <span className="font-data-mono text-data-mono">共 {total.toLocaleString()} 条</span>
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 disabled={offset === 0}
                 onClick={() => setOffset(Math.max(offset - PAGE_SIZE, 0))}
-                className="border-ink bg-surface text-ink font-label-caps text-label-caps hover:bg-surface-container h-8 border px-3 transition-colors disabled:opacity-40"
+                className="border-outline-variant bg-surface text-on-surface font-label-caps text-label-caps hover:bg-surface-container h-8 border px-3 transition-colors disabled:opacity-40"
               >
                 上一页
               </button>
@@ -230,7 +230,7 @@ export default function AuditPage() {
                 type="button"
                 disabled={page >= pageCount}
                 onClick={() => setOffset(offset + PAGE_SIZE)}
-                className="border-ink bg-surface text-ink font-label-caps text-label-caps hover:bg-surface-container h-8 border px-3 transition-colors disabled:opacity-40"
+                className="border-outline-variant bg-surface text-on-surface font-label-caps text-label-caps hover:bg-surface-container h-8 border px-3 transition-colors disabled:opacity-40"
               >
                 下一页
               </button>
