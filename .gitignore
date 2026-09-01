@@ -61,3 +61,9 @@ test-coze-*.js
 .stitch/reports/*/pairing.json
 .stitch/reports/*/fingerprint.json
 .stitch/reports/*/report.html
+
+# 新源阶段 A/C 产物：baseline/textMask/spec 是判定基准，入库；其余每次重生成
+.stitch/project-11226504772808429506/work/reports/*/project.png
+.stitch/project-11226504772808429506/work/reports/*/project-diff.png
+.stitch/project-11226504772808429506/work/reports/*/boxes.json
+.stitch/project-11226504772808429506/work/rebuild/
