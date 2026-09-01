@@ -44,7 +44,25 @@ const fixtures = JSON.parse(readFileSync(join(ROOT, '.stitch/fixtures.json'), 'u
 // 新设计源（Stitch 11226504772808429506）里归运营台的四屏
 const OUT_ROOT = '.stitch/project-11226504772808429506/work/reports';
 const PAGES = [
-  { name: 'accounts', path: '/accounts' },
+  {
+    name: 'accounts',
+    path: '/accounts',
+    // 稿子 02 画的是**检索后**的状态（4 条结果 + 右侧账号详情）。
+    // 空态截图与它没有可比性 —— 截前先执行一次检索。
+    prepare: async (page) => {
+      // 顶栏也有一个 type=search —— 必须按页面输入框的 placeholder 定位，不能用 .first()
+      const input = page.locator('input[placeholder="admin@example.com"]').first();
+      await input.fill('mia');
+      await input.press('Enter');
+      await page.waitForTimeout(400);
+      // 选中首行以填充右侧详情栏（稿子 02 画的就是选中态）
+      const open = page.locator('tbody button, tbody a').first();
+      if (await open.count()) {
+        await open.click().catch(() => undefined);
+        await page.waitForTimeout(500);
+      }
+    },
+  },
   { name: 'system', path: '/system' },
   { name: 'impersonation', path: '/impersonation?shop=nordic-cycles.myshopify.com' },
   { name: 'shop_detail', path: '/shops/nordic-cycles.myshopify.com' },
@@ -100,12 +118,15 @@ await ctx.route('**/api/ops/**', async (route) => {
 });
 
 let failed = 0;
-for (const { name, path } of PAGES) {
+for (const { name, path, prepare } of PAGES) {
   const page = await ctx.newPage();
   try {
     await page.goto(BASE + path, { waitUntil: 'networkidle', timeout: 30_000 });
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(600);
+    if (prepare) {
+      await prepare(page).catch((e) => console.warn(`  ! ${name} prepare: ${e.message}`));
+    }
     if (new URL(page.url()).pathname === '/login') {
       console.error(`  ✗ ${name} 被重定向到 /login —— token 注入失败`);
       failed++;

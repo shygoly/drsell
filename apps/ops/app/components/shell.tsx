@@ -32,7 +32,7 @@ type Props = {
  */
 function GlobalAuditBar({ offsetTop = 0 }: { offsetTop?: number }) {
   return (
-    <div className="bg-primary-container border-outline-variant fixed z-[55] flex h-8 w-full items-center justify-center border-b"
+    <div className="bg-primary-container border-card-border fixed z-[55] flex h-8 w-full items-center justify-center border-b"
       style={{ top: offsetTop }}>
       <div className="flex items-center gap-2">
         <span className="bg-error blinking-rec h-2 w-2 rounded-full" />
