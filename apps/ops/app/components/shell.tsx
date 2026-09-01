@@ -50,10 +50,10 @@ function GlobalAuditBar({ offsetTop = 0 }: { offsetTop?: number }) {
  * spacing 令牌按 skill 门禁第 5 条不迁移，一律 arbitrary：
  * row-height-standard 48px / container-padding 24px。
  */
-function GlobalTopBar({ offsetTop = 0 }: { offsetTop?: number }) {
+function GlobalTopBar({ offsetTop = 0, insetLeft = 0 }: { offsetTop?: number; insetLeft?: number }) {
   return (
-    <header className="bg-surface-container-highest border-outline-variant fixed z-[60] flex h-[48px] w-full items-center justify-between border-b px-[24px]"
-      style={{ top: offsetTop }}>
+    <header className="bg-surface-container-highest border-outline-variant fixed z-[60] flex h-[48px] items-center justify-between border-b px-[24px]"
+      style={{ top: offsetTop, left: insetLeft, width: `calc(100% - ${insetLeft}px)` }}>
       <div className="flex h-full min-w-0 items-center gap-6">
         <span className="font-headline-md text-headline-md text-primary flex shrink-0 items-center whitespace-nowrap font-bold">
           drsell Admin
@@ -129,18 +129,23 @@ export function OpsShell({
 }: Props) {
   const showTopBar = !banner && (chrome === 'topbar' || chrome === 'both');
   const showAudit = !banner && (chrome === 'audit' || chrome === 'both');
-  const offset = banner ? 112 : (showTopBar ? 48 : 0) + (showAudit ? 32 : 0);
+  const chromeH = (showTopBar ? 48 : 0) + (showAudit ? 32 : 0);
+  // 稿子 07：横幅 64px 通栏，侧栏紧接其下；顶栏只覆盖内容区。
+  const sidebarTop = banner ? 64 : chromeH;
+  const contentTop = banner ? 112 : chromeH;
   return (
     <div className="bg-background min-h-screen">
       {banner ? (
         <div className="fixed top-0 z-[70] h-16 w-full">{banner}</div>
       ) : null}
-      {banner || showTopBar ? <GlobalTopBar offsetTop={banner ? 64 : 0} /> : null}
+      {banner || showTopBar ? (
+        <GlobalTopBar offsetTop={banner ? 64 : 0} insetLeft={banner ? 240 : 0} />
+      ) : null}
       {showAudit ? <GlobalAuditBar offsetTop={showTopBar ? 48 : 0} /> : null}
-      <OpsSidebar active={active} offsetTop={offset} />
+      <OpsSidebar active={active} offsetTop={sidebarTop} />
       <div
         className="ml-[240px] flex min-h-screen min-w-0 flex-col"
-        style={{ paddingTop: offset }}
+        style={{ paddingTop: contentTop }}
       >
         <main
           className={
