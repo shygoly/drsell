@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>drsell Admin - Account Search &amp; Overview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-fixed": "#0d1c2f",
+                      "on-secondary-container": "#abb9d2",
+                      "surface-container-high": "#2a2a2b",
+                      "tertiary-container": "#231500",
+                      "on-primary-fixed": "#131b2e",
+                      "secondary": "#b9c7e0",
+                      "inverse-primary": "#565e74",
+                      "surface-container-low": "#1b1b1d",
+                      "on-secondary": "#233144",
+                      "primary-fixed-dim": "#bec6e0",
+                      "on-primary": "#283044",
+                      "error": "#ffb4ab",
+                      "surface-container": "#1f1f21",
+                      "inverse-surface": "#e4e2e4",
+                      "on-tertiary-container": "#957d5a",
+                      "error-container": "#93000a",
+                      "background": "#131315",
+                      "surface-dim": "#131315",
+                      "on-surface": "#e4e2e4",
+                      "on-tertiary-fixed-variant": "#574425",
+                      "on-secondary-fixed-variant": "#3a485c",
+                      "secondary-fixed-dim": "#b9c7e0",
+                      "surface-bright": "#39393b",
+                      "on-tertiary": "#3e2d11",
+                      "inverse-on-surface": "#303032",
+                      "primary-fixed": "#dae2fd",
+                      "surface-variant": "#353436",
+                      "outline": "#909097",
+                      "on-primary-container": "#798098",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "primary-container": "#0f172a",
+                      "secondary-container": "#3c4a5e",
+                      "on-error-container": "#ffdad6",
+                      "surface-container-lowest": "#0e0e10",
+                      "tertiary-fixed": "#fcdeb5",
+                      "primary": "#bec6e0",
+                      "surface-container-highest": "#353436",
+                      "surface-tint": "#bec6e0",
+                      "tertiary-fixed-dim": "#dec29a",
+                      "on-tertiary-fixed": "#271901",
+                      "on-surface-variant": "#c6c6cd",
+                      "surface": "#131315",
+                      "on-background": "#e4e2e4",
+                      "on-error": "#690005",
+                      "outline-variant": "#45464d",
+                      "tertiary": "#dec29a",
+                      "secondary-fixed": "#d5e3fd"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "row-height-dense": "32px",
+                      "container-padding": "24px",
+                      "row-height-standard": "48px",
+                      "gutter": "12px"
+              },
+              "fontFamily": {
+                      "data-mono": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "display-sm": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "data-mono": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-sm": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-caps": [
+                              "11px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #353436;
+            border-radius: 4px;
+        }
+      </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md overflow-hidden antialiased">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center h-row-height-standard px-container-padding bg-surface-container-highest border-b border-outline-variant flat no shadows">
+<div class="flex items-center gap-container-padding h-full">
+<div class="font-headline-md text-headline-md font-bold text-primary flex items-center">
+                drsell Admin
+            </div>
+<!-- Global Search -->
+<div class="relative flex items-center h-full max-w-md w-full ml-8 hidden lg:flex group">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant z-10 group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-background border border-outline-variant rounded pl-10 pr-4 py-1.5 font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:border-primary focus:ring-1 focus:ring-primary transition-all shadow-inner h-8 flex items-center" placeholder="Search accounts by Email, Domain, or User ID (cmd+k)" type="text"/>
+<div class="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+<span class="border border-outline-variant rounded px-1.5 py-0.5 text-[10px] text-on-surface-variant bg-surface-container-high leading-none shadow-sm">⌘</span>
+<span class="border border-outline-variant rounded px-1.5 py-0.5 text-[10px] text-on-surface-variant bg-surface-container-high leading-none shadow-sm">K</span>
+</div>
+</div>
+</div>
+<nav class="flex items-center h-full gap-4 hidden md:flex">
+<a class="h-full flex items-center px-4 border-b-2 border-transparent text-on-surface-variant font-medium hover:bg-surface-variant transition-colors hover:text-on-surface" href="#">System Health</a>
+<a class="h-full flex items-center px-4 border-b-2 border-transparent text-on-surface-variant font-medium hover:bg-surface-variant transition-colors hover:text-on-surface" href="#">Audit Logs</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<button class="p-2 rounded hover:bg-surface-variant transition-colors text-on-surface-variant hover:text-on-surface relative">
+<span class="material-symbols-outlined text-[20px]">security</span>
+</button>
+<button class="p-2 rounded hover:bg-surface-variant transition-colors text-on-surface-variant hover:text-on-surface relative">
+<span class="material-symbols-outlined text-[20px]">verified_user</span>
+</button>
+<button class="p-2 rounded hover:bg-surface-variant transition-colors text-on-surface-variant hover:text-on-surface relative">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full animate-pulse"></span>
+</button>
+</div>
+<div class="h-6 w-px bg-outline-variant mx-2"></div>
+<button class="flex items-center gap-2 hover:bg-surface-variant px-3 py-1.5 rounded transition-colors group">
+<img alt="SuperAdmin Avatar" class="w-6 h-6 rounded-full bg-surface-container-high object-cover border border-outline-variant group-hover:border-primary transition-colors" data-alt="A small, stylized avatar of a highly secure system administrator or a glowing blue security badge icon against a dark, technical background, minimalist vector style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvcQm2bzILc_3S1gjtVMO5bkS5b0CYuywicpOePn9zFoiXyFthaO9va_00RAUgg2rmmIOxfMSWSGRdpC91K0FrdsHMdtUAcjziMsp6t_7V4bVufvi7Os5C0N5RMgKqI0p56R1Lvt3uszl0czgcBJh5dORvNTWxkNpqPnWh2hsHvMceXVFa7VrhQPxF0dbNdom2zdqa8u7QvnaRdZQBTM_5mIcFQka7kUl5tWfP6PtQ8bNvmEQzhf540Q"/>
+<span class="font-label-caps text-label-caps text-primary group-hover:text-primary-fixed transition-colors">End Session</span>
+</button>
+</div>
+</header>
+<!-- Audit Active Banner -->
+<div class="fixed top-row-height-standard w-full z-40 bg-primary-container h-8 flex justify-center items-center gap-3 border-b border-outline-variant">
+<div class="w-2 h-2 rounded-full bg-error animate-pulse shadow-[0_0_8px_rgba(255,180,171,0.6)]"></div>
+<span class="font-data-mono text-data-mono text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">policy</span>
+            SUPERADMIN SESSION ACTIVE - ALL ACTIONS ARE LOGGED (ID: SA-9942-B)
+        </span>
+</div>
+<!-- Main Content Area -->
+<div class="flex flex-1 pt-[calc(48px+32px)] overflow-hidden">
+<!-- Side Navigation Bar -->
+<aside class="fixed left-0 top-[calc(48px+32px)] h-[calc(100vh-80px)] w-[240px] bg-surface-container-low border-r border-outline-variant flex flex-col py-4 z-30 overflow-y-auto custom-scrollbar hidden lg:flex">
+<div class="px-container-padding mb-6">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-8 h-8 rounded bg-primary-container border border-primary/30 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-[18px]">admin_panel_settings</span>
+</div>
+<div>
+<div class="font-headline-md text-headline-md font-extrabold text-on-surface leading-tight tracking-tight">drsell Ops</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant text-[10px]">SuperAdmin Portal</div>
+</div>
+</div>
+</div>
+<nav class="flex flex-col gap-1 px-3 flex-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded bg-secondary-container text-on-secondary-container border-r-4 border-primary transition-all" href="#">
+<span class="material-symbols-outlined">storefront</span>
+<span class="font-body-sm text-body-sm font-medium">Accounts &amp; Stores</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body-sm text-body-sm">Subscriptions &amp; Billing</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined">monitor_heart</span>
+<span class="font-body-sm text-body-sm">System Health</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-body-sm text-body-sm">Audit Logs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-sm text-body-sm">Global Config</span>
+</a>
+</nav>
+<div class="mt-auto px-3 flex flex-col gap-1 pt-4 border-t border-outline-variant mx-3">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">help</span>
+<span class="font-body-sm text-body-sm">Help Center</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">shield</span>
+<span class="font-body-sm text-body-sm">Security Policy</span>
+</a>
+</div>
+</aside>
+<!-- Main Workspace -->
+<main class="flex-1 lg:ml-[240px] h-full overflow-y-auto custom-scrollbar p-container-padding flex flex-col gap-6 bg-[#020617] relative">
+<!-- Decorative minimal background element -->
+<div class="absolute top-0 right-0 w-1/2 h-64 bg-gradient-to-bl from-primary/5 to-transparent pointer-events-none"></div>
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-4 border-b border-outline-variant relative z-10">
+<div>
+<h1 class="font-display-sm text-display-sm text-on-surface mb-1 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[28px]">manage_accounts</span>
+                        Account Search &amp; Directory
+                    </h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Global directory for merchant accounts, cross-store roles, and billing designation.</p>
+</div>
+</div>
+<!-- Layout Grid (Results + Detail) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start flex-1 min-h-0 relative z-10">
+<!-- Left Column: Search & Results Table -->
+<div class="xl:col-span-7 flex flex-col gap-4 h-full">
+<!-- Search Controls -->
+<div class="bg-primary-container border border-outline-variant rounded-lg p-4 shadow-sm flex flex-col md:flex-row gap-4 items-end">
+<div class="flex-1 w-full">
+<label class="font-label-caps text-label-caps text-on-primary-container mb-2 block">Global Lookup</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-background border border-primary/50 rounded pl-10 pr-4 py-2 font-data-mono text-data-mono text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-all shadow-inner h-10" type="text" value="admin@nexus-stores.co"/>
+</div>
+</div>
+<div class="w-full md:w-auto">
+<label class="font-label-caps text-label-caps text-on-primary-container mb-2 block">Lookup Type</label>
+<select class="w-full bg-background border border-outline-variant rounded px-3 py-2 font-body-sm text-body-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary h-10 appearance-none">
+<option>Email / Exact Match</option>
+<option>Domain Pattern (*@domain.com)</option>
+<option>User ID (UUID)</option>
+<option>Store URL Lookup</option>
+</select>
+</div>
+<button class="bg-primary text-on-primary h-10 px-6 rounded font-label-caps text-label-caps hover:bg-primary-fixed transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap">
+                            Execute Search
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<!-- Results Table Card -->
+<div class="bg-[#0F172A] border border-[#1E293B] rounded-lg shadow-sm flex flex-col flex-1 overflow-hidden">
+<div class="px-4 py-3 border-b border-[#1E293B] flex justify-between items-center bg-[#0a0f1d]">
+<h2 class="font-label-caps text-label-caps text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">list_alt</span>
+                                4 Matches Found
+                            </h2>
+<div class="font-data-mono text-data-mono text-on-surface-variant text-[10px]">Query time: 42ms</div>
+</div>
+<div class="overflow-x-auto overflow-y-auto flex-1 custom-scrollbar">
+<table class="w-full text-left border-collapse whitespace-nowrap">
+<thead class="sticky top-0 bg-[#0a0f1d] z-10 outline outline-1 outline-[#1E293B]">
+<tr>
+<th class="px-4 py-2 font-label-caps text-label-caps text-on-surface-variant font-medium">Account / Email</th>
+<th class="px-4 py-2 font-label-caps text-label-caps text-on-surface-variant font-medium">Auth</th>
+<th class="px-4 py-2 font-label-caps text-label-caps text-on-surface-variant font-medium text-center">Stores</th>
+<th class="px-4 py-2 font-label-caps text-label-caps text-on-surface-variant font-medium">Security</th>
+<th class="px-4 py-2 font-label-caps text-label-caps text-on-surface-variant font-medium text-right">Last Seen</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-data-mono text-on-surface divide-y divide-[#1E293B]">
+<!-- Active Row -->
+<tr class="h-row-height-standard hover:bg-surface-variant/30 transition-colors border-l-2 border-primary bg-primary/5 cursor-pointer">
+<td class="px-4 py-2">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center shrink-0">
+<span class="font-body-sm text-body-sm font-bold text-on-surface">A</span>
+</div>
+<span class="font-medium">admin@nexus-stores.co</span>
+</div>
+</td>
+<td class="px-4 py-2">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<img alt="Google Auth" class="w-4 h-4" data-alt="A minimal Google 'G' logo icon, monochromatic grey outline style, suitable for a dark tech UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMW6zMfwD9f1MTcnWiAx6_O-ckX5bCNpSsJqhhg4H--Ps5AqugcpAxL8WeOcuzntdFNpW54FrsEFM_ZKIOaktypQ2-vEi7xHvlmb1T0k5IxL4BmB70IrtqPAEwOeOq-hvXp9RTPWjhz6amqfYL33zDNk8hlxCeKtuGGBO8-mbk4N-oZiPfRc2wazlnbopDROTWR4-n3EqZ8pPqEy8ZYjyx-azAW1E05FVOGl9YrjuA8HI9K2b91jp1tg"/>
+                                                SSO
+                                            </div>
+</td>
+<td class="px-4 py-2 text-center">
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[10px] border border-secondary/20">3</span>
+</td>
+<td class="px-4 py-2">
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[14px]">shield</span>
+<span class="text-[10px] font-label-caps">2FA ON</span>
+</div>
+</td>
+<td class="px-4 py-2 text-right text-on-surface-variant text-[11px]">2 mins ago<br/><span class="opacity-50">192.168.1.1</span></td>
+</tr>
+<!-- Inactive Rows -->
+<tr class="h-row-height-standard hover:bg-surface-variant/30 transition-colors border-l-2 border-transparent cursor-pointer">
+<td class="px-4 py-2">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center shrink-0">
+<span class="font-body-sm text-body-sm font-bold text-on-surface">S</span>
+</div>
+<span>support@nexus-stores.co</span>
+</div>
+</td>
+<td class="px-4 py-2">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">password</span>
+                                                Pass
+                                            </div>
+</td>
+<td class="px-4 py-2 text-center">
+<span class="bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded text-[10px] border border-outline-variant">1</span>
+</td>
+<td class="px-4 py-2">
+<div class="flex items-center gap-1 text-error">
+<span class="material-symbols-outlined text-[14px]">gpp_bad</span>
+<span class="text-[10px] font-label-caps">NO 2FA</span>
+</div>
+</td>
+<td class="px-4 py-2 text-right text-on-surface-variant text-[11px]">5 days ago<br/><span class="opacity-50">10.0.0.45</span></td>
+</tr>
+<tr class="h-row-height-standard hover:bg-surface-variant/30 transition-colors border-l-2 border-transparent cursor-pointer">
+<td class="px-4 py-2">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center shrink-0">
+<span class="font-body-sm text-body-sm font-bold text-on-surface">B</span>
+</div>
+<span class="opacity-60 line-through">billing@nexus-stores.co</span>
+<span class="bg-error/15 text-error border border-error/30 px-1 py-0.5 rounded text-[8px] font-label-caps ml-1">FROZEN</span>
+</div>
+</td>
+<td class="px-4 py-2">
+<div class="flex items-center gap-1 text-on-surface-variant opacity-60">
+<img alt="Google Auth" class="w-4 h-4" data-alt="A minimal Google 'G' logo icon, monochromatic grey outline style, suitable for a dark tech UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-kwaMRxBf02Y6jaqoK5PUKsbuzKpM75hw8eEvK7n-jOwPVSzRv0KIQyroXLGkiOzPoiVTTmSE3JtaUEasH-U__0LJDxlRG0hR2Y-wGywdfTvw98ANOj-XnW04DoSjqMKjh7xTi6hC9S7f6L9Lh8TilXGZzN11fNtvI5NTFDU4vmJ1IiQJOi_lKENUwynzLewuhoEexookDAUZH88SFC1wxz4NwUSi0uLpJPtj9YHjEY7qOJlacS3fPg"/>
+                                                SSO
+                                            </div>
+</td>
+<td class="px-4 py-2 text-center">
+<span class="bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded text-[10px] border border-outline-variant opacity-60">0</span>
+</td>
+<td class="px-4 py-2">
+<div class="flex items-center gap-1 text-primary opacity-60">
+<span class="material-symbols-outlined text-[14px]">shield</span>
+<span class="text-[10px] font-label-caps">2FA ON</span>
+</div>
+</td>
+<td class="px-4 py-2 text-right text-on-surface-variant text-[11px] opacity-60">42 days ago<br/><span class="opacity-50">Unknown</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Column: Account Detail View (Membership Panopticon) -->
+<div class="xl:col-span-5 bg-[#0F172A] border border-[#1E293B] rounded-lg shadow-sm flex flex-col h-[800px] xl:h-auto overflow-hidden relative">
+<!-- Decorative corner accent -->
+<div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-primary/10 to-transparent pointer-events-none"></div>
+<!-- Header Profile -->
+<div class="p-6 border-b border-[#1E293B] bg-[#0a0f1d] flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 rounded bg-primary-container border border-primary/50 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(190,198,224,0.1)]">
+<span class="font-headline-md text-headline-md font-bold text-primary">A</span>
+</div>
+<div>
+<h3 class="font-display-sm text-[18px] font-bold text-on-surface leading-tight">admin@nexus-stores.co</h3>
+<div class="font-data-mono text-data-mono text-on-surface-variant mt-1 flex items-center gap-2">
+                                        UUID: acc_98f7e6d5
+                                        <button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-[14px]">content_copy</span></button>
+</div>
+</div>
+</div>
+<span class="bg-primary/10 text-primary border border-primary/30 px-2 py-1 rounded text-[10px] font-label-caps flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                                ACTIVE
+                            </span>
+</div>
+<!-- Quick Stats Bento -->
+<div class="grid grid-cols-3 gap-2">
+<div class="bg-surface-container-low border border-[#1E293B] rounded p-2 flex flex-col justify-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">Created</span>
+<span class="font-data-mono text-[11px] text-on-surface">2021-11-04</span>
+</div>
+<div class="bg-surface-container-low border border-[#1E293B] rounded p-2 flex flex-col justify-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">Location</span>
+<span class="font-data-mono text-[11px] text-on-surface">US-EAST-1</span>
+</div>
+<div class="bg-surface-container-low border border-[#1E293B] rounded p-2 flex flex-col justify-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">Total MRR</span>
+<span class="font-data-mono text-[11px] text-secondary font-bold">$2,450</span>
+</div>
+</div>
+</div>
+<!-- Membership Panopticon (Store List) -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-4">
+<div class="flex justify-between items-center mb-2">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">account_tree</span>
+                                Membership Panopticon (3 Stores)
+                            </h4>
+</div>
+<!-- Store Card 1 (Billing Store) -->
+<div class="bg-surface-container-low border border-primary/40 rounded-lg p-4 relative overflow-hidden group hover:border-primary transition-colors shadow-[0_0_10px_rgba(190,198,224,0.05)]">
+<div class="absolute top-0 right-0 bg-primary text-on-primary font-label-caps text-[9px] px-2 py-0.5 rounded-bl flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">payments</span>
+                                BILLING DESIGNATED
+                            </div>
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-background border border-outline-variant flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">shopping_bag</span>
+</div>
+<div>
+<div class="font-body-sm text-[14px] font-bold text-on-surface">Nexus Main Flagship</div>
+<div class="font-data-mono text-[10px] text-on-surface-variant mt-0.5">nexus-main.myshopify.com</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2 border-t border-[#1E293B] pt-3 mt-2">
+<div>
+<div class="font-label-caps text-[9px] text-on-surface-variant">Account Role</div>
+<div class="font-data-mono text-[11px] text-on-surface mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-secondary">star</span> OWNER
+                                    </div>
+</div>
+<div>
+<div class="font-label-caps text-[9px] text-on-surface-variant">Plan Tier</div>
+<div class="font-data-mono text-[11px] text-on-surface mt-1">Enterprise Plus</div>
+</div>
+</div>
+</div>
+<!-- Store Card 2 (Dev Store) -->
+<div class="bg-surface-container-low border border-[#1E293B] rounded-lg p-4 relative overflow-hidden group hover:border-outline-variant transition-colors">
+<div class="absolute top-0 right-0 bg-surface-container-highest text-on-surface-variant font-label-caps text-[9px] px-2 py-0.5 rounded-bl border-b border-l border-[#1E293B]">
+                                $0 SATELLITE
+                            </div>
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-background border border-outline-variant flex items-center justify-center shrink-0 opacity-70">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">code</span>
+</div>
+<div>
+<div class="font-body-sm text-[14px] font-bold text-on-surface opacity-90">Nexus Dev Environment</div>
+<div class="font-data-mono text-[10px] text-on-surface-variant mt-0.5">nexus-dev-01.myshopify.com</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2 border-t border-[#1E293B] pt-3 mt-2 opacity-80">
+<div>
+<div class="font-label-caps text-[9px] text-on-surface-variant">Account Role</div>
+<div class="font-data-mono text-[11px] text-on-surface mt-1">OWNER</div>
+</div>
+<div>
+<div class="font-label-caps text-[9px] text-on-surface-variant">Plan Tier</div>
+<div class="font-data-mono text-[11px] text-on-surface mt-1">Sandbox</div>
+</div>
+</div>
+</div>
+<!-- Store Card 3 (Staff Role) -->
+<div class="bg-surface-container-low border border-[#1E293B] rounded-lg p-4 relative overflow-hidden group hover:border-outline-variant transition-colors">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-background border border-outline-variant flex items-center justify-center shrink-0 opacity-70">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">storefront</span>
+</div>
+<div>
+<div class="font-body-sm text-[14px] font-bold text-on-surface opacity-90">Partner Agency Demo</div>
+<div class="font-data-mono text-[10px] text-on-surface-variant mt-0.5">agency-demo-44.myshopify.com</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2 border-t border-[#1E293B] pt-3 mt-2 opacity-80">
+<div>
+<div class="font-label-caps text-[9px] text-on-surface-variant">Account Role</div>
+<div class="font-data-mono text-[11px] text-on-surface mt-1 text-on-primary-container">STAFF (Limited)</div>
+</div>
+<div>
+<div class="font-label-caps text-[9px] text-on-surface-variant">Plan Tier</div>
+<div class="font-data-mono text-[11px] text-on-surface mt-1">Pro</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SuperAdmin Action Bar (Sticky Bottom) -->
+<div class="p-4 border-t border-[#1E293B] bg-[#0a0f1d] flex flex-col gap-3 shrink-0">
+<div class="font-label-caps text-label-caps text-error flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+                            High-Privilege Actions
+                        </div>
+<div class="flex flex-wrap gap-2">
+<button class="flex-1 bg-surface-container-high border border-outline-variant text-on-surface hover:bg-surface-variant hover:border-on-surface-variant transition-colors px-3 py-2 rounded text-[12px] font-medium flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">logout</span>
+                                Reset All Sessions
+                            </button>
+<button class="flex-1 bg-surface-container-high border border-outline-variant text-on-surface hover:bg-surface-variant hover:border-on-surface-variant transition-colors px-3 py-2 rounded text-[12px] font-medium flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+                                Send Recovery
+                            </button>
+</div>
+<!-- Impersonate Action (Requires Reason) -->
+<div class="mt-2 p-3 bg-error/5 border border-error/20 rounded-lg">
+<label class="font-label-caps text-[10px] text-on-surface-variant mb-2 block">Impersonation Reason (Required for Audit Log)</label>
+<div class="flex gap-2">
+<input class="flex-1 bg-background border border-[#1E293B] rounded px-3 py-2 font-body-sm text-body-sm text-on-surface focus:border-error focus:ring-1 focus:ring-error h-9" placeholder="Ticket # or exact issue description..." type="text"/>
+<button class="bg-error text-on-error h-9 px-4 rounded font-label-caps text-[11px] hover:bg-error-container hover:text-on-error-container transition-colors flex items-center gap-1 whitespace-nowrap">
+<span class="material-symbols-outlined text-[14px]">flip_camera_ios</span>
+                                    IMPERSONATE
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

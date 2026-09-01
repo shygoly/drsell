@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background dark:bg-background" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Assistant Settings - AIChat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#003421",
+                        "primary-fixed": "#7bfac0",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#5ddda5",
+                        "surface-bright": "#f6fafe",
+                        "surface-container-highest": "#dfe3e7",
+                        "on-primary-fixed": "#002113",
+                        "outline": "#6d7a71",
+                        "surface-container": "#ebeef3",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#3f6d5c",
+                        "primary-fixed-dim": "#5ddda5",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e5e8ed",
+                        "inverse-surface": "#2d3134",
+                        "tertiary-container": "#46a47c",
+                        "on-tertiary-fixed-variant": "#005237",
+                        "tertiary": "#006c4a",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#005236",
+                        "primary": "#006c49",
+                        "on-secondary-fixed": "#002117",
+                        "surface": "#f6fafe",
+                        "tertiary-fixed": "#97f5c8",
+                        "secondary": "#396756",
+                        "on-background": "#181c1f",
+                        "on-tertiary-container": "#003421",
+                        "surface-tint": "#006c49",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f1f4f8",
+                        "on-tertiary-fixed": "#002114",
+                        "outline-variant": "#bccac0",
+                        "secondary-fixed": "#bbedd7",
+                        "on-surface-variant": "#3d4a42",
+                        "tertiary-fixed-dim": "#7bd9ad",
+                        "primary-container": "#12a875",
+                        "inverse-on-surface": "#eef1f5",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#d7dadf",
+                        "secondary-container": "#bbedd7",
+                        "surface-variant": "#dfe3e7",
+                        "background": "#f6fafe",
+                        "on-secondary-fixed-variant": "#204f3f",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#a0d1bc",
+                        "on-surface": "#181c1f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "gutter": "20px",
+                        "base": "4px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["\"Inter, -apple-system, system-ui\""],
+                        "heading-md": ["\"Inter, -apple-system, system-ui\""],
+                        "heading-lg": ["\"Inter, -apple-system, system-ui\""],
+                        "display-lg": ["\"Inter, -apple-system, system-ui\""],
+                        "label-md": ["\"Inter, -apple-system, system-ui\""],
+                        "body-sm": ["\"Inter, -apple-system, system-ui\""]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "heading-md": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "heading-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["28px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #12a875;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #12a875;
+        }
+        .toggle-checkbox:checked + .toggle-label:before {
+            transform: translateX(100%);
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden bg-background">
+<!-- SideNavBar -->
+<nav class="flex flex-col h-screen border-r border-outline-variant bg-surface dark:bg-surface-dim docked left-0 w-64 z-20">
+<div class="p-gutter border-b border-outline-variant flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container flex items-center justify-center text-on-primary font-bold">
+                A
+            </div>
+<div>
+<h1 class="font-heading-lg text-heading-lg font-bold text-on-primary-fixed">AIChat</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Green Tech AI</p>
+</div>
+</div>
+<div class="p-4">
+<button class="w-full bg-primary-container text-on-primary font-label-md text-label-md py-2 px-4 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Automation
+            </button>
+</div>
+<div class="flex-1 overflow-y-auto py-2">
+<ul class="space-y-1 px-3">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">home</span>
+                        Home
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+                        Inbox
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-primary font-heading-md border-r-4 border-primary bg-primary-container/10 scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+                        AI Assistant
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">settings_input_component</span>
+                        Widget Config
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">group</span>
+                        Customers
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+                        Analytics
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">settings</span>
+                        Settings
+                    </a>
+</li>
+</ul>
+</div>
+<div class="mt-auto border-t border-outline-variant p-3 bg-surface-container dark:bg-surface-container-high">
+<ul class="space-y-1">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">help</span>
+                        Support
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-highest transition-colors scale-95 active:duration-100" href="#">
+<span class="material-symbols-outlined">description</span>
+                        Documentation
+                    </a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center h-14 px-gutter w-full bg-surface dark:bg-surface-dim border-b border-outline-variant z-10">
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-4 h-full">
+<a class="flex items-center h-full text-on-surface-variant font-body-sm text-body-sm hover:text-primary transition-opacity opacity-80 hover:opacity-100" href="#">Dashboard</a>
+<a class="flex items-center h-full text-on-surface-variant font-body-sm text-body-sm hover:text-primary transition-opacity opacity-80 hover:opacity-100" href="#">History</a>
+<a class="flex items-center h-full text-primary font-bold border-b-2 border-primary pb-1 font-body-sm text-body-sm" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary-container text-on-primary font-label-md text-label-md py-1.5 px-3 rounded-lg hover:opacity-90 transition-opacity">
+                    Test Widget
+                </button>
+<button class="text-primary font-label-md text-label-md border border-primary py-1.5 px-3 rounded-lg hover:bg-primary-container/5 transition-colors">
+                    Quick Settings
+                </button>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<button class="p-1 rounded-full hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="p-1 rounded-full hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+</button>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant overflow-hidden ml-2">
+<img alt="Merchant Profile" class="w-full h-full object-cover" data-alt="A professional headshot of an individual in a brightly lit modern office setting. The person has a friendly expression, wearing contemporary business casual attire. The background is slightly blurred, emphasizing a clean, corporate, tech-forward aesthetic typical of light-mode SaaS applications. The color palette features neutral grays and soft whites." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCtndsL32AS44ORwk2sUljD0BrbCqlwwIht0E71WcibpM0tW2qlR0_oglCpiPtqMGdPNTnuLOUz4T4wjXhnumEi0GnmK6K52FfEVdAB6xoyfv2BRZxP1QqARPhIrcJh20sr4C-yKeRGAJ73BYIGT1PKcqIcKBqlia80uGFD1Gu1LQe_YisF1ej4UDAxb1OtF0PFm7Qd7XIZnQxrmxYS_YK-23WtV4E72BGDy-5v-D0J-HEEIoJM4qJ8Q"/>
+</div>
+</div>
+</header>
+<!-- StatusBanner -->
+<div class="flex items-center justify-center py-2 px-gutter w-full font-medium bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-secondary-fixed font-label-md text-label-md">
+<span class="font-bold underline mr-2">AI Service Active</span>
+<span class="opacity-90 hover:opacity-100 transition-opacity cursor-pointer text-xs ml-auto">View logs</span>
+</div>
+<!-- Scrollable Content Canvas -->
+<main class="flex-1 overflow-y-auto p-4 md:p-8 bg-[#F6F7F9]">
+<div class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Settings -->
+<div class="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
+<div class="mb-2">
+<h2 class="font-display-lg text-display-lg text-on-background">AI Assistant Settings</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Configure how your AI interacts with customers on your storefront.</p>
+</div>
+<!-- AI Status Card -->
+<section class="bg-white rounded-xl border border-[#E1E3E5] p-6 shadow-sm">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-heading-md text-heading-md text-[#0A3D2E]">AI Status</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Enable or disable the AI assistant globally.</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-300 ease-in-out" id="ai-status-toggle" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-container-highest cursor-pointer relative before:absolute before:content-[''] before:h-6 before:w-6 before:rounded-full before:bg-white before:shadow-md before:transition-transform before:duration-300 before:ease-in-out" for="ai-status-toggle"></label>
+</div>
+</div>
+</section>
+<!-- Persona Card -->
+<section class="bg-white rounded-xl border border-[#E1E3E5] p-6 shadow-sm">
+<h3 class="font-heading-md text-heading-md text-[#0A3D2E] mb-4">Persona</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-full border border-outline-variant overflow-hidden bg-surface-variant shrink-0">
+<img class="w-full h-full object-cover" data-alt="A stylized 3D rendered avatar of a friendly, futuristic AI character named Ava. The character has a sleek, modern appearance with soft geometric features, glowing subtle green accents, and a welcoming smile. The background is a crisp, clean white, aligning with a high-tech, professional SaaS branding aesthetic. The lighting is bright and even." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGy_weJVRiixY1vYZ-7ct7MBIGx0noeAWqeKX42ibwEyunMWqQ-9HDVtOuDdG20mHwdsGM3ovqfPJhrG0onpB9WEFeXxpXecbeAuwqwcUW2GOZoIIhj5Bji3eBV_fqiQf3PS5IQbKOeMhCfJskH2hewfglxfNuaSYMHhXcLNMDm7rEMMpUgHckvfvcMcXA1tJgxvy5lLkq4Ulv6McDoCnmaoNwExjE6NTDdOzp-eHL5OXTi8Q6JLVYSw"/>
+</div>
+<button class="text-primary font-label-md text-label-md border border-primary py-1.5 px-3 rounded-lg hover:bg-primary-container/5 transition-colors">
+                                        Change Avatar
+                                    </button>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1">AI Name</label>
+<input class="w-full border border-[#C9CCCF] rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" type="text" value="Ava"/>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1">Conversational Tone</label>
+<select class="w-full border border-[#C9CCCF] rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
+<option>Friendly &amp; Helpful</option>
+<option>Professional &amp; Formal</option>
+<option>Casual &amp; Energetic</option>
+</select>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1">Primary Language</label>
+<select class="w-full border border-[#C9CCCF] rounded-lg px-3 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none bg-white">
+<option>Auto-detect (Recommended)</option>
+<option>English</option>
+<option>Chinese (Simplified)</option>
+<option>Spanish</option>
+</select>
+</div>
+</div>
+</div>
+</section>
+<!-- Behavior Card -->
+<section class="bg-white rounded-xl border border-[#E1E3E5] p-6 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-heading-md text-heading-md text-[#0A3D2E]">Behavior &amp; Handoff</h3>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">psychology</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Define when the AI should escalate the conversation to a human agent.</p>
+<div class="space-y-3">
+<label class="flex items-start gap-3 cursor-pointer">
+<input checked="" class="mt-1 rounded text-primary focus:ring-primary border-[#C9CCCF]" type="checkbox"/>
+<div>
+<span class="font-label-md text-label-md text-on-surface block">Customer explicitly asks for human</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">e.g., "Speak to a real person", "agent"</span>
+</div>
+</label>
+<label class="flex items-start gap-3 cursor-pointer">
+<input checked="" class="mt-1 rounded text-primary focus:ring-primary border-[#C9CCCF]" type="checkbox"/>
+<div>
+<span class="font-label-md text-label-md text-on-surface block">Complaint detected</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Negative sentiment or keywords like "angry", "terrible"</span>
+</div>
+</label>
+<label class="flex items-start gap-3 cursor-pointer">
+<input class="mt-1 rounded text-primary focus:ring-primary border-[#C9CCCF]" type="checkbox"/>
+<div>
+<span class="font-label-md text-label-md text-on-surface block">High-value order query</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Orders over $500</span>
+</div>
+</label>
+</div>
+</section>
+<!-- AI Permissions Card -->
+<section class="bg-white rounded-xl border border-[#E1E3E5] p-6 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-heading-md text-heading-md text-[#0A3D2E]">AI Permissions</h3>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">shield_person</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Control what actions the AI can perform on behalf of your store.</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="border border-[#C9CCCF] rounded-lg p-4 flex items-center justify-between bg-surface-bright">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">visibility</span>
+<span class="font-label-md text-label-md text-on-surface">View Orders / Track Shipping</span>
+</div>
+<div class="w-2 h-2 rounded-full bg-primary" title="Enabled"></div>
+</div>
+<div class="border border-[#C9CCCF] rounded-lg p-4 flex items-center justify-between opacity-60">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">sell</span>
+<span class="font-label-md text-label-md text-on-surface">Issue Discounts</span>
+</div>
+<button class="text-primary font-label-md text-label-md hover:underline">Enable</button>
+</div>
+<div class="border border-[#C9CCCF] rounded-lg p-4 flex items-center justify-between opacity-60">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">currency_exchange</span>
+<span class="font-label-md text-label-md text-on-surface">Process Refunds</span>
+</div>
+<button class="text-primary font-label-md text-label-md hover:underline">Enable</button>
+</div>
+</div>
+</section>
+<!-- System Prompt Card -->
+<section class="bg-white rounded-xl border border-[#E1E3E5] p-6 shadow-sm mb-8">
+<div class="flex items-center justify-between mb-2">
+<h3 class="font-heading-md text-heading-md text-[#0A3D2E]">System Prompt (Advanced)</h3>
+<span class="bg-surface-container-highest text-on-surface-variant font-label-md text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Expert Mode</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-3">Provide base instructions to guide the AI's core logic and boundaries.</p>
+<textarea class="w-full h-32 border border-[#C9CCCF] rounded-lg p-3 font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none font-mono text-[12px] bg-surface-bright" placeholder="You are a helpful assistant for a Shopify store..."></textarea>
+<div class="mt-4 flex justify-end">
+<button class="bg-primary-container text-on-primary font-label-md text-label-md py-2 px-6 rounded-lg hover:opacity-90 transition-opacity">
+                                Save Settings
+                            </button>
+</div>
+</section>
+</div>
+<!-- Right Column: Sandbox -->
+<div class="lg:col-span-5 xl:col-span-4 h-full hidden lg:block">
+<div class="sticky top-4 h-[calc(100vh-120px)] bg-white rounded-xl border border-[#E1E3E5] shadow-sm flex flex-col overflow-hidden">
+<div class="p-4 border-b border-[#E1E3E5] bg-surface-bright flex justify-between items-center shrink-0">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[20px]">science</span>
+<h3 class="font-heading-md text-heading-md text-[#0A3D2E]">Test your AI</h3>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+</button>
+</div>
+<!-- Chat Area -->
+<div class="flex-1 p-4 overflow-y-auto flex flex-col gap-4 bg-[#F6F7F9]">
+<div class="text-center">
+<span class="font-label-md text-label-md text-on-surface-variant/60 text-[10px] uppercase tracking-wider">Today, 10:42 AM</span>
+</div>
+<!-- AI Message -->
+<div class="flex items-end gap-2 max-w-[85%]">
+<div class="w-6 h-6 rounded-full bg-surface-variant overflow-hidden shrink-0 mb-1">
+<img class="w-full h-full object-cover" data-alt="A tiny thumbnail portrait of the AI avatar Ava, designed to fit inside a small circular chat bubble profile picture. It maintains the friendly, modern aesthetic with a soft green tech vibe against a white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbCtGe9GziakMm2cjglVOHefTkk7G0aOtYZd8Wmw9-8-eZRN_BmjZrZZegSedPOh43fiTYEXF889LWnGlEDXNvv08NsT4sBwbu01TNrQEdtj2Wi5u0u8YLuG5fp_RZD1Aopx6U03omZbOXPwF2JZvPs8jOid3d6NMhXjIXY2SfG4MZta-6DXRwQW3kVgHlPubPnJ-V4jZavlzTRqmQEgIKJil56oQC4JQjBRgpmQjF1N9AtIOemFCsWA"/>
+</div>
+<div class="bg-[#EDEEEF] rounded-2xl rounded-bl-sm p-3 font-body-sm text-body-sm text-on-surface">
+                                    Hi there! I'm Ava. How can I help you with your order today?
+                                </div>
+</div>
+<!-- User Message -->
+<div class="flex items-end gap-2 max-w-[85%] self-end flex-row-reverse">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest shrink-0 mb-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">person</span>
+</div>
+<div class="bg-primary text-white rounded-2xl rounded-br-sm p-3 font-body-sm text-body-sm">
+                                    Where is my package? The tracking hasn't updated.
+                                </div>
+</div>
+<!-- AI Typing Indicator -->
+<div class="flex items-end gap-2 max-w-[85%]">
+<div class="w-6 h-6 rounded-full bg-surface-variant overflow-hidden shrink-0 mb-1">
+<img class="w-full h-full object-cover" data-alt="Another tiny thumbnail portrait of the AI avatar Ava, designed for consistency in the chat interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUjl1rAgYKRGcLfK9eYnHgMVrpL38dukDrr8Px4Wct3gw6r2PTUW65t73HAOLS7HZ_thF4vrVSgIEFupSfA1sbB_prCLfHqD_L7suNBgdbFqAj6l9odlz9xy_ErUzw3WtAZj6X1yn9azvP6dNOMkTATABBzUIcP7tvIgKV5IWG0EDV6SZu_wlwAspSuR3BcZQwgeNAOZMP9NGSSf6vauHLw_BxoDF_reoJHVuoOCuBANHZS0A8dPcQlA"/>
+</div>
+<div class="bg-[#EDEEEF] rounded-2xl rounded-bl-sm p-3 px-4 flex items-center gap-1 h-[42px]">
+<div class="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style="animation-delay: 0s"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style="animation-delay: 0.15s"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style="animation-delay: 0.3s"></div>
+</div>
+</div>
+</div>
+<!-- Input Area -->
+<div class="p-3 border-t border-[#E1E3E5] bg-white shrink-0">
+<div class="relative flex items-center">
+<input class="w-full border border-[#C9CCCF] rounded-full pl-4 pr-10 py-2 font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-surface-bright" placeholder="Type a message to test..." type="text"/>
+<button class="absolute right-2 p-1.5 text-primary hover:bg-primary-container/10 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+<div class="text-center mt-2">
+<span class="font-label-md text-label-md text-on-surface-variant/60 text-[10px]">Sandbox environment • Analytics disabled</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

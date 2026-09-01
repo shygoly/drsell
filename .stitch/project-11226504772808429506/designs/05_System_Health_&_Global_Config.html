@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>drsell Admin - System Health</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&amp;family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#0d1c2f",
+                        "on-secondary-container": "#abb9d2",
+                        "surface-container-high": "#2a2a2b",
+                        "tertiary-container": "#231500",
+                        "on-primary-fixed": "#131b2e",
+                        "secondary": "#b9c7e0",
+                        "inverse-primary": "#565e74",
+                        "surface-container-low": "#1b1b1d",
+                        "on-secondary": "#233144",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-primary": "#283044",
+                        "error": "#ffb4ab",
+                        "surface-container": "#1f1f21",
+                        "inverse-surface": "#e4e2e4",
+                        "on-tertiary-container": "#957d5a",
+                        "error-container": "#93000a",
+                        "background": "#131315",
+                        "surface-dim": "#131315",
+                        "on-surface": "#e4e2e4",
+                        "on-tertiary-fixed-variant": "#574425",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "surface-bright": "#39393b",
+                        "on-tertiary": "#3e2d11",
+                        "inverse-on-surface": "#303032",
+                        "primary-fixed": "#dae2fd",
+                        "surface-variant": "#353436",
+                        "outline": "#909097",
+                        "on-primary-container": "#798098",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "primary-container": "#0f172a",
+                        "secondary-container": "#3c4a5e",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-lowest": "#0e0e10",
+                        "tertiary-fixed": "#fcdeb5",
+                        "primary": "#bec6e0",
+                        "surface-container-highest": "#353436",
+                        "surface-tint": "#bec6e0",
+                        "tertiary-fixed-dim": "#dec29a",
+                        "on-tertiary-fixed": "#271901",
+                        "on-surface-variant": "#c6c6cd",
+                        "surface": "#131315",
+                        "on-background": "#e4e2e4",
+                        "on-error": "#690005",
+                        "outline-variant": "#45464d",
+                        "tertiary": "#dec29a",
+                        "secondary-fixed": "#d5e3fd"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "row-height-dense": "32px",
+                        "container-padding": "24px",
+                        "row-height-standard": "48px",
+                        "gutter": "12px"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["JetBrains Mono"],
+                        "headline-md": ["Inter"],
+                        "display-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-caps": ["Inter"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-sm": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #e4e2e4; }
+        .blinking-rec { animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        .data-table-container::-webkit-scrollbar { width: 8px; height: 8px; }
+        .data-table-container::-webkit-scrollbar-track { background: #020617; }
+        .data-table-container::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-background text-on-background flex h-screen overflow-hidden">
+<!-- Global Audit Bar -->
+<div class="fixed top-0 w-full h-8 bg-primary-container z-[60] flex items-center justify-center border-b border-[#1E293B]">
+<div class="flex items-center space-x-2 text-error">
+<div class="w-2 h-2 rounded-full bg-error blinking-rec"></div>
+<span class="font-label-caps text-label-caps uppercase tracking-wider">REC LIVE AUDIT SESSION</span>
+</div>
+</div>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-8 h-[calc(100vh-2rem)] w-[240px] bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant dark:border-outline-variant flex flex-col py-4 z-50">
+<div class="px-container-padding mb-8 flex items-center space-x-3">
+<img alt="drsell Logo" class="w-8 h-8 rounded" data-alt="A sleek, minimalist geometric logo representing a highly secure data vault or control center, rendered in stark white against a deep, dark navy background. The design is utilitarian, sharp, and authoritative, fitting for an enterprise super-admin portal. The lighting is sterile and precise, emphasizing the high-security aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeiJZA8QzMFV3rrBQkzkinyT_DVTgpXlDpPjf0MvW8Ow-Puaqs5GD0wT-SZY9krn3-ugA5idHiiGOg1e1BelRasKH9YdSd5slMdnGEDVzerOnLp7YeCheHjgEMOFpggqpifojqKtar9WizTv1sJhkepYBqutF9aIUl_8QkA4XOH_k-PGE92SCwFq0zpck63Bg34hv5nIdsb9DEUTTywd8rZoC7WTQO6Ko792g568qckjnLlbn2StG99Q"/>
+<div>
+<h1 class="font-headline-md text-headline-md font-extrabold text-on-surface">drsell Ops</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant">SuperAdmin Portal</p>
+</div>
+</div>
+<nav class="flex-1 overflow-y-auto px-4 space-y-1">
+<a class="flex items-center space-x-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="storefront">storefront</span>
+<span class="font-body-sm text-body-sm">Accounts &amp; Stores</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="payments">payments</span>
+<span class="font-body-sm text-body-sm">Subscriptions &amp; Billing</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-DEFAULT bg-secondary-container text-on-secondary-container border-r-4 border-primary" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="monitor_heart" data-weight="fill" style="font-variation-settings: 'FILL' 1;">monitor_heart</span>
+<span class="font-body-sm text-body-sm font-semibold">System Health</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="receipt_long">receipt_long</span>
+<span class="font-body-sm text-body-sm">Audit Logs</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+<span class="font-body-sm text-body-sm">Global Config</span>
+</a>
+</nav>
+<div class="px-4 mt-auto space-y-1">
+<a class="flex items-center space-x-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="help">help</span>
+<span class="font-body-sm text-body-sm">Help Center</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="shield">shield</span>
+<span class="font-body-sm text-body-sm">Security Policy</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-[240px] mt-8 flex-1 h-[calc(100vh-2rem)] overflow-y-auto bg-[#020617] p-container-padding flex flex-col gap-gutter">
+<!-- Header -->
+<header class="flex justify-between items-center mb-4">
+<div>
+<h2 class="font-display-sm text-display-sm text-on-surface">System Health &amp; Telemetry</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Real-time monitoring of platform vitals, task queues, and API limits.</p>
+</div>
+<div class="flex items-center space-x-4">
+<button class="bg-primary-container text-primary border border-[#1E293B] px-4 py-2 rounded flex items-center space-x-2 hover:bg-[#1e293b] transition-colors">
+<span class="material-symbols-outlined text-[18px]">campaign</span>
+<span class="font-label-caps text-label-caps">Maintenance Banner</span>
+</button>
+</div>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-gutter flex-1">
+<!-- Left Column: Monitors -->
+<div class="col-span-12 xl:col-span-8 flex flex-col gap-gutter">
+<!-- AI Upstream Monitor -->
+<div class="bg-primary-container border border-[#1E293B] rounded-lg p-4 flex flex-col h-64">
+<div class="flex justify-between items-center mb-4 border-b border-[#1E293B] pb-2">
+<h3 class="font-headline-md text-headline-md flex items-center space-x-2 text-on-surface">
+<span class="material-symbols-outlined text-secondary">memory</span>
+<span>AI Upstream Monitor</span>
+</h3>
+<span class="bg-[#1E293B] text-on-surface-variant px-2 py-1 rounded font-data-mono text-data-mono flex items-center space-x-1">
+<span class="w-2 h-2 rounded-full bg-error inline-block"></span>
+<span>429s Deteceted</span>
+</span>
+</div>
+<div class="flex-1 overflow-auto data-table-container">
+<table class="w-full text-left border-collapse">
+<thead class="sticky top-0 bg-primary-container z-10 border-b border-[#1E293B]">
+<tr>
+<th class="font-label-caps text-label-caps text-on-surface-variant py-2 px-2">Store ID</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant py-2 px-2">Endpoint</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant py-2 px-2">Error Rate</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant py-2 px-2 text-right">Last 429</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-data-mono text-on-surface">
+<tr class="border-b border-[#1E293B] hover:bg-[#1e293b]">
+<td class="py-1 px-2 text-primary">STR-9921</td>
+<td class="py-1 px-2">/v1/embeddings</td>
+<td class="py-1 px-2 text-error">14.2%</td>
+<td class="py-1 px-2 text-right">2m ago</td>
+</tr>
+<tr class="border-b border-[#1E293B] hover:bg-[#1e293b]">
+<td class="py-1 px-2 text-primary">STR-8834</td>
+<td class="py-1 px-2">/v1/chat/completions</td>
+<td class="py-1 px-2 text-tertiary">2.1%</td>
+<td class="py-1 px-2 text-right">15m ago</td>
+</tr>
+<tr class="border-b border-[#1E293B] hover:bg-[#1e293b]">
+<td class="py-1 px-2 text-primary">STR-1102</td>
+<td class="py-1 px-2">/v1/embeddings</td>
+<td class="py-1 px-2 text-error">8.9%</td>
+<td class="py-1 px-2 text-right">4m ago</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Sync Task Queue -->
+<div class="bg-primary-container border border-[#1E293B] rounded-lg p-4 flex flex-col flex-1">
+<div class="flex justify-between items-center mb-4 border-b border-[#1E293B] pb-2">
+<h3 class="font-headline-md text-headline-md flex items-center space-x-2 text-on-surface">
+<span class="material-symbols-outlined text-secondary">sync_alt</span>
+<span>Sync Task Queue</span>
+</h3>
+<div class="flex space-x-2">
+<span class="bg-[#1E293B] text-on-surface-variant px-2 py-1 rounded font-data-mono text-data-mono border border-[#334155]">Total: 4,210</span>
+<span class="bg-[#1E293B] text-primary px-2 py-1 rounded font-data-mono text-data-mono border border-primary">Active: 124</span>
+</div>
+</div>
+<div class="flex gap-4 mb-4">
+<div class="flex-1 bg-[#020617] border border-[#1E293B] p-3 rounded">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">Product Sync</p>
+<p class="font-display-sm text-display-sm text-[#4ade80]">99.8% <span class="font-body-sm text-body-sm text-on-surface-variant">Success</span></p>
+</div>
+<div class="flex-1 bg-[#020617] border border-[#1E293B] p-3 rounded">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">Order Sync</p>
+<p class="font-display-sm text-display-sm text-tertiary">92.4% <span class="font-body-sm text-body-sm text-on-surface-variant">Success</span></p>
+</div>
+<div class="flex-1 bg-[#020617] border border-[#1E293B] p-3 rounded">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">Customer Sync</p>
+<p class="font-display-sm text-display-sm text-[#4ade80]">100% <span class="font-body-sm text-body-sm text-on-surface-variant">Success</span></p>
+</div>
+</div>
+<div class="flex-1 overflow-auto data-table-container">
+<table class="w-full text-left border-collapse">
+<thead class="sticky top-0 bg-primary-container z-10 border-b border-[#1E293B]">
+<tr>
+<th class="font-label-caps text-label-caps text-on-surface-variant py-2 px-2">Job ID</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant py-2 px-2">Type</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant py-2 px-2">Status</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant py-2 px-2 text-right">Duration</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-data-mono text-on-surface">
+<tr class="border-b border-[#1E293B] hover:bg-[#1e293b]">
+<td class="py-1 px-2 text-primary">JOB-449a</td>
+<td class="py-1 px-2">Order_Ingest</td>
+<td class="py-1 px-2"><span class="px-1 bg-[#020617] text-error border border-error rounded">FAILED</span></td>
+<td class="py-1 px-2 text-right">45s</td>
+</tr>
+<tr class="border-b border-[#1E293B] hover:bg-[#1e293b]">
+<td class="py-1 px-2 text-primary">JOB-449b</td>
+<td class="py-1 px-2">Product_Update</td>
+<td class="py-1 px-2"><span class="px-1 bg-[#020617] text-[#4ade80] border border-[#4ade80] rounded">SUCCESS</span></td>
+<td class="py-1 px-2 text-right">1.2s</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Column: Webhooks & Config -->
+<div class="col-span-12 xl:col-span-4 flex flex-col gap-gutter">
+<!-- Webhook Stream -->
+<div class="bg-primary-container border border-[#1E293B] rounded-lg p-4 flex flex-col h-[400px]">
+<div class="flex justify-between items-center mb-4 border-b border-[#1E293B] pb-2">
+<h3 class="font-headline-md text-headline-md flex items-center space-x-2 text-on-surface">
+<span class="material-symbols-outlined text-secondary">webhook</span>
+<span>Webhook Stream</span>
+</h3>
+</div>
+<div class="flex-1 overflow-auto data-table-container bg-[#020617] p-2 rounded border border-[#1E293B] font-data-mono text-data-mono">
+<div class="mb-2 pb-2 border-b border-[#1E293B]">
+<span class="text-on-surface-variant">[10:42:01 UTC]</span> <span class="text-[#4ade80]">APP_UNINSTALLED</span>
+<div class="text-[#64748b] ml-4 text-[10px]">store: myshopify.com/12345 | payload: 204b</div>
+</div>
+<div class="mb-2 pb-2 border-b border-[#1E293B]">
+<span class="text-on-surface-variant">[10:41:15 UTC]</span> <span class="text-primary">APP_INSTALLED</span>
+<div class="text-[#64748b] ml-4 text-[10px]">store: new-brand.myshopify.com | payload: 412b</div>
+</div>
+<div class="mb-2 pb-2 border-b border-[#1E293B]">
+<span class="text-on-surface-variant">[10:39:50 UTC]</span> <span class="text-error">SUBSCRIPTION_CANCELLED</span>
+<div class="text-[#64748b] ml-4 text-[10px]">store: dead-store.myshopify.com | reason: churn</div>
+</div>
+</div>
+</div>
+<!-- Global Config Snapshot -->
+<div class="bg-primary-container border border-[#1E293B] rounded-lg p-4 flex-1">
+<div class="flex justify-between items-center mb-4 border-b border-[#1E293B] pb-2">
+<h3 class="font-headline-md text-headline-md flex items-center space-x-2 text-on-surface">
+<span class="material-symbols-outlined text-secondary">tune</span>
+<span>Global Config Snapshot</span>
+</h3>
+<button class="text-primary hover:text-primary-fixed-dim"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+</div>
+<div class="space-y-4 font-body-sm text-body-sm">
+<div class="flex justify-between border-b border-[#1E293B] pb-1">
+<span class="text-on-surface-variant">Default Trial Days</span>
+<span class="text-on-surface font-data-mono text-data-mono">14</span>
+</div>
+<div class="flex justify-between border-b border-[#1E293B] pb-1">
+<span class="text-on-surface-variant">Pro Tier Base Price</span>
+<span class="text-on-surface font-data-mono text-data-mono">$49.00</span>
+</div>
+<div class="flex justify-between border-b border-[#1E293B] pb-1">
+<span class="text-on-surface-variant">Max AI Tokens (Free)</span>
+<span class="text-on-surface font-data-mono text-data-mono">50,000</span>
+</div>
+<div class="flex justify-between border-b border-[#1E293B] pb-1">
+<span class="text-on-surface-variant">Max AI Tokens (Pro)</span>
+<span class="text-on-surface font-data-mono text-data-mono">Unlimited</span>
+</div>
+</div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-4 opacity-70 flex items-center"><span class="material-symbols-outlined text-[14px] mr-1">info</span> Changes apply to new subscribers only.</p>
+</div>
+</div>
+</div>
+</main>
+</body></html>

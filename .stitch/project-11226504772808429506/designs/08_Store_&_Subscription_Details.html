@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>drsell Admin - Store &amp; Subscription Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-fixed": "#0d1c2f",
+                      "on-secondary-container": "#abb9d2",
+                      "surface-container-high": "#2a2a2b",
+                      "tertiary-container": "#231500",
+                      "on-primary-fixed": "#131b2e",
+                      "secondary": "#b9c7e0",
+                      "inverse-primary": "#565e74",
+                      "surface-container-low": "#1b1b1d",
+                      "on-secondary": "#233144",
+                      "primary-fixed-dim": "#bec6e0",
+                      "on-primary": "#283044",
+                      "error": "#ffb4ab",
+                      "surface-container": "#1f1f21",
+                      "inverse-surface": "#e4e2e4",
+                      "on-tertiary-container": "#957d5a",
+                      "error-container": "#93000a",
+                      "background": "#131315",
+                      "surface-dim": "#131315",
+                      "on-surface": "#e4e2e4",
+                      "on-tertiary-fixed-variant": "#574425",
+                      "on-secondary-fixed-variant": "#3a485c",
+                      "secondary-fixed-dim": "#b9c7e0",
+                      "surface-bright": "#39393b",
+                      "on-tertiary": "#3e2d11",
+                      "inverse-on-surface": "#303032",
+                      "primary-fixed": "#dae2fd",
+                      "surface-variant": "#353436",
+                      "outline": "#909097",
+                      "on-primary-container": "#798098",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "primary-container": "#0f172a",
+                      "secondary-container": "#3c4a5e",
+                      "on-error-container": "#ffdad6",
+                      "surface-container-lowest": "#0e0e10",
+                      "tertiary-fixed": "#fcdeb5",
+                      "primary": "#bec6e0",
+                      "surface-container-highest": "#353436",
+                      "surface-tint": "#bec6e0",
+                      "tertiary-fixed-dim": "#dec29a",
+                      "on-tertiary-fixed": "#271901",
+                      "on-surface-variant": "#c6c6cd",
+                      "surface": "#131315",
+                      "on-background": "#e4e2e4",
+                      "on-error": "#690005",
+                      "outline-variant": "#45464d",
+                      "tertiary": "#dec29a",
+                      "secondary-fixed": "#d5e3fd"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "row-height-dense": "32px",
+                      "container-padding": "24px",
+                      "row-height-standard": "48px",
+                      "gutter": "12px"
+              },
+              "fontFamily": {
+                      "data-mono": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "display-sm": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "data-mono": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-sm": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-caps": [
+                              "11px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center h-row-height-standard px-container-padding bg-surface-container-highest dark:bg-surface-container-highest border-b border-outline-variant dark:border-outline-variant flat no shadows">
+<div class="flex items-center gap-6">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary">drsell Admin</span>
+<!-- Navigation Links -->
+<nav class="hidden md:flex gap-4">
+<a class="text-on-surface-variant font-medium hover:bg-surface-variant transition-colors px-2 py-1 rounded" href="#">System Health</a>
+<a class="text-on-surface-variant font-medium hover:bg-surface-variant transition-colors px-2 py-1 rounded" href="#">Audit Logs</a>
+</nav>
+</div>
+<!-- Search Bar (on_left implicitly handled by layout flow) -->
+<div class="hidden md:flex items-center bg-surface-container-low rounded border border-outline-variant px-3 py-1 mr-auto ml-6">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mr-2">search</span>
+<input class="bg-transparent border-none text-body-sm focus:outline-none text-on-surface w-64 placeholder-on-surface-variant" placeholder="Search..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<!-- Trailing Icon Actions -->
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">security</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">verified_user</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<!-- Trailing Primary Action -->
+<button class="bg-primary-container text-on-primary-container font-label-caps text-label-caps px-4 py-2 rounded font-semibold hover:bg-surface-variant transition-colors">End Session</button>
+<!-- Avatar -->
+<img alt="SuperAdmin Avatar" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A small, circular abstract geometric profile avatar with dark blue and metallic silver hues, exuding a highly technical and secure corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVYD96T6dfOnjc4hojN2I4G7FHMLg0OxzL_eyRO1gBCyFWrbVGvXxUKiGyFenM6XHeBOIh1daLZBb7rTcfu5yv_ebj3UN8eIbsevTpI7Imojlk6OwA6l03ObUrsrAsha0C-alV1PLL78k9jvkb7GdO5nDqZaD78wU98TYCrYZfr0mQhAzMn86sIr1wtm589Z3id38ymRzdqXCi-G7CCisRcyJoxxYDj-MqUpJxcotF03_y2pylscfMKg"/>
+</div>
+</header>
+<!-- Side Navigation Bar -->
+<aside class="fixed left-0 top-0 h-screen w-[240px] flex flex-col py-4 bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant dark:border-outline-variant flat no shadows mt-row-height-standard pt-6 z-40">
+<div class="px-6 mb-8 hidden">
+<!-- Header Avatar and text from JSON (visually hidden but structurally present as per json if needed, though TopNav covers brand) -->
+<img alt="drsell Logo" class="w-10 h-10 rounded mb-2" data-alt="A sleek, minimalist corporate logo featuring stylized tech-inspired nodes on a deep slate background, representing data security." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2sWPazm5pgGSbQtWL7peOtSmu5VFPI5W3mkrpz5c_lr7VGDW-bXIY1yQY59wiCs2Zq3bkyiX22sE3PmtMMwTGDqKvaKo74_QAWzGiuhf_ad2yUpBdVeuATDdKKuk_kcVgBOdqs4I1JBEUwetPRItKabHPZ1KLhmZ-qGYNx0QPnckGWORLAXVI38lnkonnox6pB-e3vkgbol4k_1CNxtf6mdsJXAAgBBNkj4yeJ0pVu9lzdOsJOOWahw"/>
+<h2 class="font-headline-md text-headline-md font-extrabold text-on-surface">drsell Ops</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">SuperAdmin Portal</p>
+</div>
+<nav class="flex-1 flex flex-col gap-1 px-3">
+<!-- Tab 1 -->
+<a class="flex items-center gap-3 px-3 py-2 rounded bg-secondary-container text-on-secondary-container border-r-4 border-primary Active: scale-[0.98]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="font-label-caps text-label-caps">Accounts &amp; Stores</span>
+</a>
+<!-- Tab 2 -->
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-label-caps text-label-caps">Subscriptions &amp; Billing</span>
+</a>
+<!-- Tab 3 -->
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined">monitor_heart</span>
+<span class="font-label-caps text-label-caps">System Health</span>
+</a>
+<!-- Tab 4 -->
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-caps text-label-caps">Audit Logs</span>
+</a>
+<!-- Tab 5 -->
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-caps text-label-caps">Global Config</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-1 px-3 border-t border-outline-variant pt-4">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-caps text-label-caps">Help Center</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#">
+<span class="material-symbols-outlined">shield</span>
+<span class="font-label-caps text-label-caps">Security Policy</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[240px] mt-row-height-standard flex-1 p-container-padding overflow-y-auto">
+<!-- Audit Bar (Persistent top-level banner) -->
+<div class="bg-primary-container text-on-primary-container font-data-mono text-data-mono px-4 py-2 rounded border border-outline-variant flex items-center justify-between mb-6 shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-error animate-pulse"></div>
+<span>AUDIT ACTIVE: SESSION LOGGING ENGAGED [ID: SA-9942-X]</span>
+</div>
+<span class="text-on-surface-variant opacity-70">IP: 192.168.1.45 (CORP VPN)</span>
+</div>
+<!-- Page Header -->
+<div class="mb-8 flex justify-between items-end border-b border-outline-variant pb-4">
+<div>
+<h1 class="font-display-sm text-display-sm text-on-surface mb-1 flex items-center gap-2">
+                    Acme Corp Global <span class="material-symbols-outlined text-primary text-xl">verified</span>
+</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Store ID: acme-corp-prod.myshopify.com</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-low border border-outline-variant text-on-surface hover:bg-surface-container-high px-4 py-2 rounded font-label-caps text-label-caps transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">sync</span> Manual Resync
+                </button>
+<button class="bg-primary text-on-primary hover:bg-primary-fixed px-4 py-2 rounded font-label-caps text-label-caps font-bold transition-colors shadow-lg">
+                    Manage Access
+                </button>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-gutter mb-8">
+<!-- Subscription Status Card (Span 4) -->
+<div class="col-span-12 lg:col-span-4 bg-[#0F172A] border border-[#1E293B] rounded-xl p-6 relative overflow-hidden group">
+<!-- Abstract BG Hint -->
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-error-container opacity-20 rounded-full blur-2xl group-hover:opacity-30 transition-opacity"></div>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">credit_card</span> Subscription Status
+                </h3>
+<div class="flex items-center justify-between mb-6">
+<span class="font-headline-md text-headline-md text-on-surface font-bold">Pro Tier</span>
+<!-- Status Chip -->
+<span class="px-2 py-1 rounded bg-error-container/20 text-error border border-error/30 font-data-mono text-data-mono flex items-center gap-1">
+<div class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></div> FROZEN
+                    </span>
+</div>
+<div class="bg-surface-container border border-error/20 rounded p-4 mb-4">
+<p class="font-body-sm text-body-sm text-error mb-1 font-semibold">Action Required</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Store is within the 30-day recovery window. Data will be purged if unassigned.</p>
+</div>
+<div class="flex justify-between items-center pt-2 border-t border-[#1E293B]">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">Days Remaining</p>
+<p class="font-display-sm text-display-sm text-error font-bold">04</p>
+</div>
+<button class="text-primary hover:text-primary-fixed text-sm font-label-caps border border-primary/30 px-3 py-1 rounded transition-colors bg-primary-container/20">Extend Trial</button>
+</div>
+</div>
+<!-- Billing Usage Card (Span 4) -->
+<div class="col-span-12 lg:col-span-4 bg-[#0F172A] border border-[#1E293B] rounded-xl p-6 relative">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">analytics</span> AI Resolution Usage
+                </h3>
+<div class="mb-6">
+<div class="flex justify-between items-baseline mb-2">
+<span class="font-display-sm text-display-sm text-on-surface">850</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">/ 1000 Limit</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-container-highest rounded-full h-2 mb-1">
+<div class="bg-secondary h-2 rounded-full" style="width: 85%"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-right">85% Utilized</p>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center border-b border-[#1E293B] pb-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Current Cycle</span>
+<span class="font-data-mono text-data-mono text-on-surface">Oct 1 - Oct 31</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Overage Est.</span>
+<span class="font-data-mono text-data-mono text-error font-bold">+$45.00</span>
+</div>
+</div>
+</div>
+<!-- Scope Checker Card (Span 4) -->
+<div class="col-span-12 lg:col-span-4 bg-[#0F172A] border border-[#1E293B] rounded-xl p-6">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">policy</span> Granted Scopes
+                </h3>
+<ul class="space-y-2">
+<li class="flex items-center justify-between p-2 rounded bg-surface-container-low border border-outline-variant">
+<span class="font-data-mono text-data-mono text-on-surface">read_products</span>
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+</li>
+<li class="flex items-center justify-between p-2 rounded bg-surface-container-low border border-outline-variant">
+<span class="font-data-mono text-data-mono text-on-surface">write_orders</span>
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+</li>
+<li class="flex items-center justify-between p-2 rounded bg-error-container/10 border border-error/50">
+<span class="font-data-mono text-data-mono text-error">read_customers</span>
+<span class="material-symbols-outlined text-error text-sm">cancel</span>
+</li>
+<li class="flex items-center justify-between p-2 rounded bg-surface-container-low border border-outline-variant">
+<span class="font-data-mono text-data-mono text-on-surface">write_inventory</span>
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- Event Log Table (Single Column Vert Stack) -->
+<div class="bg-[#0F172A] border border-[#1E293B] rounded-xl overflow-hidden">
+<div class="p-4 border-b border-[#1E293B] flex justify-between items-center bg-surface-container-lowest">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">list_alt</span> Recent Sync Events
+                </h3>
+<button class="text-primary hover:text-primary-fixed text-sm font-label-caps transition-colors">View Full Log</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container text-on-surface-variant font-label-caps text-label-caps border-b border-[#1E293B]">
+<th class="p-3 h-row-height-dense sticky left-0 bg-surface-container z-10">Timestamp (UTC)</th>
+<th class="p-3 h-row-height-dense">Event Type</th>
+<th class="p-3 h-row-height-dense">Actor / Origin</th>
+<th class="p-3 h-row-height-dense">Status</th>
+<th class="p-3 h-row-height-dense text-right pr-6 sticky right-0 bg-surface-container z-10">Actions</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-data-mono">
+<tr class="border-b border-[#1E293B] hover:bg-surface-container-high transition-colors">
+<td class="p-3 text-on-surface-variant">2023-10-24 14:32:01</td>
+<td class="p-3 text-on-surface">WEBHOOK_ORDER_CREATE</td>
+<td class="p-3 text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">lock</span> 10.0.0.55
+                            </td>
+<td class="p-3">
+<span class="text-primary flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-primary"></div> SUCCESS</span>
+</td>
+<td class="p-3 text-right pr-6"><button class="text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-sm">code</span></button></td>
+</tr>
+<tr class="border-b border-[#1E293B] hover:bg-surface-container-high transition-colors">
+<td class="p-3 text-on-surface-variant">2023-10-24 14:15:22</td>
+<td class="p-3 text-on-surface">MANUAL_PRODUCT_SYNC</td>
+<td class="p-3 text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">person</span> admin_jsmith
+                            </td>
+<td class="p-3">
+<span class="text-error flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-error"></div> FAILED (403)</span>
+</td>
+<td class="p-3 text-right pr-6"><button class="text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-sm">code</span></button></td>
+</tr>
+<tr class="border-b border-[#1E293B] hover:bg-surface-container-high transition-colors">
+<td class="p-3 text-on-surface-variant">2023-10-24 13:00:05</td>
+<td class="p-3 text-on-surface">CRON_BILLING_CHECK</td>
+<td class="p-3 text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">smart_toy</span> system_worker
+                            </td>
+<td class="p-3">
+<span class="text-primary flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-primary"></div> SUCCESS</span>
+</td>
+<td class="p-3 text-right pr-6"><button class="text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-sm">code</span></button></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</body></html>
