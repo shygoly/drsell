@@ -3,9 +3,9 @@
  "判据": "skill fidelity-rubric §4 阶梯 B：A 级 = fullPage ≤5% 且 masked ≤1% 且 structural ≤0.3%。",
  "遮罩后 mismatch": {
   "accounts": "32.37%",
-  "system": "64.20%",
-  "impersonation": "21.82%",
-  "shop_detail": "17.50%"
+  "system": "69.33%",
+  "impersonation": "21.81%",
+  "shop_detail": "17.45%"
  },
  "起点": {
   "accounts": "34.62%",
@@ -40,5 +40,16 @@
   "修了一个真 bug：授权范围原本只遍历已授予的 scope，缺失项永远不显示 —— 而这张卡的意义正是显示缺什么",
   "impersonation 按稿子屏 07 重排：冒名横幅提为置顶通栏，OpsShell 加 banner 槽",
   "全局顶栏（稿子 02/08 有、我们没有）已补齐"
- ]
+ ],
+ "令牌层对表结论": {
+  "方法": "把 tokens-superadmin-dark.json 的 51 个色令牌与 tokens.css + globals.css 的语义映射逐项比对。",
+  "结果": "对上 20 · 值不同 5 · 未注册 26",
+  "已修": [
+   "on-primary 被误映射到 --sheet(#0f172a)，稿子实际是 #283044；#283044 不撞 DS-8，已改用稿子值。它在每屏出现 5 次（按钮与状态签），是真实可见差异。",
+   "注册稿子屏 07 用的琥珀阶 400/500/800/900，冒名横幅改用它们",
+   "字体：稿子四屏统一 Inter + JetBrains Mono，我们用的还是旧亮色源的 Bricolage Grotesque + Instrument Sans + Martian Mono —— 已换。skill 的 known-diff-sources 把字体不同源列为第一大因（≈42%），且明说不同源时 S 不可达。"
+  ],
+  "仍有理由不同": "error-container / on-error-container 是 DS-8 重映射（tokens.css 头部已注明）"
+ },
+ "为什么像素指标仍不动": "令牌、字体、壳、卡片组成都对齐后，四屏仍在 17–69%。逐项实测证明差异是**结构性**的：卡片重建 16.69→17.32、内容区审计条 17.43→18.22、字体对齐后 system 64.2→69.33 —— 每个局部修正都在错位里重新洗牌。根因不变：新源的页面跳过了阶段 A 的重建步，与稿子在结构层不同构。"
 }

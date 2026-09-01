@@ -81,6 +81,11 @@
   --color-stock: var(--stock);
   --color-sheet: var(--sheet);
   --color-card-border: var(--card-border);
+  /* 稿子屏 07 冒名横幅的琥珀阶 */
+  --color-amber-400: var(--st-amber-400);
+  --color-amber-500: var(--st-amber-500);
+  --color-amber-800: var(--st-amber-800);
+  --color-amber-900: var(--st-amber-900);
   --color-sheet-2: var(--sheet-2);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
@@ -121,7 +126,9 @@
   --color-outline-variant: var(--st-outline-variant);
   --color-primary: var(--st-primary);
   --color-primary-container: var(--st-primary-container);
-  --color-on-primary: var(--sheet);                      /* 原 #283044 → 深色 on-primary */
+  /* 稿子 superadmin-dark 的 on-primary 是 #283044，之前被误映射到 --sheet(#0f172a)；
+     #283044 不在 storefront 令牌集里，不撞 DS-8，直接用稿子值。 */
+  --color-on-primary: var(--st-on-primary);
   --color-on-primary-container: var(--st-on-primary-container);
   /* Stitch 的 secondary 与 shadcn secondary 同名不同义，不注册为 shadcn secondary。
      secondary-container 只用于侧栏导航选中态，故注册。 */

@@ -67,15 +67,15 @@ function ImpersonationPage() {
   }
 
   const banner = (
-    <div className="bg-frozen-accent/15 border-frozen-accent flex h-16 w-full items-center gap-4 border-b px-[24px]">
-      <span className="bg-frozen-accent text-on-primary font-label-caps text-label-caps flex shrink-0 items-center gap-2 px-3 py-1.5 uppercase">
+    <div className="bg-amber-900/30 border-amber-500 flex h-16 w-full items-center gap-4 border-b px-[24px]">
+      <span className="bg-amber-500 text-amber-900 font-label-caps text-label-caps flex shrink-0 items-center gap-2 px-3 py-1.5 uppercase">
         <ShieldAlert className="h-4 w-4" aria-hidden="true" />
         Impersonation Active
       </span>
-      <span className="text-frozen-accent min-w-0 flex-1 truncate text-[13px]">
+      <span className="text-amber-400 min-w-0 flex-1 truncate text-[13px]">
         Impersonating {email || '—'} for Store: {shop || '—'}
       </span>
-      <span className="border-frozen-accent/40 text-on-surface-variant font-data-mono hidden shrink-0 border-l pl-4 text-[12px] lg:block">
+      <span className="border-amber-500/40 text-on-surface-variant font-data-mono hidden shrink-0 border-l pl-4 text-[12px] lg:block">
         Reason: {reason}
       </span>
       <span className="text-on-surface-variant font-data-mono flex shrink-0 items-center gap-1.5 text-[12px]">
@@ -89,7 +89,7 @@ function ImpersonationPage() {
           clearToken();
           window.location.href = '/login';
         }}
-        className="bg-frozen-accent/20 border-frozen-accent text-frozen-accent hover:bg-frozen-accent hover:text-on-primary flex shrink-0 items-center gap-2 border px-3 py-2 text-[12px] font-bold uppercase transition-colors"
+        className="bg-amber-500/20 border-amber-500 text-amber-400 hover:bg-amber-500 hover:text-amber-900 flex shrink-0 items-center gap-2 border px-3 py-2 text-[12px] font-bold uppercase transition-colors"
       >
         <LogOut className="h-4 w-4" aria-hidden="true" />
         End Session &amp; Logout
@@ -169,8 +169,8 @@ function ImpersonationPage() {
               </div>
             </div>
 
-            <div className="bg-primary-container border-frozen-accent rounded-lg border">
-              <h2 className="text-frozen-accent border-outline-variant m-0 flex items-center gap-2 border-b px-4 py-3 text-sm font-bold">
+            <div className="bg-primary-container border-amber-500 rounded-lg border">
+              <h2 className="text-amber-400 border-outline-variant m-0 flex items-center gap-2 border-b px-4 py-3 text-sm font-bold">
                 <ShieldAlert className="h-4 w-4" aria-hidden="true" />
                 Impersonation Context
               </h2>
