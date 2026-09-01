@@ -10,6 +10,8 @@ type Props = {
   meta?: string;
   /** Stitch 稿自带页头与内边距的页面传 false，由页面自己排版 */
   padded?: boolean;
+  /** expiry_queue 稿没有顶栏（页头那一行就是顶栏），传 false 避免整页下推 56px */
+  chrome?: boolean;
   children: React.ReactNode;
 };
 
@@ -17,7 +19,7 @@ type Props = {
  *  工单进来时手上往往只有一个店铺域名。 */
 function OpsTopBar() {
   return (
-    <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-card px-7 py-2.5">
+    <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-4 border-ink bg-card-surface border-b px-[16px] py-2.5">
       <label className="relative flex min-w-0 max-w-md flex-1 items-center">
         <Search
           className="pointer-events-none absolute left-2.5 h-4 w-4 text-muted-foreground"
@@ -50,12 +52,12 @@ function OpsTopBar() {
   );
 }
 
-export function OpsShell({ active, title, subtitle, meta, padded = true, children }: Props) {
+export function OpsShell({ active, title, subtitle, meta, padded = true, chrome = true, children }: Props) {
   return (
     <div className="flex min-h-screen">
       <OpsSidebar active={active} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <OpsTopBar />
+        {chrome ? <OpsTopBar /> : null}
         <main className={padded ? "min-w-0 flex-1 px-7 pb-12 pt-6" : "flex min-w-0 flex-1 flex-col overflow-hidden"}>
           {(title || meta) && (
             <header className="mb-5 flex flex-wrap items-start justify-between gap-4">

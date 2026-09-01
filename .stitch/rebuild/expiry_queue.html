@@ -21,7 +21,7 @@
                 extend: {
                     "colors": {
                         "ink": "#14211e",
-                        "on-error": "#ffffff",
+                        "on-error": "#fafcfa",
                         "primary-fixed-dim": "#bbcac5",
                         "surface": "#f6fbf6",
                         "card-surface": "#fafcfa",
@@ -31,9 +31,9 @@
                         "outline-variant": "#c2c8c5",
                         "on-tertiary-container": "#bf7422",
                         "on-surface": "#171d1b",
-                        "on-primary": "#ffffff",
+                        "on-primary": "#fafcfa",
                         "primary-container": "#14211e",
-                        "surface-container-lowest": "#ffffff",
+                        "surface-container-lowest": "#fafcfa",
                         "inverse-surface": "#2c322f",
                         "trial-accent": "#4b3fa8",
                         "secondary-container": "#9b90fe",
@@ -42,7 +42,7 @@
                         "on-secondary-fixed-variant": "#42359f",
                         "inverse-primary": "#bbcac5",
                         "surface-variant": "#dfe4e0",
-                        "on-error-container": "#93000a",
+                        "on-error-container": "#8e3b2f",
                         "on-primary-fixed": "#111e1b",
                         "secondary-fixed": "#e4dfff",
                         "surface-container-high": "#e4e9e5",
@@ -53,10 +53,10 @@
                         "outline": "#737876",
                         "on-surface-variant": "#424846",
                         "on-secondary-container": "#30208d",
-                        "error-container": "#ffdad6",
+                        "error-container": "#f6e2de",
                         "tertiary-fixed-dim": "#ffb875",
-                        "error": "#ba1a1a",
-                        "on-secondary": "#ffffff",
+                        "error": "#8e3b2f",
+                        "on-secondary": "#fafcfa",
                         "on-primary-container": "#7b8985",
                         "inverse-on-surface": "#edf2ee",
                         "on-tertiary-fixed": "#2d1600",
@@ -70,7 +70,7 @@
                         "surface-dim": "#d6dbd7",
                         "surface-bright": "#f6fbf6",
                         "surface-container-highest": "#dfe4e0",
-                        "on-tertiary": "#ffffff",
+                        "on-tertiary": "#fafcfa",
                         "tertiary": "#0b0300"
                     },
                     "borderRadius": {
@@ -116,13 +116,14 @@
         ::-webkit-scrollbar-thumb { background: #14211e; border: 1px solid #e6ebe7; }
     </style>
 <style id="stitch-fullheight">html,body{min-height:100%;height:100%;background:#e6ebe7}</style>
+<style>.runway-hatch-frozen{background:repeating-linear-gradient(-45deg,#a66009 0 3px,transparent 3px 6px);background-color:rgba(166,96,9,.12)}</style>
 </head>
 <body class="bg-page-bg text-ink h-screen flex overflow-hidden font-body-md text-body-md">
 <!-- SideNavBar (Shared Component) -->
 <nav class="bg-surface dark:bg-surface-dim w-[200px] h-screen flex-shrink-0 border-r border-ink dark:border-outline-variant flex flex-col h-full overflow-y-auto">
 <!-- Brand Header -->
 <div class="h-16 flex items-center px-standard border-b border-ink">
-<span class="font-headline-sm text-headline-sm font-black text-ink dark:text-on-surface uppercase tracking-tighter">AI Ops Console</span>
+<span class="font-headline-sm text-headline-sm font-black text-ink dark:text-on-surface uppercase tracking-tighter">Drsell 运营台</span>
 </div>
 <!-- Navigation Tabs -->
 <div class="flex flex-col flex-1 py-tight">
@@ -148,6 +149,10 @@
 <span class="material-symbols-outlined text-[18px]">inventory_2</span>
 <span class="font-data-mono text-data-mono">套餐配置</span>
 </a>
+</div>
+<div class="border-t border-ink px-standard py-3 flex flex-col gap-1">
+<span class="font-data-mono text-[10px] text-on-surface-variant truncate">admin@drsell.szchada.top</span>
+<button class="font-label-caps text-label-caps text-on-surface-variant uppercase self-start">退出登录</button>
 </div>
 </nav>
 <!-- Main Canvas -->
@@ -178,13 +183,15 @@
 <div class="grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr] border-b border-ink h-[44px] hover:bg-surface-container-low transition-colors">
 <div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center truncate">Luxe Cosmetics</div>
 <div class="px-3 border-r border-ink flex items-center">
-<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-trial-accent tracking-tight">Trial</span>
+<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-trial-accent tracking-tight">PENDING</span>
 </div>
 <div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center">2023-11-15</div>
 <div class="px-3 border-r border-ink flex items-center gap-3">
 <span class="font-data-mono text-data-mono w-6 text-right">08</span>
 <div class="flex-1 h-2 border border-ink bg-surface relative">
-<div class="absolute inset-y-0 left-0 bg-trial-accent w-[30%]"></div>
+<div class="absolute inset-y-0 left-0 bg-surface-dim" style="width:86%"></div>
+<div class="absolute inset-y-0 right-0 bg-trial-accent" style="left:86%"></div>
+<div class="absolute -top-[3px] -bottom-[3px] w-px bg-ink" style="left:86%"></div>
 </div>
 </div>
 <div class="px-3 flex items-center justify-center">
@@ -195,13 +202,15 @@
 <div class="grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr] border-b border-ink h-[44px] hover:bg-surface-container-low transition-colors">
 <div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center truncate">Nomad Gear Co.</div>
 <div class="px-3 border-r border-ink flex items-center">
-<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-frozen-accent tracking-tight">Frozen</span>
+<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-frozen-accent tracking-tight">FROZEN</span>
 </div>
 <div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center">2023-10-31</div>
 <div class="px-3 border-r border-ink flex items-center gap-3">
 <span class="font-data-mono text-data-mono w-6 text-right text-frozen-accent">-5</span>
 <div class="flex-1 h-2 border border-ink bg-surface relative">
-<div class="absolute inset-y-0 left-0 bg-frozen-accent w-[100%]"></div>
+<div class="absolute inset-y-0 left-0 bg-surface-dim" style="width:90%"></div>
+<div class="absolute inset-y-0 right-0 runway-hatch-frozen" style="left:90%"></div>
+<div class="absolute -top-[3px] -bottom-[3px] w-px bg-ink" style="left:90%"></div>
 </div>
 </div>
 <div class="px-3 flex items-center justify-center">
@@ -212,13 +221,15 @@
 <div class="grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr] border-b border-ink h-[44px] hover:bg-surface-container-low transition-colors">
 <div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center truncate">Urban Roasters</div>
 <div class="px-3 border-r border-ink flex items-center">
-<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-ink tracking-tight">Active</span>
+<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-ink tracking-tight">ACTIVE</span>
 </div>
 <div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center">2023-11-09</div>
 <div class="px-3 border-r border-ink flex items-center gap-3">
 <span class="font-data-mono text-data-mono w-6 text-right text-frozen-accent">02</span>
 <div class="flex-1 h-2 border border-ink bg-surface relative">
-<div class="absolute inset-y-0 left-0 bg-frozen-accent w-[15%]"></div>
+<div class="absolute inset-y-0 left-0 bg-surface-dim" style="width:80%"></div>
+<div class="absolute inset-y-0 right-0 bg-on-surface-variant" style="left:80%"></div>
+<div class="absolute -top-[3px] -bottom-[3px] w-px bg-ink" style="left:80%"></div>
 </div>
 </div>
 <div class="px-3 flex items-center justify-center">
@@ -229,13 +240,15 @@
 <div class="grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr] border-b border-ink h-[44px] hover:bg-surface-container-low transition-colors">
 <div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center truncate">Elevate Fitness</div>
 <div class="px-3 border-r border-ink flex items-center">
-<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-trial-accent tracking-tight">Trial</span>
+<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-trial-accent tracking-tight">PENDING</span>
 </div>
 <div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center">2023-11-20</div>
 <div class="px-3 border-r border-ink flex items-center gap-3">
 <span class="font-data-mono text-data-mono w-6 text-right">13</span>
 <div class="flex-1 h-2 border border-ink bg-surface relative">
-<div class="absolute inset-y-0 left-0 bg-trial-accent w-[65%]"></div>
+<div class="absolute inset-y-0 left-0 bg-surface-dim" style="width:36%"></div>
+<div class="absolute inset-y-0 right-0 bg-trial-accent" style="left:36%"></div>
+<div class="absolute -top-[3px] -bottom-[3px] w-px bg-ink" style="left:36%"></div>
 </div>
 </div>
 <div class="px-3 flex items-center justify-center">
@@ -246,34 +259,37 @@
 <div class="grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr] border-b border-ink h-[44px] hover:bg-surface-container-low transition-colors">
 <div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center truncate">Zenith Tech</div>
 <div class="px-3 border-r border-ink flex items-center">
-<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-ink tracking-tight">Active</span>
+<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-frozen-accent tracking-tight">FROZEN</span>
 </div>
 <div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center">2023-11-08</div>
 <div class="px-3 border-r border-ink flex items-center gap-3">
 <span class="font-data-mono text-data-mono w-6 text-right text-frozen-accent">01</span>
 <div class="flex-1 h-2 border border-ink bg-surface relative">
-<div class="absolute inset-y-0 left-0 bg-frozen-accent w-[5%]"></div>
+<div class="absolute inset-y-0 left-0 bg-surface-dim" style="width:42%"></div>
+<div class="absolute inset-y-0 right-0 runway-hatch-frozen" style="left:42%"></div>
+<div class="absolute -top-[3px] -bottom-[3px] w-px bg-ink" style="left:42%"></div>
 </div>
 </div>
 <div class="px-3 flex items-center justify-center">
-<button class="px-3 py-1 bg-card-surface text-ink border border-ink font-label-caps text-label-caps hover:bg-surface-container transition-colors">查看</button>
+<button class="px-3 py-1 bg-card-surface text-ink border border-ink font-label-caps text-label-caps hover:bg-surface-container transition-colors">发催缴提醒</button>
 </div>
 </div>
 <!-- Row 6: Frozen -->
 <div class="grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr] h-[44px] hover:bg-surface-container-low transition-colors">
 <div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center truncate">Bloom Botanicals</div>
 <div class="px-3 border-r border-ink flex items-center">
-<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-frozen-accent tracking-tight">Frozen</span>
+<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-error line-through tracking-tight">CANCELLED</span>
 </div>
 <div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center">2023-10-25</div>
 <div class="px-3 border-r border-ink flex items-center gap-3">
-<span class="font-data-mono text-data-mono w-6 text-right text-frozen-accent">-12</span>
+<span class="font-data-mono text-data-mono w-6 text-right text-error line-through">-12</span>
 <div class="flex-1 h-2 border border-ink bg-surface relative">
-<div class="absolute inset-y-0 left-0 bg-frozen-accent w-[100%]"></div>
+<div class="absolute inset-y-0 left-0 bg-surface-dim" style="width:100%"></div>
+<div class="absolute -top-[3px] -bottom-[3px] w-px bg-ink" style="left:100%"></div>
 </div>
 </div>
 <div class="px-3 flex items-center justify-center">
-<button class="px-3 py-1 bg-card-surface text-ink border border-ink font-label-caps text-label-caps hover:bg-surface-container transition-colors">发催缴提醒</button>
+<button class="px-3 py-1 bg-card-surface text-ink border border-ink font-label-caps text-label-caps hover:bg-surface-container transition-colors">查看</button>
 </div>
 </div>
 </div>

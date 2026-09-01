@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ListFilter } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ListFilter } from 'lucide-react';
 import { AuthGate } from '@/app/components/auth-gate';
 import { OpsShell } from '@/app/components/shell';
 import { queueAction, queueKindLabel, Runway, runwayState } from '@/app/components/runway';
@@ -55,14 +55,11 @@ export default function HomePage() {
 
   return (
     <AuthGate>
-      <OpsShell active="queue" padded={false}>
+      <OpsShell active="queue" padded={false} chrome={false}>
         {/* Header —— Stitch 稿 h-16，与主区同底 */}
         <header className="border-ink bg-card-surface flex h-16 items-center justify-between border-b px-[16px]">
           <h1 className="font-headline-md text-headline-md text-ink m-0">到期队列</h1>
           <div className="flex items-center gap-4">
-            <span className="font-data-mono text-data-mono text-on-surface-variant">
-              {today} · {items.length} 家待处理 / 共 {totalShops} 家
-            </span>
             <button
               type="button"
               aria-label="筛选"
@@ -78,9 +75,9 @@ export default function HomePage() {
 
           <div className="bg-card-surface border-ink border shadow-none">
             <div className={`${GRID} border-ink bg-surface-container-low border-b`}>
-              <div className={HEAD}>店铺</div>
+              <div className={HEAD}>商户名称</div>
               <div className={HEAD}>当前状态</div>
-              <div className={HEAD}>归属账号</div>
+              <div className={HEAD}>到期日期</div>
               <div className={HEAD}>剩余天数</div>
               <div className={`${HEAD} border-r-0 justify-center`}>操作</div>
             </div>
@@ -100,8 +97,11 @@ export default function HomePage() {
                   <div className={CELL}>
                     <StatusChip status={item.status} />
                   </div>
-                  <div className={`${CELL} font-data-mono text-data-mono truncate`}>
-                    {item.ownerEmail ?? '—'}
+                  <div
+                    className={`${CELL} font-data-mono text-data-mono`}
+                    title={`${item.ownerEmail ?? '未认领'} · ${queueKindLabel(item.queueKind)}`}
+                  >
+                    {item.windowEnd.slice(0, 10)}
                   </div>
                   <div className={`${CELL} gap-3`}>
                     <Runway
@@ -110,9 +110,6 @@ export default function HomePage() {
                       state={state}
                       daysLabel={String(item.daysRemaining)}
                     />
-                    <span className="font-data-mono text-data-mono text-on-surface-variant whitespace-nowrap">
-                      {queueKindLabel(item.queueKind)}
-                    </span>
                   </div>
                   <div className="flex items-center justify-center px-3">
                     <button
@@ -135,8 +132,25 @@ export default function HomePage() {
 
           <div className="text-on-surface-variant mt-3 flex items-center justify-between text-[13px]">
             <span className="font-data-mono text-data-mono">
-              第 1–{items.length} 条 / 共 {totalShops} 条
+              第 1–{items.length} 条 / 共 {totalShops} 条 · {today}
             </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                aria-label="上一页"
+                disabled
+                className="border-ink bg-card-surface hover:bg-surface-container flex h-8 w-8 items-center justify-center border disabled:opacity-50"
+              >
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-label="下一页"
+                className="border-ink bg-card-surface hover:bg-surface-container flex h-8 w-8 items-center justify-center border"
+              >
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
           </div>
         </div>
       </OpsShell>

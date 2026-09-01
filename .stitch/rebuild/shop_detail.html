@@ -14,7 +14,7 @@
             theme: {
                 extend: {
                     "colors": {
-                        "on-error": "#ffffff",
+                        "on-error": "#fafcfa",
                         "inverse-primary": "#bbcac5",
                         "on-background": "#171d1b",
                         "ink": "#14211e",
@@ -27,7 +27,7 @@
                         "surface-container-high": "#e4e9e5",
                         "on-surface-variant": "#424846",
                         "on-secondary-container": "#30208d",
-                        "error-container": "#ffdad6",
+                        "error-container": "#f6e2de",
                         "outline-variant": "#c2c8c5",
                         "secondary": "#5a4fb8",
                         "tertiary-fixed-dim": "#ffb875",
@@ -37,7 +37,7 @@
                         "secondary-fixed-dim": "#c6bfff",
                         "primary-container": "#14211e",
                         "secondary-fixed": "#e4dfff",
-                        "on-secondary": "#ffffff",
+                        "on-secondary": "#fafcfa",
                         "card-surface": "#fafcfa",
                         "on-tertiary-fixed": "#2d1600",
                         "on-primary-container": "#7b8985",
@@ -47,7 +47,7 @@
                         "secondary-container": "#9b90fe",
                         "inverse-surface": "#2c322f",
                         "surface-variant": "#dfe4e0",
-                        "surface-container-lowest": "#ffffff",
+                        "surface-container-lowest": "#fafcfa",
                         "tertiary": "#0b0300",
                         "surface-container-low": "#f0f5f1",
                         "tertiary-container": "#311800",
@@ -56,10 +56,10 @@
                         "primary-fixed-dim": "#bbcac5",
                         "on-tertiary-container": "#bf7422",
                         "primary-fixed": "#d7e6e1",
-                        "on-primary": "#ffffff",
-                        "on-error-container": "#93000a",
-                        "on-tertiary": "#ffffff",
-                        "error": "#ba1a1a",
+                        "on-primary": "#fafcfa",
+                        "on-error-container": "#8e3b2f",
+                        "on-tertiary": "#fafcfa",
+                        "error": "#8e3b2f",
                         "tertiary-fixed": "#ffdcc0",
                         "on-secondary-fixed-variant": "#42359f",
                         "surface-container": "#eaefeb",
@@ -149,53 +149,39 @@
 </div>
 </header>
 <!-- Desktop SideNavBar (hidden md:flex) -->
-<nav class="hidden md:flex flex-col h-full overflow-y-auto w-[200px] flex-shrink-0 bg-surface border-r border-ink z-40 relative">
-<div class="p-standard border-b border-ink bg-card-surface flex flex-col items-start gap-base sticky top-0 z-10">
-<div class="flex items-center gap-tight mb-2">
-<span class="material-symbols-outlined text-ink" data-weight="fill">token</span>
-<span class="font-headline-sm text-headline-sm font-black text-ink uppercase tracking-tighter">AI Ops Console</span>
+<nav class="bg-surface dark:bg-surface-dim w-[200px] h-screen flex-shrink-0 border-r border-ink dark:border-outline-variant flex flex-col h-full overflow-y-auto">
+<!-- Brand Header -->
+<div class="h-16 flex items-center px-standard border-b border-ink">
+<span class="font-headline-sm text-headline-sm font-black text-ink dark:text-on-surface uppercase tracking-tighter">AI Ops Console</span>
 </div>
-<div class="font-data-mono text-data-mono text-on-surface-variant">Internal Admin</div>
-</div>
-<div class="flex-1 py-tight flex flex-col gap-base mt-2">
-<!-- 到期队列 -->
-<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant hover:bg-surface-container transition-colors duration-150 group" href="#">
-<span class="material-symbols-outlined group-hover:text-trial-accent transition-colors">schedule</span>
-<span class="font-label-caps text-label-caps uppercase tracking-wider mt-1">到期队列</span>
+<!-- Navigation Tabs -->
+<div class="flex flex-col flex-1 py-tight">
+<!-- Active Tab -->
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span class="font-data-mono text-data-mono">到期队列</span>
 </a>
-<!-- 店铺 (Active) -->
-<a class="flex items-center gap-tight px-standard py-tight bg-secondary-container text-on-secondary-container font-bold border-y border-ink relative group" href="#">
-<div class="absolute left-0 top-0 bottom-0 w-1 bg-ink"></div>
-<span class="material-symbols-outlined" data-weight="fill">storefront</span>
-<span class="font-label-caps text-label-caps uppercase tracking-wider mt-1">店铺</span>
+<!-- Inactive Tabs -->
+<a class="bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary font-bold border-y border-ink dark:border-outline-variant flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">storefront</span>
+<span class="font-data-mono text-data-mono">店铺</span>
 </a>
-<!-- 账号 -->
-<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant hover:bg-surface-container transition-colors duration-150 group" href="#">
-<span class="material-symbols-outlined group-hover:text-trial-accent transition-colors">person</span>
-<span class="font-label-caps text-label-caps uppercase tracking-wider mt-1">账号</span>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span class="font-data-mono text-data-mono">账号</span>
 </a>
-<!-- 审计日志 -->
-<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant hover:bg-surface-container transition-colors duration-150 group" href="#">
-<span class="material-symbols-outlined group-hover:text-trial-accent transition-colors">security</span>
-<span class="font-label-caps text-label-caps uppercase tracking-wider mt-1">审计日志</span>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">security</span>
+<span class="font-data-mono text-data-mono">审计日志</span>
 </a>
-<!-- 套餐配置 -->
-<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant hover:bg-surface-container transition-colors duration-150 group" href="#">
-<span class="material-symbols-outlined group-hover:text-trial-accent transition-colors">inventory_2</span>
-<span class="font-label-caps text-label-caps uppercase tracking-wider mt-1">套餐配置</span>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+<span class="font-data-mono text-data-mono">套餐配置</span>
 </a>
 </div>
-<!-- User Profile Anchor -->
-<div class="mt-auto border-t border-ink p-standard bg-card-surface">
-<div class="flex items-center gap-tight">
-<div class="w-8 h-8 bg-surface-variant border border-ink overflow-hidden flex-shrink-0">
-<img alt="User Profile" class="w-full h-full object-cover" data-alt="A stark, minimalist profile photo of an administrator, rendered in high contrast black and white with a stark lighting setup. The image fits perfectly into a raw, neo-brutalist data dashboard aesthetic, looking highly professional and structural." src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='96' height='96' fill='%23d6dbd7'/%3E%3C/svg%3E"/>
-</div>
-<div class="overflow-hidden">
-<div class="font-data-mono text-[10px] text-ink truncate font-bold">admin@drsell</div>
-<div class="font-data-mono text-[9px] text-on-surface-variant truncate">superadmin</div>
-</div>
-</div>
+<div class="border-t border-ink px-standard py-3 flex flex-col gap-1">
+<span class="font-data-mono text-[10px] text-on-surface-variant truncate">admin@drsell.szchada.top</span>
+<button class="font-label-caps text-label-caps text-on-surface-variant uppercase self-start">退出登录</button>
 </div>
 </nav>
 <!-- Main Content Canvas -->
@@ -281,23 +267,24 @@
 <div class="flex flex-col gap-1">
 <div class="flex justify-between font-data-mono text-[11px]">
 <span class="uppercase">AI 解决</span>
-<span>1,206 / 1,000</span>
+<span class="text-error font-bold">1,206 / 1,000</span>
 </div>
-<div class="h-2 w-full bg-surface border border-ink overflow-hidden">
-<div class="h-full bg-ink w-[85%]"></div>
+<div class="h-2 w-full bg-error-container border border-error overflow-hidden">
+<div class="h-full bg-error w-full"></div>
 </div>
 </div>
 <!-- Meter 3: Bandwidth -->
 <div class="flex flex-col gap-1">
 <div class="flex justify-between font-data-mono text-[11px]">
 <span class="uppercase">坐席</span>
-<span class="text-error font-bold">3 / 5</span>
+<span>3 / 5</span>
 </div>
-<div class="h-2 w-full bg-error-container border border-error overflow-hidden">
-<div class="h-full bg-error w-full"></div>
+<div class="h-2 w-full bg-surface border border-ink overflow-hidden">
+<div class="h-full bg-ink w-[60%]"></div>
 </div>
 </div>
 </div>
+<p class="font-data-mono text-[11px] text-on-surface-variant m-0">超出 206 次 AI 解决，按 $0.90 计约 $185.40，欠费解决前不出账。</p>
 </div>
 <!-- 可用期 (Availability) -->
 <div class="bg-card-surface p-5 flex flex-col gap-4 lg:col-span-1 h-full">

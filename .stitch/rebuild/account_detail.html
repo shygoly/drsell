@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html class="dark" lang="en"><head>
+<html class="" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Account Details - mia@nordiccycles.se</title>
@@ -17,20 +17,20 @@
                         "surface-dim": "#d6dbd7",
                         "surface": "#f6fbf6",
                         "on-tertiary-container": "#bf7422",
-                        "on-tertiary": "#ffffff",
+                        "on-tertiary": "#fafcfa",
                         "tertiary-fixed-dim": "#ffb875",
                         "on-primary-fixed": "#111e1b",
                         "frozen-accent": "#a66009",
                         "on-secondary-fixed-variant": "#42359f",
-                        "on-primary": "#ffffff",
-                        "error": "#ba1a1a",
+                        "on-primary": "#fafcfa",
+                        "error": "#8e3b2f",
                         "outline": "#737876",
                         "on-surface-variant": "#424846",
                         "tertiary": "#0b0300",
                         "tertiary-container": "#311800",
                         "tertiary-fixed": "#ffdcc0",
                         "surface-tint": "#53615d",
-                        "on-error": "#ffffff",
+                        "on-error": "#fafcfa",
                         "on-tertiary-fixed": "#2d1600",
                         "surface-container-high": "#e4e9e5",
                         "on-tertiary-fixed-variant": "#6b3b00",
@@ -40,7 +40,7 @@
                         "surface-container-low": "#f0f5f1",
                         "background": "#f6fbf6",
                         "card-surface": "#fafcfa",
-                        "surface-container-lowest": "#ffffff",
+                        "surface-container-lowest": "#fafcfa",
                         "surface-variant": "#dfe4e0",
                         "primary-container": "#14211e",
                         "primary-fixed": "#d7e6e1",
@@ -48,18 +48,18 @@
                         "secondary": "#5a4fb8",
                         "page-bg": "#e6ebe7",
                         "secondary-fixed-dim": "#c6bfff",
-                        "on-secondary": "#ffffff",
+                        "on-secondary": "#fafcfa",
                         "surface-bright": "#f6fbf6",
                         "secondary-fixed": "#e4dfff",
                         "on-secondary-fixed": "#160066",
-                        "error-container": "#ffdad6",
+                        "error-container": "#f6e2de",
                         "on-background": "#171d1b",
                         "trial-accent": "#4b3fa8",
                         "surface-container-highest": "#dfe4e0",
                         "on-surface": "#171d1b",
                         "primary-fixed-dim": "#bbcac5",
                         "on-primary-container": "#7b8985",
-                        "on-error-container": "#93000a",
+                        "on-error-container": "#8e3b2f",
                         "primary": "#000705",
                         "inverse-primary": "#bbcac5",
                         "ink": "#14211e",
@@ -113,42 +113,39 @@
 </head>
 <body class="flex h-screen overflow-hidden antialiased">
 <!-- SideNavBar -->
-<nav class="hidden md:flex flex-col bg-surface dark:bg-surface-dim border-r border-ink dark:border-outline-variant w-[200px] h-screen flex-shrink-0">
-<div class="p-standard border-b border-ink dark:border-outline-variant flex items-center gap-tight">
-<div class="w-8 h-8 rounded-full bg-ink flex items-center justify-center flex-shrink-0">
-<span class="material-symbols-outlined text-surface text-[20px]">admin_panel_settings</span>
+<nav class="bg-surface dark:bg-surface-dim w-[200px] h-screen flex-shrink-0 border-r border-ink dark:border-outline-variant flex flex-col h-full overflow-y-auto">
+<!-- Brand Header -->
+<div class="h-16 flex items-center px-standard border-b border-ink">
+<span class="font-headline-sm text-headline-sm font-black text-ink dark:text-on-surface uppercase tracking-tighter">AI Ops Console</span>
 </div>
-<div class="overflow-hidden">
-<h1 class="font-headline-sm text-headline-sm font-black text-ink dark:text-on-surface uppercase tracking-tighter truncate" title="AI Ops Console">AI Ops Console</h1>
-<p class="font-label-caps text-label-caps text-on-surface-variant truncate">Internal Admin</p>
+<!-- Navigation Tabs -->
+<div class="flex flex-col flex-1 py-tight">
+<!-- Active Tab -->
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span class="font-data-mono text-data-mono">到期队列</span>
+</a>
+<!-- Inactive Tabs -->
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">storefront</span>
+<span class="font-data-mono text-data-mono">店铺</span>
+</a>
+<a class="bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary font-bold border-y border-ink dark:border-outline-variant flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span class="font-data-mono text-data-mono">账号</span>
+</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">security</span>
+<span class="font-data-mono text-data-mono">审计日志</span>
+</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+<span class="font-data-mono text-data-mono">套餐配置</span>
+</a>
 </div>
-</div>
-<div class="flex flex-col h-full overflow-y-auto py-tight font-body-md text-body-md Martian Mono: font-data-mono text-data-mono text-ink dark:text-on-surface">
-<!-- 到期队列 -->
-<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 active:translate-x-1 transition-all" href="#">
-<span class="material-symbols-outlined text-[20px]">schedule</span>
-<span class="truncate">到期队列</span>
-</a>
-<!-- 店铺 -->
-<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 active:translate-x-1 transition-all" href="#">
-<span class="material-symbols-outlined text-[20px]">storefront</span>
-<span class="truncate">店铺</span>
-</a>
-<!-- 账号 (ACTIVE) -->
-<a class="flex items-center gap-tight px-standard py-tight bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary font-bold border-y border-ink dark:border-outline-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 active:translate-x-1 transition-all" href="#">
-<span class="material-symbols-outlined text-[20px]">person</span>
-<span class="truncate">账号</span>
-</a>
-<!-- 审计日志 -->
-<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 active:translate-x-1 transition-all" href="#">
-<span class="material-symbols-outlined text-[20px]">security</span>
-<span class="truncate">审计日志</span>
-</a>
-<!-- 套餐配置 -->
-<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 active:translate-x-1 transition-all" href="#">
-<span class="material-symbols-outlined text-[20px]">inventory_2</span>
-<span class="truncate">套餐配置</span>
-</a>
+<div class="border-t border-ink px-standard py-3 flex flex-col gap-1">
+<span class="font-data-mono text-[10px] text-on-surface-variant truncate">admin@drsell.szchada.top</span>
+<button class="font-label-caps text-label-caps text-on-surface-variant uppercase self-start">退出登录</button>
 </div>
 </nav>
 <!-- Main Canvas -->
