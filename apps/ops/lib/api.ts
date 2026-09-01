@@ -87,6 +87,7 @@ export type ShopDetail = {
   shopifyChargeId?: string | null;
   lastSuccessfulChargeAt?: string | null;
   periodStart?: string | null;
+  scopes?: string[];
 };
 
 export type AuditLogRow = {

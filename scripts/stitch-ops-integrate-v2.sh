@@ -29,12 +29,14 @@ for entry in "${PAGES[@]}"; do
   echo "measure $name"
   "$NODE_BIN" "$ENGINE/scripts/measure.js" --input "$src" \
     --out "$OUT/spec/${name}.spec.json" --viewport "$VIEWPORT"
-  echo "render baseline $name"
-  "$NODE_BIN" "$ENGINE/scripts/render.js" --input "$src" \
+  # rebuild/ 是可编辑副本 —— 目标图是**我们的设计**，不是 Stitch 原样输出。
+  # 已存在则不覆盖（保留已打入的刻意偏离）。
+  [[ -f "$OUT/rebuild/${name}.html" ]] || cp "$src" "$OUT/rebuild/${name}.html"
+  echo "render baseline $name (from rebuild)"
+  "$NODE_BIN" "$ENGINE/scripts/render.js" --input "$OUT/rebuild/${name}.html" \
     --out "$OUT/reports/${name}/baseline.png" --viewport "$VIEWPORT"
-  "$NODE_BIN" "$ENGINE/scripts/mask-text.js" --input "$src" \
+  "$NODE_BIN" "$ENGINE/scripts/mask-text.js" --input "$OUT/rebuild/${name}.html" \
     --out "$OUT/reports/${name}/textMask.png" --viewport "$VIEWPORT"
-  cp "$src" "$OUT/rebuild/${name}.html"
 done
 
 echo "阶段 A 完成 → $OUT"

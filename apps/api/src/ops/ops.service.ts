@@ -252,6 +252,8 @@ export class OpsService {
       lastSuccessfulChargeAt:
         sub?.status === 'ACTIVE' && sub.updatedAt ? sub.updatedAt.toISOString() : null,
       periodStart: periodStart?.toISOString() ?? null,
+      /** 稿子屏 08 的「授权范围」卡：Shop.scopes 是逗号分隔的 OAuth scope */
+      scopes: shop.scopes ? shop.scopes.split(',').map((x) => x.trim()).filter(Boolean) : [],
     };
   }
 

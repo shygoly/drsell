@@ -2,49 +2,32 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Hourglass, Mail, ReceiptText, Activity } from 'lucide-react';
+import {
+  Activity,
+  CheckCircle2,
+  CreditCard,
+  Mail,
+  ShieldCheck,
+  XCircle,
+} from 'lucide-react';
 import { AuthGate } from '@/app/components/auth-gate';
 import { OpsShell } from '@/app/components/shell';
 import { ShopActions } from '@/app/shops/[domain]/actions';
 import { formatAuditAction, opsFetch, type AuditLogPage, type ShopDetail } from '@/lib/api';
+import { extendFreeze } from '@/lib/shop-actions';
 
-const PANEL = 'bg-card-surface flex h-full flex-col gap-4 p-5';
-const PANEL_HEAD = 'border-outline-variant flex items-center gap-2 border-b pb-2';
-const PANEL_TITLE = 'font-label-caps text-label-caps m-0 font-bold uppercase tracking-widest';
-const KV = 'border-outline-variant/10 flex items-end justify-between border-b pb-1';
-const KV_KEY = 'font-data-mono text-on-surface-variant text-[11px] uppercase';
-const KV_VAL = 'font-data-mono text-[13px]';
+const CARD = 'bg-primary-container border-card-border rounded-xl border p-6';
+
+/** Shopify 安装需要的 scope，用于「授权范围」卡的缺失检测 */
+const REQUIRED_SCOPES = [
+  'read_products',
+  'write_orders',
+  'read_customers',
+  'write_inventory',
+];
 
 function fmt(d: string | null | undefined) {
   return d ? String(d).slice(0, 10) : '—';
-}
-
-/** 用量计。超额那条给 error 色 —— 只有需要处理的才拿到颜色。 */
-function Meter({ label, used, limit }: { label: string; used: number; limit: number }) {
-  const over = used > limit;
-  const pct = Math.min(Math.round((used / Math.max(limit, 1)) * 100), 100);
-  return (
-    <div className="flex flex-col gap-1">
-      <div className="font-data-mono flex justify-between text-[11px]">
-        <span className="uppercase">{label}</span>
-        <span className={over ? 'text-error font-bold' : undefined}>
-          {used.toLocaleString()} / {limit.toLocaleString()}
-        </span>
-      </div>
-      <div
-        className={
-          over
-            ? 'bg-error-container border-error h-2 w-full overflow-hidden border'
-            : 'bg-surface border-outline-variant h-2 w-full overflow-hidden border'
-        }
-      >
-        <div
-          className={over ? 'bg-error h-full w-full' : 'bg-primary h-full'}
-          style={over ? undefined : { width: `${pct}%` }}
-        />
-      </div>
-    </div>
-  );
 }
 
 export default function ShopDetailPage({ params }: { params: Promise<{ domain: string }> }) {
@@ -72,6 +55,11 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
   useEffect(reload, [reload]);
 
   const frozen = shop?.status?.toUpperCase() === 'FROZEN';
+  const aiUsed = shop?.aiResolved ?? 0;
+  const aiLimit = shop?.aiResolvedLimit ?? 0;
+  const aiOver = aiUsed > aiLimit;
+  const aiPct = Math.min(Math.round((aiUsed / Math.max(aiLimit, 1)) * 100), 100);
+  const overageUsd = Math.max(aiUsed - aiLimit, 0) * 0.9;
   const terminal = ['DECLINED', 'EXPIRED', 'CANCELLED'].includes(
     (shop?.status ?? '').toUpperCase(),
   );
@@ -102,7 +90,7 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
           {error ? <p className="text-error text-sm">{error}</p> : null}
 
           {/* Header */}
-          <div className="border-outline-variant flex flex-col items-start justify-between gap-4 border-b pb-4 md:flex-row md:items-end">
+          <div className="flex flex-col items-start justify-between gap-4 pb-4 md:flex-row md:items-end">
             <div>
               <div className="mb-1 flex items-center gap-3">
                 <h1 className="font-headline-lg text-headline-lg text-on-surface m-0 font-bold tracking-tight">
@@ -140,98 +128,143 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
             ) : null}
           </div>
 
-          {/* 三栏面板：格线靠父级 bg-primary 透出 */}
-          <div className="border-outline-variant bg-primary grid shrink-0 grid-cols-1 gap-0 border md:grid-cols-2 lg:grid-cols-3">
-            {/* 计费 */}
-            <div className={`${PANEL} border-outline-variant border-b md:border-b-0 md:border-r`}>
-              <div className={PANEL_HEAD}>
-                <ReceiptText className="h-6 w-6" aria-hidden="true" />
-                <h2 className={PANEL_TITLE}>计费</h2>
+          {/* 稿子屏 08 的 Bento：订阅状态 / AI 解决用量 / 授权范围 */}
+          <div className="grid grid-cols-12 gap-3">
+            {/* 订阅状态 */}
+            <div className={`col-span-12 lg:col-span-4 ${CARD}`}>
+              <h3 className="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+                <CreditCard className="h-4 w-4" aria-hidden="true" />
+                订阅状态
+              </h3>
+              <div className="mb-6 flex items-center justify-between">
+                <span className="font-headline-md text-headline-md text-on-surface font-bold">
+                  {shop?.planName ?? shop?.planCode ?? '—'}
+                </span>
+                <span
+                  className={
+                    frozen
+                      ? 'bg-error-container/20 text-error border-error/30 font-data-mono text-data-mono flex items-center gap-1 rounded border px-2 py-1'
+                      : 'bg-surface-container text-on-surface-variant border-outline-variant font-data-mono text-data-mono flex items-center gap-1 rounded border px-2 py-1'
+                  }
+                >
+                  <span className={frozen ? 'bg-error h-1.5 w-1.5 rounded-full' : 'bg-on-surface-variant h-1.5 w-1.5 rounded-full'} />
+                  {(shop?.status ?? '—').toUpperCase()}
+                </span>
               </div>
-              <div className="flex flex-1 flex-col justify-center gap-3">
-                <div className={KV}>
-                  <span className={KV_KEY}>套餐</span>
-                  <span className={`${KV_VAL} font-bold`}>
-                    {shop?.planName ?? shop?.planCode ?? '—'}
-                    {shop?.planPriceUsd ? ` · $${shop.planPriceUsd}/月` : ''}
-                  </span>
-                </div>
-                <div className={KV}>
-                  <span className={KV_KEY}>安装于</span>
-                  <span className={KV_VAL}>{fmt(shop?.installedAt)}</span>
-                </div>
-                <div className={KV}>
-                  <span className={KV_KEY}>下次扣费</span>
-                  <span className={`${KV_VAL} ${frozen ? 'text-error font-bold' : ''}`}>
-                    {frozen ? '欠费' : fmt(shop?.currentPeriodEnd)}
-                  </span>
-                </div>
-                <div className="flex items-end justify-between">
-                  <span className={KV_KEY}>上次成功扣费</span>
-                  <span className={KV_VAL}>{fmt(shop?.lastSuccessfulChargeAt)}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 本周期用量 */}
-            <div className={`${PANEL} border-outline-variant border-b lg:border-b-0 lg:border-r`}>
-              <div className={PANEL_HEAD}>
-                <Activity className="h-6 w-6" aria-hidden="true" />
-                <h2 className={PANEL_TITLE}>本周期用量</h2>
-              </div>
-              <div className="flex flex-1 flex-col justify-center gap-4">
-                <Meter label="对话" used={shop?.chatCount ?? 0} limit={shop?.chatLimit ?? 0} />
-                <Meter
-                  label="AI 解决"
-                  used={shop?.aiResolved ?? 0}
-                  limit={shop?.aiResolvedLimit ?? 0}
-                />
-                <Meter
-                  label="坐席"
-                  used={shop?.agentSeats ?? 0}
-                  limit={shop?.agentSeatsLimit ?? 0}
-                />
-                {shop?.overQuotaNote ? (
-                  <p className="font-data-mono text-on-surface-variant m-0 text-[11px]">
-                    {shop.overQuotaNote}
+              {frozen ? (
+                <div className="bg-surface-container border-error/20 mb-4 rounded border p-4">
+                  <p className="font-body-sm text-body-sm text-error m-0 mb-1 font-semibold">
+                    需要处理
                   </p>
-                ) : null}
+                  <p className="font-body-sm text-body-sm text-on-surface-variant m-0">
+                    该店处在 30 天解冻窗口内。逾期后订阅终止，只能重新走一次。
+                  </p>
+                </div>
+              ) : null}
+              <div className="border-card-border flex items-center justify-between border-t pt-2">
+                <div>
+                  <p className="font-label-caps text-label-caps text-on-surface-variant m-0 mb-1">
+                    剩余天数
+                  </p>
+                  <p
+                    className={`font-display-sm text-display-sm m-0 font-bold ${frozen ? 'text-error' : 'text-on-surface'}`}
+                  >
+                    {daysLeft !== null ? String(daysLeft).padStart(2, '0') : '—'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const v = window.prompt('延长解冻期多少天？（1–30）', '7');
+                    if (v === null) return;
+                    const days = Number(v);
+                    if (!Number.isInteger(days) || days < 1 || days > 30) return;
+                    void extendFreeze(domain, days).then(reload);
+                  }}
+                  title={`${frozen ? '解冻截止' : '下次扣费'} ${fmt(windowEnd)}`}
+                  className="text-primary hover:text-primary-fixed border-primary/30 bg-primary-container/20 font-label-caps rounded border px-3 py-1 text-sm transition-colors"
+                >
+                  延长解冻期
+                </button>
               </div>
             </div>
 
-            {/* 可用期 */}
-            <div className={PANEL}>
-              <div className={PANEL_HEAD}>
-                <Hourglass className="h-6 w-6" aria-hidden="true" />
-                <h2 className={PANEL_TITLE}>可用期</h2>
+            {/* AI 解决用量 */}
+            <div className={`col-span-12 lg:col-span-4 ${CARD}`}>
+              <h3 className="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+                <Activity className="h-4 w-4" aria-hidden="true" />
+                AI 解决用量
+              </h3>
+              <div className="mb-2 flex items-end justify-between">
+                <span className="font-display-sm text-display-sm text-on-surface font-bold">
+                  {(shop?.aiResolved ?? 0).toLocaleString()}
+                </span>
+                <span className="text-on-surface-variant font-data-mono text-[12px]">
+                  / {(shop?.aiResolvedLimit ?? 0).toLocaleString()} Limit
+                </span>
               </div>
-              <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`font-data-mono mb-1 text-[10px] uppercase tracking-widest ${frozen ? 'text-frozen-accent' : 'text-on-surface-variant'}`}
-                  >
-                    剩余
-                  </div>
-                  <div className="font-headline-lg text-on-surface text-[52px] font-black leading-none tracking-tighter">
-                    {daysLeft ?? '—'} 天
-                  </div>
-                </div>
-                <div className="flex w-full flex-col gap-1">
-                  <div className="font-data-mono text-on-surface-variant flex justify-between text-[10px]">
-                    <span>{frozen ? '冻结中' : '当前周期'}</span>
-                    <span>{frozen ? '订阅终止' : '下次扣费'}</span>
-                  </div>
-                  <div className="bg-surface border-outline-variant flex h-3 w-full border">
-                    <div
-                      className={`border-outline-variant h-full border-r ${frozen ? 'bg-frozen-accent' : 'bg-on-surface-variant'}`}
-                      style={{ width: `${spent}%` }}
-                    />
-                    <div className="relative h-full flex-1 overflow-hidden bg-transparent">
-                      <div className="runway-hatch-frozen absolute inset-0" />
-                    </div>
-                  </div>
-                </div>
+              <div className="bg-surface-container border-outline-variant mb-1 h-2 w-full overflow-hidden rounded border">
+                <div
+                  className={aiOver ? 'bg-error h-full w-full' : 'bg-primary h-full'}
+                  style={aiOver ? undefined : { width: `${aiPct}%` }}
+                />
               </div>
+              <div className="text-on-surface-variant font-data-mono mb-4 text-right text-[11px]">
+                {aiPct}% Utilized
+              </div>
+              <dl className="m-0 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <dt className="text-on-surface-variant font-body-sm text-body-sm">本周期</dt>
+                  <dd className="font-data-mono text-on-surface m-0 text-[12px]">
+                    {fmt(shop?.periodStart)} – {fmt(shop?.currentPeriodEnd)}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-on-surface-variant font-body-sm text-body-sm">超额预估</dt>
+                  <dd className={`font-data-mono m-0 text-[12px] ${aiOver ? 'text-error' : 'text-on-surface'}`}>
+                    {aiOver ? `+$${overageUsd.toFixed(2)}` : '$0.00'}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            {/* 授权范围 —— 数据源 Shop.scopes，本轮新暴露 */}
+            <div className={`col-span-12 lg:col-span-4 ${CARD}`}>
+              <h3 className="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                授权范围
+              </h3>
+              <ul className="m-0 flex list-none flex-col gap-2 p-0">
+                {Array.from(new Set([...REQUIRED_SCOPES, ...(shop?.scopes ?? [])])).map((sc) => {
+                  const granted = shop?.scopes?.includes(sc) ?? false;
+                  return (
+                    <li
+                      key={sc}
+                      className={
+                        granted
+                          ? 'bg-surface-container-low border-outline-variant flex items-center justify-between rounded border p-2'
+                          : 'bg-error-container/10 border-error/50 flex items-center justify-between rounded border p-2'
+                      }
+                    >
+                      <span
+                        className={`font-data-mono text-data-mono ${granted ? 'text-on-surface' : 'text-error'}`}
+                      >
+                        {sc}
+                      </span>
+                      {granted ? (
+                        <CheckCircle2 className="text-primary h-4 w-4" aria-hidden="true" />
+                      ) : (
+                        <XCircle className="text-error h-4 w-4" aria-hidden="true" />
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+              {!shop?.scopes?.length ? (
+                <p className="text-on-surface-variant m-0 mt-3 text-[11px]">
+                  尚未记录授权范围（安装时未回写 scopes）
+                </p>
+              ) : null}
             </div>
           </div>
 

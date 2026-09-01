@@ -80,6 +80,7 @@
 
   --color-stock: var(--stock);
   --color-sheet: var(--sheet);
+  --color-card-border: var(--card-border);
   --color-sheet-2: var(--sheet-2);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);

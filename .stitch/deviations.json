@@ -293,5 +293,23 @@
   ],
   "未做的事": "剩余 6.8–17.8% 需要逐元素对 spec.json 调间距与行高，属于像素精修，本轮未做。",
   "截图伪影已排除": "Chromium 截高于视口的图时按块重绘，position:sticky 元素会在页尾重复出现（DOM 只有一份）。截图脚本已在截前把 sticky 改 relative。橙色像素从 244200 降到 225505，但遮罩后判据不变（6.86%）—— 说明剩余差异不在伪影，是真实布局尺度差。"
+ },
+ "新源_逐屏偏离": {
+  "impersonation": [
+   {
+    "偏离": "Total Revenue / Active Orders / Customers 三张卡 → 订阅状态 / 套餐 / 归属。前者是商户业务数据，/ops/* 没有对应接口；按「宁可少一格，不放假数」换成真有数据源的字段。"
+   },
+   {
+    "偏离": "Recent Orders（商户订单表）→ 最近店铺事件（运营审计）。同上，无订单数据源。"
+   }
+  ],
+  "shop_detail": [
+   {
+    "偏离": "目标稿的 mock 数据（Acme Corp Global / Pro Tier / 850 / Oct 1-Oct 31 / +$45.00 / WEBHOOK_ORDER_CREATE 等）换成 fixture 的实际值。目标图是我们的设计，样例数据该用我们的词汇。这一步在旧源上把 expiry_queue 从 6.86% 压到 0.10%。"
+   },
+   {
+    "偏离": "Store ID / Manual Resync / Manage Access → 归属行 / 组内计费店 / 收全额。我们没有对外店铺 ID，也没有 Manage Access 这个动作。"
+   }
+  ]
  }
 }

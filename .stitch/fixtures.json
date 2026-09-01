@@ -104,7 +104,12 @@
   "planName": "Growth",
   "planPriceUsd": 79,
   "shopifyChargeId": "gid://shopify/AppSubscription/28451903",
-  "lastSuccessfulChargeAt": "2026-07-28T00:00:00.000Z"
+  "lastSuccessfulChargeAt": "2026-07-28T00:00:00.000Z",
+  "scopes": [
+   "read_products",
+   "write_orders",
+   "write_inventory"
+  ]
  },
  "/ops/accounts/usr_8849a01f": {
   "id": "usr_8849a01f",
