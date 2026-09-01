@@ -8,6 +8,11 @@
 :root {
   --stock: #131315;
   --sheet: #0f172a;
+  --st-on-primary: #283044;
+  --st-amber-400: #fbbf24;
+  --st-amber-500: #f59e0b;
+  --st-amber-800: #92400e;
+  --st-amber-900: #78350f;
   --card-border: #1e293b;   /* 稿子屏 08 的卡片描边 */
   --sheet-2: #1b1b1d;
   --ink: #e4e2e4;
@@ -47,15 +52,20 @@
   --tint-frozen: rgba(245, 158, 11, .12);
   --tint-lost: rgba(255, 180, 171, .12);
   --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 8px 24px -16px rgba(0, 0, 0, .85);
-  --f-display: "Bricolage Grotesque", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --f-body: "Instrument Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --f-data: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --f-display: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --f-body: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --f-data: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --stock: #131315;
     --sheet: #0f172a;
+    --st-on-primary: #283044;
+    --st-amber-400: #fbbf24;
+    --st-amber-500: #f59e0b;
+    --st-amber-800: #92400e;
+    --st-amber-900: #78350f;
     --card-border: #1e293b;   /* 稿子屏 08 的卡片描边 */
     --sheet-2: #1b1b1d;
     --ink: #e4e2e4;
@@ -95,15 +105,20 @@
     --tint-frozen: rgba(245, 158, 11, .12);
     --tint-lost: rgba(255, 180, 171, .12);
     --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 8px 24px -16px rgba(0, 0, 0, .85);
-    --f-display: "Bricolage Grotesque", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    --f-body: "Instrument Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    --f-data: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --f-display: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --f-body: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --f-data: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
   }
 }
 
 :root[data-theme="dark"] {
     --stock: #131315;
     --sheet: #0f172a;
+    --st-on-primary: #283044;
+    --st-amber-400: #fbbf24;
+    --st-amber-500: #f59e0b;
+    --st-amber-800: #92400e;
+    --st-amber-900: #78350f;
     --card-border: #1e293b;   /* 稿子屏 08 的卡片描边 */
     --sheet-2: #1b1b1d;
     --ink: #e4e2e4;
@@ -143,7 +158,7 @@
     --tint-frozen: rgba(245, 158, 11, .12);
     --tint-lost: rgba(255, 180, 171, .12);
     --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 8px 24px -16px rgba(0, 0, 0, .85);
-    --f-display: "Bricolage Grotesque", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    --f-body: "Instrument Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    --f-data: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --f-display: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --f-body: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --f-data: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
