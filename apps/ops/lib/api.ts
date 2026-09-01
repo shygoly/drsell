@@ -2,18 +2,8 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:3001/api';
 export const MERCHANT_APP_URL =
   process.env.NEXT_PUBLIC_MERCHANT_URL ?? 'https://drsell.szchada.top';
 
-export function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('ops_token');
-}
-
-export function setToken(token: string) {
-  localStorage.setItem('ops_token', token);
-}
-
-export function clearToken() {
-  localStorage.removeItem('ops_token');
-}
+export { clearToken, getToken, setToken } from '@/lib/auth';
+import { clearToken, getToken } from '@/lib/auth';
 
 export async function opsFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = getToken();
@@ -149,9 +139,11 @@ export function formatAuditAction(action: string) {
 }
 
 export function openImpersonationSession(result: ImpersonateResult) {
-  const url = new URL(MERCHANT_APP_URL);
-  url.pathname = '/app';
+  // Stitch 屏 07：先进入运营台内的 Active Support Session 视图，
+  // 由该视图再打开商户端外部窗口。内部视图保留会话上下文与审计轨迹。
+  const url = new URL('/impersonation', window.location.origin);
   url.searchParams.set('shop', result.shopDomain);
-  url.searchParams.set('impersonation_token', result.accessToken);
-  window.open(url.toString(), '_blank', 'noopener,noreferrer');
+  url.searchParams.set('token', result.accessToken);
+  url.searchParams.set('expiresIn', String(result.expiresIn));
+  window.location.href = url.toString();
 }
