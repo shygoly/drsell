@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0.0",
+  "rating": "B",
+  "environment": {
+    "os": "unknown",
+    "chromium": "unknown",
+    "chromiumRevision": "unknown",
+    "deviceScaleFactor": 1,
+    "viewport": {
+      "width": 1440,
+      "height": 2400
+    },
+    "fonts": [],
+    "fontLoadStatus": "unknown",
+    "pixelmatch": {
+      "threshold": 0.02,
+      "includeAA": false,
+      "alpha": 0.1
+    }
+  },
+  "metrics": {
+    "axis1": {
+      "hardPass": true,
+      "checks": []
+    },
+    "axis2": {
+      "fullPageDiff": 25.28,
+      "maskedDiff": 21.59,
+      "structuralDiff": 21.07,
+      "layoutDiff": 21.59,
+      "hasAssetMask": false,
+      "assetMaskPixels": 0,
+      "assetChanged": 0,
+      "keyElements": []
+    }
+  },
+  "diffImage": {
+    "path": ".stitch/project-11226504772808429506/work/reports/impersonation/project-diff.png",
+    "red": 0,
+    "orange": 728149,
+    "yellow": 145598
+  },
+  "elements": [],
+  "topFixes": [],
+  "pairing": {
+    "missing": [],
+    "extra": [],
+    "fuzzy": []
+  },
+  "iteration": 1,
+  "converged": false
+}
