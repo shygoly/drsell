@@ -46,3 +46,18 @@ test-coze-*.js
 
 # 沙箱内使用的本地 pnpm store（避免写全局 store）
 .pnpm-store
+
+# stitch-to-shadcn-pro 产物：baseline.png 与 spec.json 是判定基准，必须入库；
+# 其余每次 verify 都会重生成，不入库（合计 ~10MB）。
+.stitch/reports/*/rebuilt.png
+.stitch/reports/*/diff.png
+.stitch/reports/*/textMask.png
+.stitch/reports/*/boxes.json
+.stitch/reports/*/axis1.json
+.stitch/reports/*/axis2.json
+.stitch/reports/*/diff.json
+.stitch/reports/*/result.json
+.stitch/reports/*/rebuilt.spec.json
+.stitch/reports/*/pairing.json
+.stitch/reports/*/fingerprint.json
+.stitch/reports/*/report.html
