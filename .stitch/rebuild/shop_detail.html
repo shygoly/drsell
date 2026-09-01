@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Drsell Ops Console - Shop Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&amp;family=Martian+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#bbcac5",
+                        "on-background": "#171d1b",
+                        "ink": "#14211e",
+                        "on-primary-fixed-variant": "#3c4a46",
+                        "inverse-on-surface": "#edf2ee",
+                        "primary": "#000705",
+                        "outline": "#737876",
+                        "surface-dim": "#d6dbd7",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "surface-container-high": "#e4e9e5",
+                        "on-surface-variant": "#424846",
+                        "on-secondary-container": "#30208d",
+                        "error-container": "#ffdad6",
+                        "outline-variant": "#c2c8c5",
+                        "secondary": "#5a4fb8",
+                        "tertiary-fixed-dim": "#ffb875",
+                        "surface": "#f6fbf6",
+                        "on-surface": "#171d1b",
+                        "page-bg": "#e6ebe7",
+                        "secondary-fixed-dim": "#c6bfff",
+                        "primary-container": "#14211e",
+                        "secondary-fixed": "#e4dfff",
+                        "on-secondary": "#ffffff",
+                        "card-surface": "#fafcfa",
+                        "on-tertiary-fixed": "#2d1600",
+                        "on-primary-container": "#7b8985",
+                        "on-primary-fixed": "#111e1b",
+                        "background": "#f6fbf6",
+                        "surface-container-highest": "#dfe4e0",
+                        "secondary-container": "#9b90fe",
+                        "inverse-surface": "#2c322f",
+                        "surface-variant": "#dfe4e0",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#0b0300",
+                        "surface-container-low": "#f0f5f1",
+                        "tertiary-container": "#311800",
+                        "trial-accent": "#4b3fa8",
+                        "frozen-accent": "#a66009",
+                        "primary-fixed-dim": "#bbcac5",
+                        "on-tertiary-container": "#bf7422",
+                        "primary-fixed": "#d7e6e1",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdcc0",
+                        "on-secondary-fixed-variant": "#42359f",
+                        "surface-container": "#eaefeb",
+                        "surface-bright": "#f6fbf6",
+                        "surface-tint": "#53615d",
+                        "on-secondary-fixed": "#160066"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "tight": "8px",
+                        "gutter": "1px",
+                        "standard": "16px",
+                        "container-max": "1280px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Bricolage Grotesque"],
+                        "data-mono": ["Martian Mono"],
+                        "headline-sm": ["Bricolage Grotesque"],
+                        "headline-lg": ["Bricolage Grotesque"],
+                        "body-lg": ["Bricolage Grotesque"],
+                        "label-caps": ["Martian Mono"],
+                        "headline-md": ["Bricolage Grotesque"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "data-mono": ["13px", { "lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "headline-sm": ["18px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-lg": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label-caps": ["11px", { "lineHeight": "1", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "1.2", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom Scrollbar for Ledger Aesthetic */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e6ebe7;
+            border-left: 1px solid #14211e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #14211e;
+            border: 1px solid #e6ebe7;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b3fa8;
+        }
+    </style>
+</head>
+<body class="bg-page-bg text-ink font-body-md min-h-screen flex flex-col md:flex-row overflow-hidden antialiased selection:bg-trial-accent selection:text-on-secondary">
+<!-- Mobile Top Navigation (md:hidden) -->
+<header class="md:hidden bg-card-surface border-b border-ink flex justify-between items-center h-16 px-standard w-full flex-shrink-0 z-50">
+<div class="flex items-center gap-tight">
+<span class="material-symbols-outlined text-ink text-2xl">admin_panel_settings</span>
+<span class="font-headline-md text-headline-md font-bold text-ink">AI Ops Console</span>
+</div>
+<div class="flex items-center gap-standard">
+<button class="hover:text-trial-accent transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:text-trial-accent transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 bg-surface-variant border border-ink rounded-none overflow-hidden">
+<img alt="Admin Avatar" class="w-full h-full object-cover" data-alt="A close-up, high-contrast, minimalist avatar of an AI system administrator. The style is stark and technical, with deep blacks and stark whites, fitting a neo-brutalist financial ledger aesthetic. The image is cropped tightly and feels authoritative and crisp." src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='96' height='96' fill='%23d6dbd7'/%3E%3C/svg%3E"/>
+</div>
+</div>
+</header>
+<!-- Desktop SideNavBar (hidden md:flex) -->
+<nav class="hidden md:flex flex-col h-full overflow-y-auto w-[200px] flex-shrink-0 bg-surface border-r border-ink z-40 relative">
+<div class="p-standard border-b border-ink bg-card-surface flex flex-col items-start gap-base sticky top-0 z-10">
+<div class="flex items-center gap-tight mb-2">
+<span class="material-symbols-outlined text-ink" data-weight="fill">token</span>
+<span class="font-headline-sm text-headline-sm font-black text-ink uppercase tracking-tighter">AI Ops Console</span>
+</div>
+<div class="font-data-mono text-data-mono text-on-surface-variant">Internal Admin</div>
+</div>
+<div class="flex-1 py-tight flex flex-col gap-base mt-2">
+<!-- 到期队列 -->
+<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant hover:bg-surface-container transition-colors duration-150 group" href="#">
+<span class="material-symbols-outlined group-hover:text-trial-accent transition-colors">schedule</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider mt-1">到期队列</span>
+</a>
+<!-- 店铺 (Active) -->
+<a class="flex items-center gap-tight px-standard py-tight bg-secondary-container text-on-secondary-container font-bold border-y border-ink relative group" href="#">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-ink"></div>
+<span class="material-symbols-outlined" data-weight="fill">storefront</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider mt-1">店铺</span>
+</a>
+<!-- 账号 -->
+<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant hover:bg-surface-container transition-colors duration-150 group" href="#">
+<span class="material-symbols-outlined group-hover:text-trial-accent transition-colors">person</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider mt-1">账号</span>
+</a>
+<!-- 审计日志 -->
+<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant hover:bg-surface-container transition-colors duration-150 group" href="#">
+<span class="material-symbols-outlined group-hover:text-trial-accent transition-colors">security</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider mt-1">审计日志</span>
+</a>
+<!-- 套餐配置 -->
+<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant hover:bg-surface-container transition-colors duration-150 group" href="#">
+<span class="material-symbols-outlined group-hover:text-trial-accent transition-colors">inventory_2</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider mt-1">套餐配置</span>
+</a>
+</div>
+<!-- User Profile Anchor -->
+<div class="mt-auto border-t border-ink p-standard bg-card-surface">
+<div class="flex items-center gap-tight">
+<div class="w-8 h-8 bg-surface-variant border border-ink overflow-hidden flex-shrink-0">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A stark, minimalist profile photo of an administrator, rendered in high contrast black and white with a stark lighting setup. The image fits perfectly into a raw, neo-brutalist data dashboard aesthetic, looking highly professional and structural." src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='96' height='96' fill='%23d6dbd7'/%3E%3C/svg%3E"/>
+</div>
+<div class="overflow-hidden">
+<div class="font-data-mono text-[10px] text-ink truncate font-bold">SYS_ADMIN</div>
+<div class="font-data-mono text-[9px] text-on-surface-variant truncate">AUTH_LVL_9</div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col h-full overflow-y-auto relative">
+<!-- Desktop Top App Bar Supplement (Provides Search/Actions absent from side nav) -->
+<div class="hidden md:flex justify-end items-center h-16 px-standard bg-card-surface border-b border-ink sticky top-0 z-30 flex-shrink-0">
+<div class="flex items-center gap-standard">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-ink">search</span>
+<input class="pl-8 pr-3 py-1 bg-surface border border-ink font-data-mono text-[12px] focus:outline-none focus:ring-1 focus:ring-ink w-64 placeholder-on-surface-variant" placeholder="Search shops, logs..." type="text"/>
+</div>
+<button class="hover:text-trial-accent transition-colors flex items-center justify-center w-8 h-8 border border-transparent hover:border-ink">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:text-trial-accent transition-colors flex items-center justify-center w-8 h-8 border border-transparent hover:border-ink">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</div>
+<div class="flex-1 p-standard md:p-6 lg:p-8 flex flex-col gap-6 max-w-container-max mx-auto w-full">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-ink pb-4">
+<div>
+<div class="flex items-center gap-3 mb-1">
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-ink font-bold tracking-tight">nordic-cycles.myshopify.com</h1>
+<span class="inline-flex items-center px-2 py-0.5 bg-surface border border-frozen-accent text-frozen-accent font-label-caps text-label-caps">FROZEN</span>
+</div>
+<div class="font-data-mono text-data-mono text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+                        归属: mia@nordiccycles.se
+                    </div>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-data-mono text-[10px] text-on-surface-variant uppercase">Shop ID:</span>
+<span class="font-data-mono text-data-mono bg-surface border border-ink px-2 py-1">SHP-992-FX</span>
+</div>
+</div>
+<!-- Bento Grid Layout for Main Panels -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border border-ink bg-ink flex-shrink-0">
+<!-- 计费 (Billing) -->
+<div class="bg-card-surface p-5 flex flex-col gap-4 border-b md:border-b-0 md:border-r border-ink lg:col-span-1 h-full">
+<div class="flex items-center gap-2 border-b border-ink pb-2">
+<span class="material-symbols-outlined">receipt_long</span>
+<h2 class="font-label-caps text-label-caps uppercase tracking-widest font-bold">计费</h2>
+</div>
+<div class="flex-1 flex flex-col gap-3 justify-center">
+<div class="flex justify-between items-end border-b border-ink/10 pb-1">
+<span class="font-data-mono text-[11px] text-on-surface-variant uppercase">Plan Type</span>
+<span class="font-data-mono text-[13px] font-bold">PRO TIER</span>
+</div>
+<div class="flex justify-between items-end border-b border-ink/10 pb-1">
+<span class="font-data-mono text-[11px] text-on-surface-variant uppercase">Start Date</span>
+<span class="font-data-mono text-[13px]">2023-01-15</span>
+</div>
+<div class="flex justify-between items-end border-b border-ink/10 pb-1">
+<span class="font-data-mono text-[11px] text-on-surface-variant uppercase">Next Billing</span>
+<span class="font-data-mono text-[13px] text-error font-bold">OVERDUE</span>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-data-mono text-[11px] text-on-surface-variant uppercase">MRR</span>
+<span class="font-data-mono text-[13px]">$149.00</span>
+</div>
+</div>
+</div>
+<!-- 本周期用量 (Current Usage) -->
+<div class="bg-card-surface p-5 flex flex-col gap-4 border-b lg:border-b-0 lg:border-r border-ink lg:col-span-1 h-full">
+<div class="flex items-center gap-2 border-b border-ink pb-2">
+<span class="material-symbols-outlined">data_usage</span>
+<h2 class="font-label-caps text-label-caps uppercase tracking-widest font-bold">本周期用量</h2>
+</div>
+<div class="flex-1 flex flex-col gap-4 justify-center">
+<!-- Meter 1: API Calls -->
+<div class="flex flex-col gap-1">
+<div class="flex justify-between font-data-mono text-[11px]">
+<span class="uppercase">API Calls</span>
+<span>8,420 / 10,000</span>
+</div>
+<div class="h-2 w-full bg-surface border border-ink overflow-hidden">
+<div class="h-full bg-ink w-[84%]"></div>
+</div>
+</div>
+<!-- Meter 2: Storage -->
+<div class="flex flex-col gap-1">
+<div class="flex justify-between font-data-mono text-[11px]">
+<span class="uppercase">Storage (GB)</span>
+<span>42.5 / 50.0</span>
+</div>
+<div class="h-2 w-full bg-surface border border-ink overflow-hidden">
+<div class="h-full bg-ink w-[85%]"></div>
+</div>
+</div>
+<!-- Meter 3: Bandwidth -->
+<div class="flex flex-col gap-1">
+<div class="flex justify-between font-data-mono text-[11px]">
+<span class="uppercase">Bandwidth</span>
+<span class="text-error font-bold">LIMIT REACHED</span>
+</div>
+<div class="h-2 w-full bg-error-container border border-error overflow-hidden">
+<div class="h-full bg-error w-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- 可用期 (Availability) -->
+<div class="bg-card-surface p-5 flex flex-col gap-4 lg:col-span-1 h-full">
+<div class="flex items-center gap-2 border-b border-ink pb-2">
+<span class="material-symbols-outlined">hourglass_bottom</span>
+<h2 class="font-label-caps text-label-caps uppercase tracking-widest font-bold">可用期</h2>
+</div>
+<div class="flex-1 flex flex-col justify-center items-center text-center gap-4">
+<div class="flex flex-col items-center">
+<div class="font-data-mono text-[10px] uppercase tracking-widest text-frozen-accent mb-1">Time Remaining</div>
+<div class="text-[52px] font-black leading-none tracking-tighter text-ink" style="font-family: 'Bricolage Grotesque', sans-serif;">4 DAYS</div>
+</div>
+<div class="w-full flex flex-col gap-1">
+<div class="flex justify-between font-data-mono text-[10px] text-on-surface-variant">
+<span>Freezing...</span>
+<span>Termination</span>
+</div>
+<!-- Runway Bar -->
+<div class="h-3 w-full bg-surface border border-ink flex">
+<div class="h-full bg-frozen-accent w-[20%] border-r border-ink"></div>
+<div class="h-full bg-transparent flex-1 relative overflow-hidden">
+<!-- Striped background pattern for tension -->
+<div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 4px, #14211e 4px, #14211e 8px);"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Spacer to push footer down if content is short -->
+<div class="flex-1"></div>
+</div>
+<!-- Sticky Footer Action Bar -->
+<div class="mt-auto border-t border-ink bg-card-surface p-4 md:p-standard flex-shrink-0 sticky bottom-0 z-20">
+<div class="max-w-container-max mx-auto flex gap-0 border border-ink overflow-x-auto w-full snap-x">
+<!-- Action Button 1 -->
+<button class="flex-1 min-w-[120px] h-10 bg-card-surface hover:bg-surface-container border-r border-ink last:border-r-0 flex items-center justify-center gap-2 px-3 transition-colors snap-start whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">campaign</span>
+<span class="font-label-caps text-label-caps">发催缴提醒</span>
+</button>
+<!-- Action Button 2 -->
+<button class="flex-1 min-w-[120px] h-10 bg-card-surface hover:bg-surface-container border-r border-ink last:border-r-0 flex items-center justify-center gap-2 px-3 transition-colors snap-start whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">more_time</span>
+<span class="font-label-caps text-label-caps">延长解冻期</span>
+</button>
+<!-- Action Button 3 -->
+<button class="flex-1 min-w-[130px] h-10 bg-card-surface hover:bg-surface-container border-r border-ink last:border-r-0 flex items-center justify-center gap-2 px-3 transition-colors snap-start whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">swap_horiz</span>
+<span class="font-label-caps text-label-caps">改指定计费店</span>
+</button>
+<!-- Action Button 4 -->
+<button class="flex-1 min-w-[120px] h-10 bg-card-surface hover:bg-surface-container border-r border-ink last:border-r-0 flex items-center justify-center gap-2 px-3 transition-colors snap-start whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">sync</span>
+<span class="font-label-caps text-label-caps">重跑同步</span>
+</button>
+<!-- Action Button 5 -->
+<button class="flex-1 min-w-[100px] h-10 bg-card-surface hover:bg-surface-container border-r border-ink last:border-r-0 flex items-center justify-center gap-2 px-3 transition-colors snap-start whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">login</span>
+<span class="font-label-caps text-label-caps">代登录</span>
+</button>
+<!-- Action Button 6 (Destructive Intent) -->
+<button class="flex-1 min-w-[120px] h-10 bg-surface hover:bg-error hover:text-on-error text-error border-r border-ink last:border-r-0 flex items-center justify-center gap-2 px-3 transition-colors snap-start whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">block</span>
+<span class="font-label-caps text-label-caps">停用聊天窗</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Mobile Bottom NavBar (md:hidden) -->
+<nav class="md:hidden flex justify-around items-center h-16 bg-card-surface border-t border-ink w-full flex-shrink-0 z-50">
+<!-- Tab 1 -->
+<a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-ink transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-active:scale-95 transition-transform">schedule</span>
+<span class="font-label-caps text-[9px] mt-1">到期队列</span>
+</a>
+<!-- Tab 2 (Active) -->
+<a class="flex flex-col items-center justify-center w-full h-full bg-secondary-container text-on-secondary-container border-t-2 border-ink group" href="#">
+<span class="material-symbols-outlined text-[24px]" data-weight="fill">storefront</span>
+<span class="font-label-caps text-[9px] mt-1 font-bold">店铺</span>
+</a>
+<!-- Tab 3 -->
+<a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-ink transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-active:scale-95 transition-transform">person</span>
+<span class="font-label-caps text-[9px] mt-1">账号</span>
+</a>
+<!-- Tab 4 -->
+<a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-ink transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-active:scale-95 transition-transform">security</span>
+<span class="font-label-caps text-[9px] mt-1">审计日志</span>
+</a>
+</nav>
+</body></html>

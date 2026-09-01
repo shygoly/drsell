@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Ops Console - 到期队列</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&amp;family=Martian+Mono:wght@400..700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "ink": "#14211e",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#bbcac5",
+                        "surface": "#f6fbf6",
+                        "card-surface": "#fafcfa",
+                        "surface-container-low": "#f0f5f1",
+                        "primary-fixed": "#d7e6e1",
+                        "frozen-accent": "#a66009",
+                        "outline-variant": "#c2c8c5",
+                        "on-tertiary-container": "#bf7422",
+                        "on-surface": "#171d1b",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#14211e",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#2c322f",
+                        "trial-accent": "#4b3fa8",
+                        "secondary-container": "#9b90fe",
+                        "surface-container": "#eaefeb",
+                        "on-primary-fixed-variant": "#3c4a46",
+                        "on-secondary-fixed-variant": "#42359f",
+                        "inverse-primary": "#bbcac5",
+                        "surface-variant": "#dfe4e0",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed": "#111e1b",
+                        "secondary-fixed": "#e4dfff",
+                        "surface-container-high": "#e4e9e5",
+                        "secondary": "#5a4fb8",
+                        "page-bg": "#e6ebe7",
+                        "primary": "#000705",
+                        "background": "#f6fbf6",
+                        "outline": "#737876",
+                        "on-surface-variant": "#424846",
+                        "on-secondary-container": "#30208d",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb875",
+                        "error": "#ba1a1a",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#7b8985",
+                        "inverse-on-surface": "#edf2ee",
+                        "on-tertiary-fixed": "#2d1600",
+                        "secondary-fixed-dim": "#c6bfff",
+                        "surface-tint": "#53615d",
+                        "tertiary-container": "#311800",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "on-background": "#171d1b",
+                        "on-secondary-fixed": "#160066",
+                        "tertiary-fixed": "#ffdcc0",
+                        "surface-dim": "#d6dbd7",
+                        "surface-bright": "#f6fbf6",
+                        "surface-container-highest": "#dfe4e0",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#0b0300"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                    "spacing": {
+                        "standard": "16px",
+                        "base": "4px",
+                        "tight": "8px",
+                        "gutter": "1px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["Martian Mono"],
+                        "label-caps": ["Martian Mono"],
+                        "headline-lg": ["Bricolage Grotesque"],
+                        "body-md": ["Bricolage Grotesque"],
+                        "headline-md": ["Bricolage Grotesque"],
+                        "headline-sm": ["Bricolage Grotesque"],
+                        "body-lg": ["Bricolage Grotesque"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["13px", { "lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "label-caps": ["11px", { "lineHeight": "1", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-sm": ["18px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+        /* Scrollbar styling for Ledger aesthetic */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #e6ebe7; border-left: 1px solid #14211e; }
+        ::-webkit-scrollbar-thumb { background: #14211e; border: 1px solid #e6ebe7; }
+    </style>
+</head>
+<body class="bg-page-bg text-ink h-screen flex overflow-hidden font-body-md text-body-md">
+<!-- SideNavBar (Shared Component) -->
+<nav class="bg-surface dark:bg-surface-dim w-[200px] h-screen flex-shrink-0 border-r border-ink dark:border-outline-variant flex flex-col h-full overflow-y-auto">
+<!-- Brand Header -->
+<div class="h-16 flex items-center px-standard border-b border-ink">
+<span class="font-headline-sm text-headline-sm font-black text-ink dark:text-on-surface uppercase tracking-tighter">AI Ops Console</span>
+</div>
+<!-- Navigation Tabs -->
+<div class="flex flex-col flex-1 py-tight">
+<!-- Active Tab -->
+<a class="bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary font-bold border-y border-ink dark:border-outline-variant flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span class="font-data-mono text-data-mono">到期队列</span>
+</a>
+<!-- Inactive Tabs -->
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">storefront</span>
+<span class="font-data-mono text-data-mono">店铺</span>
+</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span class="font-data-mono text-data-mono">账号</span>
+</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">security</span>
+<span class="font-data-mono text-data-mono">审计日志</span>
+</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 flex items-center px-standard py-3 gap-3 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+<span class="font-data-mono text-data-mono">套餐配置</span>
+</a>
+</div>
+</nav>
+<!-- Main Canvas -->
+<main class="flex-1 flex flex-col h-full overflow-hidden">
+<!-- Header -->
+<header class="h-16 flex items-center px-standard border-b border-ink bg-card-surface justify-between">
+<h1 class="font-headline-md text-headline-md text-ink">到期队列</h1>
+<div class="flex items-center gap-4">
+<button class="w-8 h-8 flex items-center justify-center border border-ink hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+</button>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 overflow-auto p-standard">
+<!-- Data Table Container -->
+<div class="bg-card-surface border border-ink shadow-none">
+<!-- Table Grid Definition -->
+<div class="grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr] border-b border-ink bg-surface-container-low">
+<!-- Column Headers -->
+<div class="px-3 py-2 border-r border-ink font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center">商户名称</div>
+<div class="px-3 py-2 border-r border-ink font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center">当前状态</div>
+<div class="px-3 py-2 border-r border-ink font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center">到期日期</div>
+<div class="px-3 py-2 border-r border-ink font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center">剩余天数</div>
+<div class="px-3 py-2 font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center justify-center">操作</div>
+</div>
+<!-- Row 1: Trial -->
+<div class="grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr] border-b border-ink h-[44px] hover:bg-surface-container-low transition-colors">
+<div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center truncate">Luxe Cosmetics</div>
+<div class="px-3 border-r border-ink flex items-center">
+<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-trial-accent tracking-tight">Trial</span>
+</div>
+<div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center">2023-11-15</div>
+<div class="px-3 border-r border-ink flex items-center gap-3">
+<span class="font-data-mono text-data-mono w-6 text-right">08</span>
+<div class="flex-1 h-2 border border-ink bg-surface relative">
+<div class="absolute inset-y-0 left-0 bg-trial-accent w-[30%]"></div>
+</div>
+</div>
+<div class="px-3 flex items-center justify-center">
+<button class="px-3 py-1 bg-trial-accent text-on-primary border border-ink font-label-caps text-label-caps hover:bg-ink transition-colors">Upgrade</button>
+</div>
+</div>
+<!-- Row 2: Frozen -->
+<div class="grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr] border-b border-ink h-[44px] hover:bg-surface-container-low transition-colors">
+<div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center truncate">Nomad Gear Co.</div>
+<div class="px-3 border-r border-ink flex items-center">
+<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-frozen-accent tracking-tight">Frozen</span>
+</div>
+<div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center">2023-10-31</div>
+<div class="px-3 border-r border-ink flex items-center gap-3">
+<span class="font-data-mono text-data-mono w-6 text-right text-frozen-accent">-5</span>
+<div class="flex-1 h-2 border border-ink bg-surface relative">
+<div class="absolute inset-y-0 left-0 bg-frozen-accent w-[100%]"></div>
+</div>
+</div>
+<div class="px-3 flex items-center justify-center">
+<button class="px-3 py-1 bg-card-surface text-ink border border-ink font-label-caps text-label-caps hover:bg-surface-container transition-colors">Review</button>
+</div>
+</div>
+<!-- Row 3: Paid Expiring Soon -->
+<div class="grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr] border-b border-ink h-[44px] hover:bg-surface-container-low transition-colors">
+<div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center truncate">Urban Roasters</div>
+<div class="px-3 border-r border-ink flex items-center">
+<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-ink tracking-tight">Paid</span>
+</div>
+<div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center">2023-11-09</div>
+<div class="px-3 border-r border-ink flex items-center gap-3">
+<span class="font-data-mono text-data-mono w-6 text-right text-frozen-accent">02</span>
+<div class="flex-1 h-2 border border-ink bg-surface relative">
+<div class="absolute inset-y-0 left-0 bg-frozen-accent w-[15%]"></div>
+</div>
+</div>
+<div class="px-3 flex items-center justify-center">
+<button class="px-3 py-1 bg-card-surface text-ink border border-ink font-label-caps text-label-caps hover:bg-surface-container transition-colors">Notify</button>
+</div>
+</div>
+<!-- Row 4: Trial -->
+<div class="grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr] border-b border-ink h-[44px] hover:bg-surface-container-low transition-colors">
+<div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center truncate">Elevate Fitness</div>
+<div class="px-3 border-r border-ink flex items-center">
+<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-trial-accent tracking-tight">Trial</span>
+</div>
+<div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center">2023-11-20</div>
+<div class="px-3 border-r border-ink flex items-center gap-3">
+<span class="font-data-mono text-data-mono w-6 text-right">13</span>
+<div class="flex-1 h-2 border border-ink bg-surface relative">
+<div class="absolute inset-y-0 left-0 bg-trial-accent w-[65%]"></div>
+</div>
+</div>
+<div class="px-3 flex items-center justify-center">
+<button class="px-3 py-1 bg-trial-accent text-on-primary border border-ink font-label-caps text-label-caps hover:bg-ink transition-colors">Upgrade</button>
+</div>
+</div>
+<!-- Row 5: Paid Expiring -->
+<div class="grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr] border-b border-ink h-[44px] hover:bg-surface-container-low transition-colors">
+<div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center truncate">Zenith Tech</div>
+<div class="px-3 border-r border-ink flex items-center">
+<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-ink tracking-tight">Paid</span>
+</div>
+<div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center">2023-11-08</div>
+<div class="px-3 border-r border-ink flex items-center gap-3">
+<span class="font-data-mono text-data-mono w-6 text-right text-frozen-accent">01</span>
+<div class="flex-1 h-2 border border-ink bg-surface relative">
+<div class="absolute inset-y-0 left-0 bg-frozen-accent w-[5%]"></div>
+</div>
+</div>
+<div class="px-3 flex items-center justify-center">
+<button class="px-3 py-1 bg-card-surface text-ink border border-ink font-label-caps text-label-caps hover:bg-surface-container transition-colors">Notify</button>
+</div>
+</div>
+<!-- Row 6: Frozen -->
+<div class="grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr] h-[44px] hover:bg-surface-container-low transition-colors">
+<div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center truncate">Bloom Botanicals</div>
+<div class="px-3 border-r border-ink flex items-center">
+<span class="inline-flex items-center px-2 py-0.5 border border-ink bg-card-surface text-[11px] font-bold uppercase text-frozen-accent tracking-tight">Frozen</span>
+</div>
+<div class="px-3 border-r border-ink font-data-mono text-data-mono flex items-center">2023-10-25</div>
+<div class="px-3 border-r border-ink flex items-center gap-3">
+<span class="font-data-mono text-data-mono w-6 text-right text-frozen-accent">-12</span>
+<div class="flex-1 h-2 border border-ink bg-surface relative">
+<div class="absolute inset-y-0 left-0 bg-frozen-accent w-[100%]"></div>
+</div>
+</div>
+<div class="px-3 flex items-center justify-center">
+<button class="px-3 py-1 bg-card-surface text-ink border border-ink font-label-caps text-label-caps hover:bg-surface-container transition-colors">Review</button>
+</div>
+</div>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="mt-4 flex justify-between items-center text-data-mono font-data-mono text-on-surface-variant">
+<span>Showing 1 to 6 of 24 records</span>
+<div class="flex gap-2">
+<button class="w-8 h-8 flex items-center justify-center border border-ink bg-card-surface hover:bg-surface-container disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center border border-ink bg-card-surface hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</body></html>
