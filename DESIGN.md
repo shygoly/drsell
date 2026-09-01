@@ -1,60 +1,118 @@
-# DESIGN.md — 设计令牌与 UI 反模式论证
+# DESIGN.md — Stitch 设计源与 UI 反模式
+
+> 本文件是 `DS-n` 的**出处文档**（论证锚点）。
+> 登记册见 [`DECISIONS.md`](DECISIONS.md)；架构决策见 [`ARCHITECTURE.md`](ARCHITECTURE.md)。
+> 机器校验：`pnpm spec`（`spec/check-design.mjs` 守护 DS-7/8/9，`spec/check-boundaries.mjs` 守护 DS-10）。
+
+## 0. Stitch 源：项目 `11226504772808429506`（9 屏）
+
+API key 拉取方式：`scripts/stitch-mcp.sh`（JSON-RPC over `https://stitch.googleapis.com/mcp`，
+header `X-Goog-Api-Key`）。原始返回与落盘：
+
+| 路径 | 内容 |
+|---|---|
+| `.stitch/mcp/screens-11226504772808429506.json` | MCP `list_screens` 原样返回 |
+| `.stitch/project-11226504772808429506/designs/*.html` | 9 屏 HTML 原样落盘 |
+| `.stitch/project-11226504772808429506/shots/*.png` | 9 屏缩略图（512px 宽） |
+| `.stitch/project-11226504772808429506/tokens-merchant-light.json` | 商户浅色主题 47 令牌 |
+| `.stitch/project-11226504772808429506/tokens-superadmin-dark.json` | 超管深色主题 51 令牌 |
+
+### 0.1 九屏 ↔ 主题 ↔ 路由
+
+| # | 屏 | 主题 | 实现位置 |
+|---|---|---|---|
+| 00 | Onboarding: Welcome | merchant-light | `apps/storefront/app/onboarding` |
+| 01 | Home Dashboard | merchant-light | `apps/storefront/app/page` |
+| 02 | Accounts & Membership Overview | superadmin-dark | `apps/ops/app/accounts`（重建） |
+| 03 | AI Assistant: Settings | merchant-light | `apps/storefront/app/ai-assistant` |
+| 04 | Inbox: Conversations | merchant-light | `apps/storefront/app/inbox` |
+| 05 | System Health & Global Config | superadmin-dark | `apps/ops/app/system`（新建） |
+| 06 | Widget Configuration | merchant-light | `apps/storefront/app/widget-config` |
+| 07 | Active Support Session (Impersonation) | superadmin-dark | `apps/ops/app/impersonation`（新建） |
+| 08 | Store & Subscription Details | superadmin-dark | `apps/ops/app/shops/[domain]`（重建） |
+
+不在 9 屏里但保留的运营台功能：`/` 到期队列、`/shops` 店铺列表、`/audit` 审计日志、
+`/plans` 套餐目录、`/login`。它们**按 superadmin-dark 令牌体系重排**，不得保留旧浅色账本底。
+`apps/storefront` 的 customers / analytics / history / support / documentation 同理，不在 9 屏里，
+按 merchant-light 令牌体系排。
+
+### 0.2 两套主题的 Stitch 实测令牌（节选）
+
+**merchant-light**（5 屏一致，权威值）：
+`primary #006c49`、`background #f6fafe`、`surface #f6fafe`、
+`on-surface #181c1f`、`on-surface-variant #3d4a42`、`outline #6d7a71`、
+`outline-variant #bccac0`、`error #ba1a1a`、`error-container #ffdad6`。
+
+**superadmin-dark**（4 屏一致，权威值）：
+`primary #bec6e0`、`background #131315`、`surface #131315`、
+`primary-container #0f172a`、`secondary-container #3c4a5e`、
+`on-surface #e4e2e4`、`on-surface-variant #c6c6cd`、`outline #909097`、
+`outline-variant #45464d`、`error #ffb4ab`、`error-container #93000a`。
+
+两套主题在 Stitch 内是**不同项目段**：00/01/03/04/06 用浅色绿（商家面），
+02/05/07/08 用深色蓝灰（超管面）。同一个 Stitch 项目里两套壳并存，实现时按路由隔离，
+不得混用令牌。`DS-8` 机器守护两套令牌 hex 值零交集（跨 app 的碰撞）。
+
+### 0.3 超管壳的取舍
+
+四屏超管稿的壳互不一致：05 有 `h-8` 全局审计条且侧栏 `top-8 w-[240px]`；
+02 侧栏 `top-[80px]`；07 侧栏 `top-[96px] w-sidebar`；08 侧栏 `top-0 w-[240px]`。
+单一实现无法同时对齐四份互相矛盾的稿，**以 05（System Health）为准**：
+全局审计条 + 240px 侧栏 + 主画布 `bg-background`。其余三屏只取内容区，不取壳。
+
+### 0.4 对 Stitch 稿的明确偏离
+
+1. 图标用 `lucide-react`，不用 Material Symbols —— 少一个外部字体请求（`DS-3` 精神）。
+2. 颜色一律走 `tokens.css` 注册的具名 utility，Stitch 的 `bg-[#020617]` /
+   `border-[#1E293B]` 这类 arbitrary hex 照搬即撞 `DS-7`，必须映射成令牌。
+3. Stitch 编造的状态词、指标口径（API CALLS / STORAGE / BANDWIDTH、RISK SCORE、
+   `MRR` 等）一律不采纳，以 `ADR-13` 与真实数据源为准。
+4. `error-container #93000a`、`on-error-container #ffdad6` 与 storefront 令牌集相交，
+   照收即撞 `DS-8`；在 ops tokens 中重映射后再进 `globals.css`。
 
 ## 1. 令牌源登记
 
 | # | 源文件 | 服务对象 | 体系 | 状态 |
 |---|---|---|---|---|
-| 1 | `apps/storefront/src/app/globals.css` | 商家平台 + 内嵌 | shadcn / Tailwind v4 | 权威 |
+| 1 | `apps/storefront/src/app/globals.css` | 商家平台 + 内嵌 | shadcn / Tailwind v4 | 权威（merchant-light） |
 | 2 | `apps/web`（Polaris 默认主题） | Shopify OAuth / webhook 服务 | Polaris 13 | 无自定义令牌 |
 | 3 | `apps/web/app/globals.css` 自定义深色块 | `apps/web` 遗留页面 | 手写 | 待清理，见 `ADR-10` |
 | 4 | `apps/web/extensions/chatbot/assets/drsell-chat.js` | 店面聊天窗 | 无源，hex 散点 | 见 `TBD-2` |
-| 5 | `apps/ops/app/tokens.css` + `globals.css` | 运营台 | shadcn CSS 变量 + Tailwind v4 | 权威 hex 在 tokens.css，见 `ADR-12` |
+| 5 | `apps/ops/app/tokens.css` + `globals.css` | 运营台 | shadcn CSS 变量 + Tailwind v4 | 权威（superadmin-dark） |
+| 6 | `.stitch/project-11226504772808429506/designs/*.html` | Stitch 原始设计源 | Stitch HTML | 参照物，不直接 import |
 
-## 2. 运营台设计意图
+## 2. 设计意图
 
-**配色与商家端刻意分家。** 商家端是 Shopify 绿 `#006c49`；运营台是冷灰绿账本纸底
-（`--stock #e6ebe7`）加三色信号集：试用靛蓝 `--trial #4b3fa8`、冻结赭黄 `--frozen #a66009`、
-终态锈红 `--lost #8e3b2f`。理由：在运营台点下的按钮会影响真实商家的账单，
-两个面绝不能被认错。这条由 `DS-8` 机器守护。
+### 2.1 两面必须分家
 
-**健康状态不给颜色。** `ACTIVE` 用墨色 `--ink`，只有需要处理的状态才拿到信号色，
-让眼睛只被该处理的行拽走。**这条守不住**——写不出稳定的 grep，故不给 DS 编号，
-仅作为评审时的口径。
+商家面（storefront）是 Shopify 绿 `#006c49` + 冷白 `#f6fafe`；
+超管面（ops）是深色蓝灰 `primary #bec6e0` + `background #131315`。
+理由：在运营台点下的按钮会影响真实商家的账单，两个面绝不能被认错。
+`DS-8` 机器守护两套令牌 hex 值交集必须为空。
 
-**主元件是跑道条，不是状态点。** 驱动运营动作的三件事全是时间：试用剩余、
-计费周期结束、欠费后的 30 天解冻窗口。所以行的主体是「还剩多少路」，状态签退到旁边做注解。
+### 2.2 超管面（ops）用深色
 
-**字体三角色。** 显示 Bricolage Grotesque / 正文 Instrument Sans / 数据 Martian Mono，
-中文统一回落 `PingFang SC, Hiragino Sans GB, Microsoft YaHei`。
+Stitch 02/05/07/08 四屏全部是深色蓝灰主题，不是旧四屏的浅色账本纸底。
+旧 tokens（`--stock #e6ebe7` 那套）由 `superadmin-dark` 令牌替换；
+`/` 到期队列、`/audit` 等保留功能也随壳换成深色。**健康状态不给颜色**的原则继续保留：
+只有 `FROZEN` / `PENDING` / 失败 才拿信号色。
 
-**视觉参照物是 `design/stitch-export/drsell_ops_console/` 四屏**，方法论走
-`stitch-to-shadcn-pro`（引擎 `~/.cursor/skills/stitch-to-shadcn-pro`，产物在 `.stitch/`）。
-Stitch 稿只作结构与尺度的参照：它编造的状态词（`PAID`）、指标口径（API CALLS / STORAGE /
-BANDWIDTH）、字段（RISK SCORE）、`MRR` 一律不采纳，与 `ADR-13` 冲突处以 `ADR-13` 为准。
-Stitch 自动扩出的 M3 色阶里有四个值撞 storefront 令牌（`#ffffff` `#ba1a1a` `#93000a`
-`#ffdad6`），已重映射；`DS-8` 守着这条。
+### 2.3 商家面（storefront）的参照物切换
 
-**对 `stitch-to-shadcn-pro` 的三处明确偏离：**
+商家面此前参照 `design/stitch-export/stitch_shopify_ai_chat_dashboard/`；
+该导出与 Stitch 项目 01/03/04/06 同源（merchant-light 47 令牌一致）。
+后续像素复核以 `.stitch/project-11226504772808429506/` 的 5 屏为准。
 
-1. 图标用 `lucide-react`，不用 skill 建议的 Material Symbols —— 少一个外部字体请求，
-   且与商家端图标语言一致（`DS-3` 的精神，虽然它的守护面不覆盖 `apps/ops`）。
-2. 颜色一律走注册好的具名 utility（`text-ink-3` / `bg-surface-container`），不用 skill
-   建议的 arbitrary hex（`text-[#ffffff]`）—— 那会直接撞 `DS-7`。
-3. 跑道条的填充语义与 Stitch 相反：Stitch 从左填**已用**时间，我们填**剩余**时间。
-   驱动运营动作的是「还剩多少路」。
+### 2.4 字体三角色
 
-**spacing 用 arbitrary px 是刻意的**（skill 的强制门禁第 5 条：token 只迁
-colors/fontSize/fontFamily/borderRadius，spacing 一律 arbitrary）。将来若把 `DS-1`
-（禁 arbitrary 尺寸）的守护面扩到 `apps/ops`，这里会整片变红 —— 先记在这。
+显示 Bricolage Grotesque / 正文 Instrument Sans / 数据 Martian Mono，
+中文统一回落 `PingFang SC, Hiragino Sans GB, Microsoft YaHei`。两套主题共用字体，不共用色。
 
-**四屏 Stitch 稿的壳互不一致**：侧栏底色 `expiry_queue`/`audit_log` 是 `#f6fbf6`、
-`account_detail` 是 `#d6dbd7`；宽度三屏 200px、`audit_log` 256px；`audit_log` 还多一条
-深色顶栏与英文导航。单一实现不可能同时对齐四份互相矛盾的稿，**以 `expiry_queue` 为准**。
+### 2.5 像素复核的确定性来源
 
-**「稿子与实现是否一致」这条守不住** —— 它的守护是阶段 C 像素复核，而阶段 C 当前未达标
-（遮罩后 6.81%–17.76%，计划的门是 ≤0.36%；红=0，即无结构漂移，差异是布局尺度）。
-逐屏数字与已定位原因见 `.stitch/deviations.json`。按元语规矩，**守不住的条目不进登记册**，
-故本节全段留在叙述层，不给 ADR/DS 编号。
+「稿子与实现是否一致」的守护是阶段 C 像素复核。本项目 Stitch 源已切换到
+项目 `11226504772808429506`，阶段 C 的 `target.png` 应从该项目 screenshots 生成。
+旧 `.stitch/reports/*` 对应旧四屏，保留到新复核通过后归档。
 
 ## 3. DS — UI 反模式（运营台部分）
 
@@ -63,17 +121,21 @@ colors/fontSize/fontFamily/borderRadius，spacing 一律 arbitrary）。将来�
 | `DS-7` | `apps/ops` 源码禁止 hex 字面量，颜色只能来自 `tokens.css` | `spec/check-design.mjs` |
 | `DS-8` | ops 令牌的 hex 值集合与 storefront 令牌的 hex 值集合交集必须为空 | `spec/check-design.mjs` |
 | `DS-9` | `tokens.css` 须在 `:root`、`@media (prefers-color-scheme: dark)`、`:root[data-theme="dark"]` 三处定义**同一套**令牌名 | `spec/check-design.mjs` |
-| `DS-10` | `apps/ops` 不得引入 `@shopify/polaris`（shadcn / tailwind 允许） | `spec/check-boundaries.mjs` |
+| `DS-10` | `apps/ops` 不得引入 `@shopify/polaris`（shadcn / tailwind 允许，见 ADR-12） | `spec/check-boundaries.mjs` |
 
 ### `DS-7`
 
 运营台颜色只能来自 `apps/ops/app/tokens.css`，源码里散落 hex 会绕过三态主题与 DS-8 撞色检测。
 **怎么被抓住**：`spec/check-design.mjs` 扫描 `apps/ops` 除 `tokens.css` 外的 `.ts/.tsx/.css`，剥注释后命中 `#RRGGBB` 即红。
+**实现约束**：Stitch 超管稿的 `bg-[#020617]` / `border-[#1E293B]` / `text-[#4ade80]` 在移植时
+必须映射为 tokens.css 中的具名 utility（如 `bg-background` / `border-outline-variant` / `text-trial-accent`）。
 
 ### `DS-8`
 
 ops 与 storefront 两套面绝不能共用色值，否则运营动作与商家 UI 会被认错。
 **怎么被抓住**：解析两套令牌文件的 `--name: #hex` 映射，值集合求交，非空即红。
+**实现约束**：superadmin-dark 的 `error-container #93000a`、`on-error-container #ffdad6`
+与 storefront 交集，tokens.css 里重映射后再映射进 `globals.css`。
 
 ### `DS-9`
 
@@ -105,8 +167,8 @@ Stitch 导出里布局尺寸全是绝对像素（`max-w-[360px]` / `rounded-[28p
 
 ### `DS-3`
 
-Stitch 用 Material Symbols 图标字体，项目定的是 `lucide-react`（P4 组件映射表）。
-残留会多拉一个外部字体请求，且在 Shopify Admin iframe 的 CSP 下可能直接被拦。
+Stitch 用 Material Symbols 图标字体，项目定的是 `lucide-react`（组件映射表见
+`docs/stitch-to-shadcn-plan.md`）。残留会多拉一个外部字体请求，且在 Shopify Admin iframe 的 CSP 下可能直接被拦。
 **怎么被抓住**：`grep -rni 'material-symbols'` 命中即红。
 
 ### `DS-4`

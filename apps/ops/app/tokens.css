@@ -1,40 +1,46 @@
-/* apps/ops/app/tokens.css — ADR-12 运营台设计令牌（三态） */
+/* apps/ops/app/tokens.css — ADR-12 运营台设计令牌（三态）
+ * 设计源：Stitch 项目 11226504772808429506 的 superadmin-dark 四屏
+ * （02 Accounts / 05 System Health / 07 Impersonation / 08 Store & Subscription）。
+ * 三个块定义同一套令牌名（DS-9）；值统一取 Stitch 深色主题，运营台恒为深色。
+ * 重映射说明：Stitch error-container #93000a 与 on-error-container #ffdad6 在
+ * storefront 令牌集里，照收即撞 DS-8，故分别重映射为 #3d1512 / #f3c4be。
+ */
 :root {
-  --stock:   #e6ebe7;
-  --sheet:   #fafcfa;
-  --sheet-2: #f1f4f1;
-  --ink:     #14211e;
-  --ink-2:   #55635d;
-  --rule:    #c4cdc7;
-  --trial:   #4b3fa8;
-  --frozen:  #a66009;
-  --lost:    #8e3b2f;
+  --stock:   #131315;
+  --sheet:   #0f172a;
+  --sheet-2: #1b1b1d;
+  --ink:     #e4e2e4;
+  --ink-2:   #c6c6cd;
+  --rule:    #45464d;
+  --trial:   #dec29a;
+  --frozen:  #f59e0b;
+  --lost:    #ffb4ab;
 
-  /* Stitch 稿实测扩充（用量 ≥4，见 .stitch/spec/*.spec.json） */
-  --ink-alt: #171d1b;
-  --ink-3:   #424846;
-  --sheet-3: #f6fbf6;
-  --sheet-4: #eaefeb;
-  --rule-2:  #dfe4e0;
-  --rule-3:  #c2c8c5;
+  /* Stitch superadmin-dark 实测扩充 */
+  --ink-alt: #e4e2e4;
+  --ink-3:   #909097;
+  --sheet-3: #1b1b1d;
+  --sheet-4: #1f1f21;
+  --rule-2:  #353436;
+  --rule-3:  #909097;
 
-  /* Stitch 语义名实测值（阶段 B 移植用，skill 阶段0 规则 6）。
-     --st-error-container 是重映射值：Stitch 原值 #ffdad6 在 storefront 令牌集里，收了撞 DS-8。 */
-  --st-on-primary-container:    #7b8985;
-  --st-on-secondary-container:  #30208d;
-  --st-outline:                 #737876;
-  --st-primary:                 #000705;
-  --st-secondary:               #5a4fb8;
-  --st-secondary-container:     #9b90fe;
-  --st-surface-container-high:  #e4e9e5;
-  --st-surface-container-low:   #f0f5f1;
-  --st-surface-dim:             #d6dbd7;
-  --st-tertiary-fixed:          #ffdcc0;
-  --st-error-container:         #f6e2de;
-  --tint-trial:  rgba(75, 63, 168, .1);
-  --tint-frozen: rgba(166, 96, 9, .12);
-  --tint-lost:   rgba(142, 59, 47, .1);
-  --shadow: 0 1px 2px rgba(20, 33, 30, .06), 0 8px 24px -16px rgba(20, 33, 30, .3);
+  /* Stitch 语义名实测值（superadmin-dark）。
+     --st-error-container 是重映射值，原值 #93000a 撞 storefront 令牌集（DS-8）。 */
+  --st-on-primary-container:    #798098;
+  --st-on-secondary-container:  #abb9d2;
+  --st-outline:                 #909097;
+  --st-primary:                 #bec6e0;
+  --st-secondary:               #b9c7e0;
+  --st-secondary-container:     #3c4a5e;
+  --st-surface-container-high:  #2a2a2b;
+  --st-surface-container-low:   #1b1b1d;
+  --st-surface-dim:             #131315;
+  --st-tertiary-fixed:          #fcdeb5;
+  --st-error-container:         #3d1512;
+  --tint-trial:  rgba(222, 194, 154, .12);
+  --tint-frozen: rgba(245, 158, 11, .12);
+  --tint-lost:   rgba(255, 180, 171, .12);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 8px 24px -16px rgba(0, 0, 0, .85);
 
   --f-display: "Bricolage Grotesque", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --f-body: "Instrument Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
@@ -43,36 +49,36 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --stock:   #101614;
-    --sheet:   #19201d;
-    --sheet-2: #212926;
-    --ink:     #e3eae5;
-    --ink-2:   #93a19b;
-    --rule:    #2f3a36;
-    --trial:   #9a8fee;
-    --frozen:  #e0a03c;
-    --lost:    #e08878;
-    --ink-alt: #eef2ef;
-    --ink-3:   #a8b4ae;
-    --sheet-3: #141a18;
-    --sheet-4: #232b28;
-    --rule-2:  #29332f;
-    --rule-3:  #3a4642;
-    --st-on-primary-container:    #8f9a95;
-    --st-on-secondary-container:  #c6bfff;
-    --st-outline:                 #8b918e;
-    --st-primary:                 #e3eae5;
-    --st-secondary:               #9a8fee;
-    --st-secondary-container:     #42359f;
-    --st-surface-container-high:  #272f2c;
-    --st-surface-container-low:   #1c2421;
-    --st-surface-dim:             #0c110f;
-    --st-tertiary-fixed:          #4a2c0a;
-    --st-error-container:         #3a201c;
-    --tint-trial:  rgba(154, 143, 238, .14);
-    --tint-frozen: rgba(224, 160, 60, .14);
-    --tint-lost:   rgba(224, 136, 120, .13);
-    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+    --stock:   #131315;
+    --sheet:   #0f172a;
+    --sheet-2: #1b1b1d;
+    --ink:     #e4e2e4;
+    --ink-2:   #c6c6cd;
+    --rule:    #45464d;
+    --trial:   #dec29a;
+    --frozen:  #f59e0b;
+    --lost:    #ffb4ab;
+    --ink-alt: #e4e2e4;
+    --ink-3:   #909097;
+    --sheet-3: #1b1b1d;
+    --sheet-4: #1f1f21;
+    --rule-2:  #353436;
+    --rule-3:  #909097;
+    --st-on-primary-container:    #798098;
+    --st-on-secondary-container:  #abb9d2;
+    --st-outline:                 #909097;
+    --st-primary:                 #bec6e0;
+    --st-secondary:               #b9c7e0;
+    --st-secondary-container:     #3c4a5e;
+    --st-surface-container-high:  #2a2a2b;
+    --st-surface-container-low:   #1b1b1d;
+    --st-surface-dim:             #131315;
+    --st-tertiary-fixed:          #fcdeb5;
+    --st-error-container:         #3d1512;
+    --tint-trial:  rgba(222, 194, 154, .12);
+    --tint-frozen: rgba(245, 158, 11, .12);
+    --tint-lost:   rgba(255, 180, 171, .12);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 8px 24px -16px rgba(0, 0, 0, .85);
     --f-display: "Bricolage Grotesque", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
     --f-body: "Instrument Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
     --f-data: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -80,37 +86,37 @@
 }
 
 :root[data-theme="dark"] {
-  --stock:   #101614;
-  --sheet:   #19201d;
-  --sheet-2: #212926;
-  --ink:     #e3eae5;
-  --ink-2:   #93a19b;
-  --rule:    #2f3a36;
-  --trial:   #9a8fee;
-  --frozen:  #e0a03c;
-  --lost:    #e08878;
-  --ink-alt: #eef2ef;
-  --ink-3:   #a8b4ae;
-  --sheet-3: #141a18;
-  --sheet-4: #232b28;
-  --rule-2:  #29332f;
-  --rule-3:  #3a4642;
-  --st-on-primary-container:    #8f9a95;
-  --st-on-secondary-container:  #c6bfff;
-  --st-outline:                 #8b918e;
-  --st-primary:                 #e3eae5;
-  --st-secondary:               #9a8fee;
-  --st-secondary-container:     #42359f;
-  --st-surface-container-high:  #272f2c;
-  --st-surface-container-low:   #1c2421;
-  --st-surface-dim:             #0c110f;
-  --st-tertiary-fixed:          #4a2c0a;
-  --st-error-container:         #3a201c;
-  --tint-trial:  rgba(154, 143, 238, .14);
-  --tint-frozen: rgba(224, 160, 60, .14);
-  --tint-lost:   rgba(224, 136, 120, .13);
-  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
-  --f-display: "Bricolage Grotesque", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --f-body: "Instrument Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --f-data: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --stock:   #131315;
+    --sheet:   #0f172a;
+    --sheet-2: #1b1b1d;
+    --ink:     #e4e2e4;
+    --ink-2:   #c6c6cd;
+    --rule:    #45464d;
+    --trial:   #dec29a;
+    --frozen:  #f59e0b;
+    --lost:    #ffb4ab;
+    --ink-alt: #e4e2e4;
+    --ink-3:   #909097;
+    --sheet-3: #1b1b1d;
+    --sheet-4: #1f1f21;
+    --rule-2:  #353436;
+    --rule-3:  #909097;
+    --st-on-primary-container:    #798098;
+    --st-on-secondary-container:  #abb9d2;
+    --st-outline:                 #909097;
+    --st-primary:                 #bec6e0;
+    --st-secondary:               #b9c7e0;
+    --st-secondary-container:     #3c4a5e;
+    --st-surface-container-high:  #2a2a2b;
+    --st-surface-container-low:   #1b1b1d;
+    --st-surface-dim:             #131315;
+    --st-tertiary-fixed:          #fcdeb5;
+    --st-error-container:         #3d1512;
+    --tint-trial:  rgba(222, 194, 154, .12);
+    --tint-frozen: rgba(245, 158, 11, .12);
+    --tint-lost:   rgba(255, 180, 171, .12);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 8px 24px -16px rgba(0, 0, 0, .85);
+    --f-display: "Bricolage Grotesque", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --f-body: "Instrument Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --f-data: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
