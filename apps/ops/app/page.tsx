@@ -12,9 +12,9 @@ import { runQueueAction } from '@/lib/shop-actions';
 
 /** Stitch 稿的列比与格线：5 列网格，非 <table>。见 .stitch/rebuild/expiry_queue.html */
 const GRID = 'grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr]';
-const CELL = 'px-3 border-r border-ink flex items-center';
+const CELL = 'px-3 border-r border-outline-variant flex items-center';
 const HEAD =
-  'px-3 py-2 border-r border-ink font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center';
+  'px-3 py-2 border-r border-outline-variant font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center';
 
 /** 状态签。健康态（ACTIVE）不给颜色——只有需要处理的状态拿到信号色。 */
 function StatusChip({ status }: { status: string }) {
@@ -29,7 +29,7 @@ function StatusChip({ status }: { status: string }) {
           : 'text-on-surface-variant';
   return (
     <span
-      className={`bg-card-surface border-ink inline-flex items-center border px-2 py-0.5 text-[11px] font-bold tracking-tight uppercase ${tone}`}
+      className={`bg-card-surface border-outline-variant inline-flex items-center border px-2 py-0.5 text-[11px] font-bold tracking-tight uppercase ${tone}`}
     >
       {s}
     </span>
@@ -79,13 +79,13 @@ export default function HomePage() {
   return (
     <AuthGate>
       <OpsShell active="queue" padded={false} chrome={false}>
-        <header className="border-ink bg-card-surface flex h-16 items-center justify-between border-b px-[16px]">
-          <h1 className="font-headline-md text-headline-md text-ink m-0">到期队列</h1>
+        <header className="border-outline-variant bg-card-surface flex h-16 items-center justify-between border-b px-[16px]">
+          <h1 className="font-headline-md text-headline-md text-on-surface m-0">到期队列</h1>
           <div className="flex items-center gap-4">
             <button
               type="button"
               aria-label="筛选"
-              className="border-ink hover:bg-surface-container flex h-8 w-8 items-center justify-center border transition-colors"
+              className="border-outline-variant hover:bg-surface-container flex h-8 w-8 items-center justify-center border transition-colors"
             >
               <ListFilter className="h-[18px] w-[18px]" aria-hidden="true" />
             </button>
@@ -96,8 +96,8 @@ export default function HomePage() {
           {error ? <p className="text-error mb-3 text-sm">{error}</p> : null}
           {toast ? <p className="text-on-surface-variant mb-3 text-sm">{toast}</p> : null}
 
-          <div className="bg-card-surface border-ink border shadow-none">
-            <div className={`${GRID} border-ink bg-surface-container-low border-b`}>
+          <div className="bg-card-surface border-outline-variant border shadow-none">
+            <div className={`${GRID} border-outline-variant bg-surface-container-low border-b`}>
               <div className={HEAD}>商户名称</div>
               <div className={HEAD}>当前状态</div>
               <div className={HEAD}>到期日期</div>
@@ -112,7 +112,7 @@ export default function HomePage() {
               return (
                 <div
                   key={item.shopDomain}
-                  className={`${GRID} border-ink hover:bg-surface-container-low h-[44px] border-b transition-colors`}
+                  className={`${GRID} border-outline-variant hover:bg-surface-container-low h-[44px] border-b transition-colors`}
                 >
                   <div className={`${CELL} font-data-mono text-data-mono truncate`}>
                     <Link href={`/shops/${encodeURIComponent(item.shopDomain)}`}>
@@ -141,7 +141,7 @@ export default function HomePage() {
                       type="button"
                       disabled={busy}
                       onClick={() => void handleQueueAction(item)}
-                      className="bg-card-surface text-ink border-ink font-label-caps text-label-caps hover:bg-surface-container border px-3 py-1 transition-colors disabled:opacity-50"
+                      className="bg-card-surface text-on-surface border-outline-variant font-label-caps text-label-caps hover:bg-surface-container border px-3 py-1 transition-colors disabled:opacity-50"
                     >
                       {busy ? '…' : actionLabel}
                     </button>
@@ -166,14 +166,14 @@ export default function HomePage() {
                 type="button"
                 aria-label="上一页"
                 disabled
-                className="border-ink bg-card-surface hover:bg-surface-container flex h-8 w-8 items-center justify-center border disabled:opacity-50"
+                className="border-outline-variant bg-card-surface hover:bg-surface-container flex h-8 w-8 items-center justify-center border disabled:opacity-50"
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               </button>
               <button
                 type="button"
                 aria-label="下一页"
-                className="border-ink bg-card-surface hover:bg-surface-container flex h-8 w-8 items-center justify-center border"
+                className="border-outline-variant bg-card-surface hover:bg-surface-container flex h-8 w-8 items-center justify-center border"
               >
                 <ChevronRight className="h-4 w-4" aria-hidden="true" />
               </button>

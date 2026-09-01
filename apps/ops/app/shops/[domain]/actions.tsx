@@ -17,7 +17,7 @@ type Props = {
 
 /** 六等分通栏，逐字对齐 .stitch/rebuild/shop_detail.html 的动作条 */
 const CELL =
-  'font-label-caps text-label-caps border-ink hover:bg-surface-container flex items-center justify-center gap-2 border-r px-2 py-3 uppercase transition-colors last:border-r-0 disabled:opacity-50';
+  'font-label-caps text-label-caps border-outline-variant hover:bg-surface-container flex items-center justify-center gap-2 border-r px-2 py-3 uppercase transition-colors last:border-r-0 disabled:opacity-50';
 
 export function ShopActions({ domain, widgetVisible, onDone }: Props) {
   const [msg, setMsg] = useState('');

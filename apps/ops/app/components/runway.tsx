@@ -27,7 +27,7 @@ const stateText: Record<RunwayProps['state'], string> = {
 /**
  * 跑道条 — 运营台的签名元件。
  *
- * 盒样式取自 Stitch 稿（`h-2 border border-ink bg-surface`，全直角）；
+ * 盒样式取自 Stitch 稿（`h-2 border border-outline-variant bg-surface`，全直角）；
  * **填充语义刻意与 Stitch 相反**：Stitch 从左填已用时间，我们填的是**剩余**时间——
  * 驱动运营动作的是「还剩多少路」，不是「走了多少路」。见 .stitch/deviations.json。
  */
@@ -60,7 +60,7 @@ export function Runway({
       ) : null}
       <div
         className={cn(
-          'relative border border-ink bg-surface',
+          'relative border border-outline-variant bg-surface',
           large ? 'h-3 w-full' : 'h-2 flex-1',
         )}
       >
@@ -68,7 +68,7 @@ export function Runway({
         {state !== 'lost' ? (
           <div className={cn('absolute inset-y-0 right-0', stateFill[state])} style={{ left: `${spent}%` }} />
         ) : null}
-        <div className="bg-ink absolute -top-[3px] -bottom-[3px] w-px" style={{ left: `${spent}%` }} />
+        <div className="bg-primary absolute -top-[3px] -bottom-[3px] w-px" style={{ left: `${spent}%` }} />
       </div>
     </div>
   );

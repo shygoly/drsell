@@ -43,11 +43,11 @@ function LoginForm() {
       <div className="flex w-full max-w-[380px] flex-col gap-5">
         {/* 品牌块 —— 与侧栏同一套语言，进来就知道这是哪个面 */}
         <div className="flex items-center gap-2.5">
-          <span className="bg-ink text-on-primary flex h-9 w-9 shrink-0 items-center justify-center">
+          <span className="bg-primary text-on-primary flex h-9 w-9 shrink-0 items-center justify-center">
             <Gauge className="h-[18px] w-[18px]" aria-hidden="true" />
           </span>
           <span className="flex flex-col">
-            <strong className="font-headline-sm text-headline-sm text-ink leading-tight">
+            <strong className="font-headline-sm text-headline-sm text-on-surface leading-tight">
               运营台
             </strong>
             <span className="font-label-caps text-label-caps text-on-surface-variant uppercase">
@@ -56,7 +56,7 @@ function LoginForm() {
           </span>
         </div>
 
-        <div className="bg-card-surface border-ink border p-6">
+        <div className="bg-card-surface border-outline-variant border p-6">
           <p className="text-on-surface-variant m-0 mb-4 text-[13px]">
             需要 superadmin 账号。每一次登录都会写入审计。
           </p>
@@ -71,7 +71,7 @@ function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-surface border-ink font-data-mono text-data-mono text-ink focus:ring-ink h-9 border px-2 focus:outline-none focus:ring-1"
+                className="bg-surface border-outline-variant font-data-mono text-data-mono text-on-surface focus:ring-ink h-9 border px-2 focus:outline-none focus:ring-1"
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -84,7 +84,7 @@ function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-surface border-ink font-data-mono text-data-mono text-ink focus:ring-ink h-9 border px-2 focus:outline-none focus:ring-1"
+                className="bg-surface border-outline-variant font-data-mono text-data-mono text-on-surface focus:ring-ink h-9 border px-2 focus:outline-none focus:ring-1"
               />
             </label>
             {error ? (
@@ -95,7 +95,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={busy}
-              className="bg-ink text-on-primary border-ink font-label-caps text-label-caps hover:bg-card-surface hover:text-ink mt-1 h-9 border uppercase transition-colors disabled:opacity-50"
+              className="bg-primary text-on-primary border-outline-variant font-label-caps text-label-caps hover:bg-card-surface hover:text-on-surface mt-1 h-9 border uppercase transition-colors disabled:opacity-50"
             >
               {busy ? '登录中…' : '登录'}
             </button>
