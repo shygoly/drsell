@@ -49,6 +49,7 @@ export default function SystemPage() {
   return (
     <AuthGate>
       <OpsShell
+        chrome="audit"
         active="system"
         title="System Health & Telemetry"
         subtitle="Real-time monitoring of platform vitals, task queues, and API limits."

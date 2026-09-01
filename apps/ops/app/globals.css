@@ -81,6 +81,7 @@
   --color-stock: var(--stock);
   --color-sheet: var(--sheet);
   --color-card-border: var(--card-border);
+  --color-canvas-deep: var(--canvas-deep);
   /* 稿子屏 07 冒名横幅的琥珀阶 */
   --color-amber-400: var(--st-amber-400);
   --color-amber-500: var(--st-amber-500);

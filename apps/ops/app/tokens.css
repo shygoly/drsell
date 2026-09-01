@@ -8,6 +8,7 @@
 :root {
   --stock: #131315;
   --sheet: #0f172a;
+  --canvas-deep: #020617;   /* 稿子屏 05 的主区底色 */
   --st-on-primary: #283044;
   --st-amber-400: #fbbf24;
   --st-amber-500: #f59e0b;
@@ -61,6 +62,7 @@
   :root:not([data-theme="light"]) {
     --stock: #131315;
     --sheet: #0f172a;
+    --canvas-deep: #020617;   /* 稿子屏 05 的主区底色 */
     --st-on-primary: #283044;
     --st-amber-400: #fbbf24;
     --st-amber-500: #f59e0b;
@@ -114,6 +116,7 @@
 :root[data-theme="dark"] {
     --stock: #131315;
     --sheet: #0f172a;
+    --canvas-deep: #020617;   /* 稿子屏 05 的主区底色 */
     --st-on-primary: #283044;
     --st-amber-400: #fbbf24;
     --st-amber-500: #f59e0b;

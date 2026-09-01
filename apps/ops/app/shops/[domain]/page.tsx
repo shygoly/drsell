@@ -85,9 +85,18 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
 
   return (
     <AuthGate>
-      <OpsShell active="shops" padded={false}>
+      <OpsShell active="shops" padded={false} chrome="topbar">
         <div className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-6 overflow-auto p-[16px] md:p-6 lg:p-8">
           {error ? <p className="text-error text-sm">{error}</p> : null}
+
+          {/* 稿子屏 08：审计信息在内容区，不用全局 REC 条 */}
+          <div className="bg-primary-container text-on-primary-container border-outline-variant font-data-mono text-data-mono mb-6 flex items-center justify-between rounded border px-4 py-2">
+            <span className="flex items-center gap-2">
+              <span className="bg-error h-2 w-2 animate-pulse rounded-full" />
+              AUDIT ACTIVE: SESSION LOGGING ENGAGED
+            </span>
+            <span className="text-on-surface-variant opacity-70">INV-3 · 写操作全部留痕</span>
+          </div>
 
           {/* Header */}
           <div className="flex flex-col items-start justify-between gap-4 pb-4 md:flex-row md:items-end">
