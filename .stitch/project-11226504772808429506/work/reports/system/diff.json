@@ -26,7 +26,7 @@
     "axis2": {
       "fullPageDiff": 70.36,
       "maskedDiff": 67.39,
-      "structuralDiff": 66.93,
+      "structuralDiff": 66.92,
       "layoutDiff": 67.39,
       "hasAssetMask": false,
       "assetMaskPixels": 0,
@@ -37,8 +37,8 @@
   "diffImage": {
     "path": ".stitch/project-11226504772808429506/work/reports/system/project-diff.png",
     "red": 0,
-    "orange": 2313116,
-    "yellow": 118520
+    "orange": 2312874,
+    "yellow": 118787
   },
   "elements": [],
   "topFixes": [],

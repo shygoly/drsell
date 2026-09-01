@@ -143,32 +143,35 @@
   --color-on-error-container: var(--st-on-error-container); /* 重映射，原 #ffdad6 撞 DS-8 */
   --color-tertiary-fixed: var(--st-tertiary-fixed);
 
-  /* Stitch 字号阶（fontSize 名与 fontFamily 名同名，Tailwind v4 下分别注册） */
-  --text-data-mono: 13px;
-  --text-data-mono--line-height: 1.4;
-  --text-data-mono--letter-spacing: -0.01em;
+  /* Stitch superadmin-dark 的字号阶（tokens-superadmin-dark 与四屏 HTML 实测一致）。
+     之前注册的是旧亮色源的值：data-mono 13px≠12px、headline-md 24px≠20px，
+     display-sm / body-sm 更是根本没注册（text-display-sm 是无效类）。
+     字号驱动每个文本块的高度，这是页面纵向偏移逐层累积的根源。 */
+  --text-data-mono: 12px;
+  --text-data-mono--line-height: 16px;
   --text-data-mono--font-weight: 500;
+  --text-headline-md: 20px;
+  --text-headline-md--line-height: 28px;
+  --text-headline-md--font-weight: 600;
+  --text-display-sm: 24px;
+  --text-display-sm--line-height: 32px;
+  --text-display-sm--letter-spacing: -0.02em;
+  --text-display-sm--font-weight: 600;
+  --text-body-md: 14px;
+  --text-body-md--line-height: 20px;
+  --text-body-md--font-weight: 400;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 18px;
+  --text-body-sm--font-weight: 400;
+  /* label-caps 稿子未定义，四屏用它做小号大写标签，沿用 11px/1/700 */
   --text-label-caps: 11px;
   --text-label-caps--line-height: 1;
   --text-label-caps--font-weight: 700;
-  --text-headline-lg: 32px;
-  --text-headline-lg--line-height: 1.1;
-  --text-headline-lg--letter-spacing: -0.02em;
-  --text-headline-lg--font-weight: 800;
-  --text-headline-md: 24px;
-  --text-headline-md--line-height: 1.2;
-  --text-headline-md--font-weight: 700;
-  --text-headline-sm: 18px;
-  --text-headline-sm--line-height: 1.2;
-  --text-headline-sm--font-weight: 700;
-  --text-body-lg: 16px;
-  --text-body-lg--line-height: 1.5;
-  --text-body-lg--font-weight: 400;
-  --text-body-md: 14px;
-  --text-body-md--line-height: 1.5;
-  --text-body-md--font-weight: 400;
+
 
   --font-data-mono: var(--f-data);
+  --font-display-sm: var(--f-display);
+  --font-body-sm: var(--f-body);
   --font-label-caps: var(--f-data);
   --font-headline-lg: var(--f-display);
   --font-headline-md: var(--f-display);

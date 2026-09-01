@@ -52,10 +52,18 @@ const PAGES = [
 
 /** 把请求 URL 归一成 fixtures 的键：去掉 /api 前缀与查询串 */
 function fixtureFor(url) {
-  const path = decodeURIComponent(new URL(url).pathname.replace(/^\/api/, ''));
-  if (fixtures[path] !== undefined) return fixtures[path];
-  const noQuery = path.split('?')[0];
-  return fixtures[noQuery];
+  const u = new URL(url);
+  const path = decodeURIComponent(u.pathname.replace(/^\/api/, ''));
+  let body = fixtures[path] !== undefined ? fixtures[path] : fixtures[path.split('?')[0]];
+  if (body === undefined) return undefined;
+  // 尊重 limit —— fixture 是静态对象，不截的话每个调用方都拿到全量，
+  // 页面渲染的行数就和稿子对不上（实测：事件表多 5 行 = 5 条多余横线）
+  const limit = Number(u.searchParams.get('limit') || 0);
+  if (limit > 0) {
+    if (Array.isArray(body)) body = body.slice(0, limit);
+    else if (body && Array.isArray(body.items)) body = { ...body, items: body.items.slice(0, limit), limit };
+  }
+  return body;
 }
 
 const browser = await chromium.launch();
