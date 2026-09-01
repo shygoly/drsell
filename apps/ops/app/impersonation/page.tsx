@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ExternalLink, LogOut, ShieldAlert, Timer } from 'lucide-react';
 import { AuthGate } from '@/app/components/auth-gate';
@@ -65,53 +66,41 @@ function ImpersonationPage() {
     window.open(url.toString(), '_blank', 'noopener,noreferrer');
   }
 
+  const banner = (
+    <div className="bg-frozen-accent/15 border-frozen-accent flex h-16 w-full items-center gap-4 border-b px-[24px]">
+      <span className="bg-frozen-accent text-on-primary font-label-caps text-label-caps flex shrink-0 items-center gap-2 px-3 py-1.5 uppercase">
+        <ShieldAlert className="h-4 w-4" aria-hidden="true" />
+        Impersonation Active
+      </span>
+      <span className="text-frozen-accent min-w-0 flex-1 truncate text-[13px]">
+        Impersonating {email || '—'} for Store: {shop || '—'}
+      </span>
+      <span className="border-frozen-accent/40 text-on-surface-variant font-data-mono hidden shrink-0 border-l pl-4 text-[12px] lg:block">
+        Reason: {reason}
+      </span>
+      <span className="text-on-surface-variant font-data-mono flex shrink-0 items-center gap-1.5 text-[12px]">
+        <Timer className="h-4 w-4" aria-hidden="true" />
+        Time remaining:
+        <b className="text-on-surface text-[15px]">{remaining ?? '—'}</b>
+      </span>
+      <button
+        type="button"
+        onClick={() => {
+          clearToken();
+          window.location.href = '/login';
+        }}
+        className="bg-frozen-accent/20 border-frozen-accent text-frozen-accent hover:bg-frozen-accent hover:text-on-primary flex shrink-0 items-center gap-2 border px-3 py-2 text-[12px] font-bold uppercase transition-colors"
+      >
+        <LogOut className="h-4 w-4" aria-hidden="true" />
+        End Session &amp; Logout
+      </button>
+    </div>
+  );
+
   return (
     <AuthGate>
-      <OpsShell active="impersonation" padded={false}>
+      <OpsShell active="impersonation" padded={false} banner={banner}>
         <div className="flex min-h-full flex-col gap-4 overflow-auto p-4 md:p-6">
-          {/* IMPERSONATION ACTIVE 条 */}
-          <div className="border-outline-variant bg-primary-container flex flex-col items-start justify-between gap-3 rounded-lg border p-4 md:flex-row md:items-center">
-            <div className="flex items-center gap-3">
-              <ShieldAlert className="text-error h-5 w-5" aria-hidden="true" />
-              <div>
-                <div className="text-on-surface font-label-caps text-[10px] uppercase tracking-wider">
-                  IMPERSONATION ACTIVE
-                </div>
-                <div className="text-on-surface font-data-mono text-[13px]">
-                  Impersonating {email || '—'} for Store: {shop || '—'}
-                  {reason !== '—' ? ` · Reason: ${reason}` : ''}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              {remaining ? (
-                <span className="text-on-surface-variant font-data-mono flex items-center gap-1.5 text-[12px]">
-                  <Timer className="h-4 w-4" aria-hidden="true" />
-                  Time remaining: {remaining}
-                </span>
-              ) : null}
-              <button
-                type="button"
-                onClick={openMerchant}
-                className="bg-primary text-on-primary border-primary hover:bg-surface-container-high hover:text-primary flex h-8 items-center gap-2 border px-3 text-[10px] font-bold uppercase transition-colors"
-              >
-                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                进入商户端
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  clearToken();
-                  window.location.href = '/login';
-                }}
-                className="border-outline-variant text-on-surface-variant hover:text-error flex h-8 items-center gap-2 border px-3 text-[10px] font-bold uppercase transition-colors"
-              >
-                <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
-                End Session &amp; Logout
-              </button>
-            </div>
-          </div>
-
           {/* 店铺概览 */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <div className="bg-primary-container border-outline-variant rounded-lg border p-4">
@@ -140,32 +129,71 @@ function ImpersonationPage() {
             </div>
           </div>
 
-          {/* Live Audit Trail */}
-          <div className="bg-primary-container border-outline-variant flex-1 rounded-lg border p-4">
-            <h2 className="text-on-surface mb-3 flex items-center gap-2 border-b border-outline-variant pb-2 text-sm font-bold">
-              <ShieldAlert className="text-secondary h-4 w-4" aria-hidden="true" />
-              Live Audit Trail
-            </h2>
-            <div className="flex flex-col gap-2">
-              {(audit?.items ?? []).map((row) => (
-                <div
-                  key={row.id}
-                  className="border-outline-variant text-on-surface-variant flex items-center justify-between gap-3 border-b pb-2 font-data-mono text-[12px]"
-                >
-                  <span className="text-on-surface">
-                    {row.createdAt.slice(0, 19).replace('T', ' ')}
-                  </span>
-                  <span className="truncate">
-                    {row.actorEmail} · {formatAuditAction(row.action)}
-                  </span>
-                  <span className={row.result === 'ok' ? 'text-on-surface-variant' : 'text-error font-bold'}>
-                    {row.result === 'ok' ? 'OK' : 'FAIL'}
-                  </span>
+          {/* 稿子屏 07：左宽表 + 右 Impersonation Context */}
+          <div className="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-3">
+            <div className="bg-primary-container border-outline-variant rounded-lg border lg:col-span-2">
+              <div className="border-outline-variant flex items-center justify-between border-b px-4 py-3">
+                <h2 className="text-on-surface m-0 text-sm font-bold">最近店铺事件</h2>
+                <Link href="/audit" className="text-secondary text-[12px] no-underline">
+                  View All
+                </Link>
+              </div>
+              <div className="flex flex-col">
+                {(audit?.items ?? []).map((row) => (
+                  <div
+                    key={row.id}
+                    className="border-outline-variant font-data-mono text-on-surface-variant flex items-center justify-between gap-3 border-b px-4 py-2.5 text-[12px] last:border-b-0"
+                  >
+                    <span className="text-on-surface shrink-0">
+                      {row.createdAt.slice(0, 19).replace('T', ' ')}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-right">
+                      {row.actorEmail} · {formatAuditAction(row.action)}
+                    </span>
+                    <span
+                      className={
+                        row.result === 'ok'
+                          ? 'text-on-surface-variant w-10 shrink-0 text-right'
+                          : 'text-error w-10 shrink-0 text-right font-bold'
+                      }
+                    >
+                      {row.result === 'ok' ? 'OK' : 'FAIL'}
+                    </span>
+                  </div>
+                ))}
+                {!audit?.items.length ? (
+                  <div className="text-on-surface-variant px-4 py-6 text-[12px]">
+                    暂无代登录审计记录
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="bg-primary-container border-frozen-accent rounded-lg border">
+              <h2 className="text-frozen-accent border-outline-variant m-0 flex items-center gap-2 border-b px-4 py-3 text-sm font-bold">
+                <ShieldAlert className="h-4 w-4" aria-hidden="true" />
+                Impersonation Context
+              </h2>
+              <div className="flex flex-col gap-4 p-4">
+                <div className="border-outline-variant bg-surface-container-high rounded border p-3">
+                  <div className="text-on-surface-variant font-label-caps mb-1 text-[10px] uppercase">
+                    Target Merchant
+                  </div>
+                  <div className="font-data-mono text-on-surface-variant text-[11px]">
+                    Store: {shop || '—'}
+                  </div>
+                  <div className="text-on-surface mt-1 text-[13px]">{email || '—'}</div>
                 </div>
-              ))}
-              {!audit?.items.length ? (
-                <div className="text-on-surface-variant text-[12px]">暂无代登录审计记录</div>
-              ) : null}
+                <div>
+                  <div className="text-on-surface mb-2 text-[13px]">Live Audit Trail</div>
+                  <pre className="border-outline-variant bg-background text-on-surface-variant m-0 overflow-x-auto rounded border p-3 font-data-mono text-[11px] leading-relaxed">
+{`[${remaining ?? '--:--'}] SESSION_START  INIT IMPERSONATION → ${shop || '—'}
+[${remaining ?? '--:--'}] ACTOR          ${email || '—'}
+[${remaining ?? '--:--'}] REASON         ${reason}
+[${remaining ?? '--:--'}] AWAITING_INPUT ...`}
+                  </pre>
+                </div>
+              </div>
             </div>
           </div>
         </div>
