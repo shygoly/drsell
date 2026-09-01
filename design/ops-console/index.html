@@ -1,0 +1,838 @@
+<title>Drsell 运营台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Sans:wght@400;500;600&family=Martian+Mono:wght@400;600&display=swap">
+
+<style>
+  /* ─────────────────────────────────────────────────────────
+     Drsell 运营台 — 设计稿
+     配色不沿用商家端的 Shopify 绿：这是另一拨人用的另一个面，
+     视觉上必须一眼可辨，否则在这里点下的按钮会误伤真实商家。
+     语义反转：健康 = 墨色，无色；只有需要处理的状态才拿到颜色。
+     ───────────────────────────────────────────────────────── */
+  :root {
+    --stock:   #e6ebe7;
+    --sheet:   #fafcfa;
+    --sheet-2: #f1f4f1;
+    --ink:     #14211e;
+    --ink-2:   #55635d;
+    --rule:    #c4cdc7;
+    --trial:   #4b3fa8;
+    --frozen:  #a66009;
+    --lost:    #8e3b2f;
+    --tint-trial:  rgba(75, 63, 168, .1);
+    --tint-frozen: rgba(166, 96, 9, .12);
+    --tint-lost:   rgba(142, 59, 47, .1);
+    --shadow: 0 1px 2px rgba(20, 33, 30, .06), 0 8px 24px -16px rgba(20, 33, 30, .3);
+
+    --f-display: "Bricolage Grotesque", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --f-body: "Instrument Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --f-data: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --stock:   #101614;
+      --sheet:   #19201d;
+      --sheet-2: #212926;
+      --ink:     #e3eae5;
+      --ink-2:   #93a19b;
+      --rule:    #2f3a36;
+      --trial:   #9a8fee;
+      --frozen:  #e0a03c;
+      --lost:    #e08878;
+      --tint-trial:  rgba(154, 143, 238, .14);
+      --tint-frozen: rgba(224, 160, 60, .14);
+      --tint-lost:   rgba(224, 136, 120, .13);
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --stock:   #101614;
+    --sheet:   #19201d;
+    --sheet-2: #212926;
+    --ink:     #e3eae5;
+    --ink-2:   #93a19b;
+    --rule:    #2f3a36;
+    --trial:   #9a8fee;
+    --frozen:  #e0a03c;
+    --lost:    #e08878;
+    --tint-trial:  rgba(154, 143, 238, .14);
+    --tint-frozen: rgba(224, 160, 60, .14);
+    --tint-lost:   rgba(224, 136, 120, .13);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--stock);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  /* ── 排版基座 ───────────────────────────────── */
+  h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; letter-spacing: -.015em; }
+  h1 { font-size: clamp(38px, 6vw, 60px); font-weight: 700; line-height: 1.02; }
+  h2 { font-size: clamp(23px, 3vw, 29px); font-weight: 700; line-height: 1.15; }
+  h3 { font-size: 17px; font-weight: 600; line-height: 1.3; }
+  p  { margin: 0; max-width: 62ch; }
+
+  .eyebrow {
+    font-family: var(--f-data);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .lede { font-size: 17px; color: var(--ink-2); max-width: 54ch; }
+  .note { font-size: 13.5px; color: var(--ink-2); }
+  .data { font-family: var(--f-data); font-variant-numeric: tabular-nums; }
+
+  a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--rule); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 2px; }
+
+  /* ── 页头 ───────────────────────────────────── */
+  .masthead {
+    padding: 64px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  /* ── 卡片 ───────────────────────────────────── */
+  .sheet {
+    background: var(--sheet);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+  }
+  .sheet-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--rule);
+  }
+  section { display: flex; flex-direction: column; gap: 20px; }
+  .section-head { display: flex; flex-direction: column; gap: 8px; }
+
+  /* ── 状态签 ─────────────────────────────────── */
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--f-data); font-size: 9.5px; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: 3px 7px; border-radius: 2px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+  .chip.is-ok     { color: var(--ink-2); border-color: var(--rule); }
+  .chip.is-trial  { color: var(--trial);  background: var(--tint-trial); }
+  .chip.is-frozen { color: var(--frozen); background: var(--tint-frozen); }
+  .chip.is-lost   { color: var(--lost);   background: var(--tint-lost); text-decoration: line-through; }
+
+  /* ── 签名元件：跑道条 ────────────────────────
+     每家店都活在一个正在收窄的窗口里 —— 试用期、计费周期、
+     或欠费后的 30 天解冻期。表格用状态点，这里用剩下的路。 */
+  .runway { display: flex; align-items: center; gap: 12px; }
+  .runway-track {
+    position: relative; flex: 1; min-width: 90px;
+    height: 8px; border-radius: 1px;
+    background: var(--sheet-2);
+    border: 1px solid var(--rule);
+    overflow: hidden;
+    transform: scaleX(0); transform-origin: left;
+    animation: draw .5s cubic-bezier(.2, .8, .2, 1) forwards;
+    animation-delay: calc(var(--i, 0) * 55ms);
+  }
+  @keyframes draw { to { transform: scaleX(1); } }
+  .runway-spent {
+    position: absolute; inset: 0 auto 0 0;
+    width: var(--spent, 50%);
+    background: var(--rule);
+    opacity: .55;
+  }
+  .runway-left {
+    position: absolute; inset: 0 0 0 auto;
+    width: calc(100% - var(--spent, 50%));
+  }
+  .runway-left[data-state="ok"]     { background: var(--ink-2); opacity: .5; }
+  .runway-left[data-state="trial"]  { background: var(--trial); }
+  .runway-left[data-state="frozen"] {
+    background: repeating-linear-gradient(
+      -45deg, var(--frozen) 0 3px, transparent 3px 6px
+    );
+    background-color: var(--tint-frozen);
+  }
+  .runway-now {
+    position: absolute; top: -3px; bottom: -3px;
+    left: var(--spent, 50%);
+    width: 1px; background: var(--ink);
+  }
+  .runway-days {
+    font-family: var(--f-data); font-variant-numeric: tabular-nums;
+    font-size: 12px; font-weight: 600; white-space: nowrap;
+    min-width: 52px; text-align: right;
+  }
+  .runway-days[data-state="trial"]  { color: var(--trial); }
+  .runway-days[data-state="frozen"] { color: var(--frozen); }
+  .runway-days[data-state="ok"]     { color: var(--ink-2); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .runway-track { animation: none; transform: none; }
+  }
+
+  /* ── 队列表 ─────────────────────────────────── */
+  .queue { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .queue th {
+    font-family: var(--f-data); font-size: 9.5px; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2);
+    text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+  .queue td { padding: 11px 14px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+  .queue tr:last-child td { border-bottom: 0; }
+  .queue .shop { font-family: var(--f-data); font-size: 12px; white-space: nowrap; }
+  .queue .owner { color: var(--ink-2); white-space: nowrap; }
+  .queue .runway-cell { min-width: 180px; }
+  .scroll-x { overflow-x: auto; }
+
+  /* ── 三道门 ─────────────────────────────────── */
+  .doors { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(268px, 1fr)); }
+  .door { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .door-url {
+    font-family: var(--f-data); font-size: 11.5px; word-break: break-all;
+    color: var(--ink-2); padding: 7px 9px; border-radius: 2px;
+    background: var(--sheet-2); border: 1px solid var(--rule);
+  }
+  .door.is-internal { border-color: var(--frozen); }
+  .door dl { margin: 0; display: flex; flex-direction: column; gap: 9px; font-size: 13.5px; }
+  .door dt {
+    font-family: var(--f-data); font-size: 9.5px; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .door dd { margin: 2px 0 0; }
+
+  /* ── 功能清单 ───────────────────────────────── */
+  .groups { display: flex; flex-direction: column; }
+  .group { border-bottom: 1px solid var(--rule); padding: 22px 0; display: grid; gap: 18px; grid-template-columns: 180px 1fr; }
+  .groups .group:first-child { padding-top: 0; }
+  .groups .group:last-child { border-bottom: 0; padding-bottom: 0; }
+  .group-title { display: flex; flex-direction: column; gap: 5px; }
+  .group-title .note { max-width: 22ch; }
+  .items { display: flex; flex-direction: column; gap: 13px; }
+  .item { display: flex; flex-direction: column; gap: 2px; }
+  .item-name { font-weight: 600; font-size: 14.5px; }
+  .item-desc { font-size: 13.5px; color: var(--ink-2); max-width: 60ch; }
+  .item-desc code {
+    font-family: var(--f-data); font-size: 11.5px;
+    padding: 1px 4px; border-radius: 2px; background: var(--sheet-2);
+  }
+
+  /* ── 店铺详情稿 ─────────────────────────────── */
+  .detail-head {
+    padding: 20px; border-bottom: 1px solid var(--rule);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .detail-id { display: flex; flex-direction: column; gap: 6px; }
+  .detail-id .dom { font-family: var(--f-data); font-size: 15px; font-weight: 600; word-break: break-all; }
+  .panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .panel { padding: 20px; border-right: 1px solid var(--rule); display: flex; flex-direction: column; gap: 14px; }
+  .panel:last-child { border-right: 0; }
+  .kv { display: flex; flex-direction: column; gap: 9px; }
+  .kv-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 13.5px; }
+  .kv-row dt { color: var(--ink-2); white-space: nowrap; }
+  .kv-row dd { margin: 0; font-family: var(--f-data); font-variant-numeric: tabular-nums; font-size: 12px; text-align: right; }
+
+  .meter { display: flex; flex-direction: column; gap: 6px; }
+  .meter-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 13px; }
+  .meter-top b { font-family: var(--f-data); font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 600; }
+  .meter-top b.is-over { color: var(--lost); }
+  .meter-track { height: 9px; border-radius: 1px; background: var(--sheet-2); border: 1px solid var(--rule); overflow: hidden; position: relative; }
+  .meter-fill { position: absolute; inset: 0 auto 0 0; width: var(--pct); background: var(--ink-2); }
+  .meter-fill.is-over {
+    background: repeating-linear-gradient(-45deg, var(--lost) 0 3px, color-mix(in srgb, var(--lost) 45%, transparent) 3px 6px);
+  }
+
+  /* 详情页的可用期是这一屏的焦点，给它显示字号 */
+  .countdown { display: flex; align-items: baseline; gap: 8px; }
+  .countdown-num {
+    font-family: var(--f-display); font-weight: 700; font-size: 52px; line-height: .9;
+    font-variant-numeric: tabular-nums; letter-spacing: -.03em;
+  }
+  .countdown-num[data-state="frozen"] { color: var(--frozen); }
+  .countdown-unit { font-size: 13.5px; color: var(--ink-2); }
+  .runway--lg .runway-track { height: 12px; }
+  .runway--lg .runway-days { display: none; }
+
+  .actions { padding: 16px 20px; border-top: 1px solid var(--rule); display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn {
+    font-family: var(--f-body); font-size: 13px; font-weight: 500; color: inherit;
+    padding: 7px 12px; border-radius: 2px; cursor: pointer;
+    background: var(--sheet-2); border: 1px solid var(--rule);
+  }
+  .btn:hover { border-color: var(--ink-2); }
+  .btn.is-grave { color: var(--lost); border-color: color-mix(in srgb, var(--lost) 45%, transparent); background: var(--tint-lost); }
+  .btn.is-grave:hover { border-color: var(--lost); }
+
+  /* ── 状态机 ─────────────────────────────────── */
+  .machine { padding: 20px; }
+  .machine svg { display: block; width: 100%; height: auto; min-width: 620px; }
+  .machine text { font-family: var(--f-data); font-size: 11px; fill: var(--ink); }
+  .machine .lbl { font-size: 9.5px; fill: var(--ink-2); letter-spacing: .04em; }
+  .machine .box { fill: var(--sheet-2); stroke: var(--rule); }
+  .machine .box.t-frozen { stroke: var(--frozen); fill: var(--tint-frozen); }
+  .machine .box.t-lost   { stroke: color-mix(in srgb, var(--lost) 55%, transparent); fill: var(--tint-lost); }
+  .machine .edge { stroke: var(--ink-2); stroke-width: 1; fill: none; }
+
+  /* ── 现状对照 ───────────────────────────────── */
+  .gap { display: grid; grid-template-columns: 1fr 1fr; }
+  .gap > div { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+  .gap > div:first-child { border-right: 1px solid var(--rule); }
+  .gap ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; }
+  .gap code { font-family: var(--f-data); font-size: 11.5px; }
+
+  footer { border-top: 1px solid var(--rule); padding-top: 20px; }
+
+  @media (max-width: 720px) {
+    .group { grid-template-columns: 1fr; gap: 12px; }
+    .group-title .note { max-width: none; }
+    .panel { border-right: 0; border-bottom: 1px solid var(--rule); }
+    .panel:last-child { border-bottom: 0; }
+    .gap { grid-template-columns: 1fr; }
+    .gap > div:first-child { border-right: 0; border-bottom: 1px solid var(--rule); }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <span class="eyebrow">内部工具 · 第三个面</span>
+    <h1>运营台</h1>
+    <p class="lede">
+      商家端回答「我的机器人今天怎么样」。这个台子只回答一个问题：<b>哪家店的钱或权，在接下来几天里会断。</b>
+    </p>
+  </header>
+
+  <!-- ── 主稿：到期队列 ───────────────────────── -->
+  <section>
+    <div class="sheet">
+      <div class="sheet-head">
+        <div>
+          <h2>到期队列</h2>
+          <p class="note">按剩余天数升序。先看最上面那行。</p>
+        </div>
+        <span class="data note">2026-08-31 · 6 家待处理 / 共 148 家</span>
+      </div>
+      <div class="scroll-x">
+        <table class="queue">
+          <thead>
+            <tr>
+              <th scope="col">店铺</th>
+              <th scope="col">归属账号</th>
+              <th scope="col">状态</th>
+              <th scope="col">窗口</th>
+              <th scope="col">剩余</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="shop">kettle-coffee</td>
+              <td class="owner">ops@kettle.co</td>
+              <td><span class="chip is-trial">试用</span></td>
+              <td class="runway-cell">
+                <div class="runway">
+                  <div class="runway-track" style="--i:0; --spent:86%">
+                    <div class="runway-spent"></div>
+                    <div class="runway-left" data-state="trial"></div>
+                    <div class="runway-now"></div>
+                  </div>
+                  <span class="runway-days" data-state="trial">2 天</span>
+                </div>
+              </td>
+              <td class="data note">14 天试用</td>
+            </tr>
+            <tr>
+              <td class="shop">nordic-cycles</td>
+              <td class="owner">mia@nordiccycles.se</td>
+              <td><span class="chip is-frozen">frozen</span></td>
+              <td class="runway-cell">
+                <div class="runway">
+                  <div class="runway-track" style="--i:1; --spent:87%">
+                    <div class="runway-spent"></div>
+                    <div class="runway-left" data-state="frozen"></div>
+                    <div class="runway-now"></div>
+                  </div>
+                  <span class="runway-days" data-state="frozen">4 天</span>
+                </div>
+              </td>
+              <td class="data note">30 天解冻期</td>
+            </tr>
+            <tr>
+              <td class="shop">studio-mano</td>
+              <td class="owner">hello@studiomano.jp</td>
+              <td><span class="chip is-ok">active</span></td>
+              <td class="runway-cell">
+                <div class="runway">
+                  <div class="runway-track" style="--i:2; --spent:80%">
+                    <div class="runway-spent"></div>
+                    <div class="runway-left" data-state="ok"></div>
+                    <div class="runway-now"></div>
+                  </div>
+                  <span class="runway-days" data-state="ok">6 天</span>
+                </div>
+              </td>
+              <td class="data note">计费周期</td>
+            </tr>
+            <tr>
+              <td class="shop">atlas-outfitters</td>
+              <td class="owner">mia@nordiccycles.se</td>
+              <td><span class="chip is-trial">试用</span></td>
+              <td class="runway-cell">
+                <div class="runway">
+                  <div class="runway-track" style="--i:3; --spent:36%">
+                    <div class="runway-spent"></div>
+                    <div class="runway-left" data-state="trial"></div>
+                    <div class="runway-now"></div>
+                  </div>
+                  <span class="runway-days" data-state="trial">9 天</span>
+                </div>
+              </td>
+              <td class="data note">14 天试用</td>
+            </tr>
+            <tr>
+              <td class="shop">verdant-home</td>
+              <td class="owner">team@verdant.home</td>
+              <td><span class="chip is-frozen">frozen</span></td>
+              <td class="runway-cell">
+                <div class="runway">
+                  <div class="runway-track" style="--i:4; --spent:40%">
+                    <div class="runway-spent"></div>
+                    <div class="runway-left" data-state="frozen"></div>
+                    <div class="runway-now"></div>
+                  </div>
+                  <span class="runway-days" data-state="frozen">18 天</span>
+                </div>
+              </td>
+              <td class="data note">30 天解冻期</td>
+            </tr>
+            <tr>
+              <td class="shop">maison-perle</td>
+              <td class="owner">contact@maisonperle.fr</td>
+              <td><span class="chip is-lost">cancelled</span></td>
+              <td class="runway-cell">
+                <div class="runway">
+                  <div class="runway-track" style="--i:5; --spent:100%">
+                    <div class="runway-spent"></div>
+                    <div class="runway-now"></div>
+                  </div>
+                  <span class="runway-days">已结束</span>
+                </div>
+              </td>
+              <td class="data note">8 月 24 日卸载</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="note">
+      跑道条是这个台子唯一的自选动作。同类产品的运营后台通常给一列状态点，
+      但真正驱动动作的三件事全是时间：试用还剩几天、计费周期哪天结束、
+      欠费后 Shopify 给的 30 天解冻期还剩多久。所以让「还剩多少路」当行的主体，
+      状态签退到旁边做注解。健康的店没有颜色——眼睛只该被要处理的行拽走。
+    </p>
+  </section>
+
+  <!-- ── 入口 ─────────────────────────────────── -->
+  <section>
+    <div class="section-head">
+      <span class="eyebrow">入口</span>
+      <h2>三道门，三种钥匙</h2>
+      <p class="note">同一套数据，三个互不重叠的面。谁能进、能看多远、能不能动钱，由门决定。</p>
+    </div>
+
+    <div class="doors">
+      <div class="sheet door">
+        <h3>Shopify Admin 内嵌</h3>
+        <div class="door-url">admin.shopify.com/store/&lt;店铺&gt;/apps/drsell</div>
+        <dl>
+          <div><dt>面向</dt><dd>商家本人，当前这一家店</dd></div>
+          <div><dt>认证</dt><dd>App Bridge session token，每次进入换发，不落 cookie</dd></div>
+          <div><dt>能做</dt><dd>装机向导、Widget 配置、单店对话、确认套餐扣费</dd></div>
+          <div><dt>不能</dt><dd>跨店，也看不到别的账号</dd></div>
+        </dl>
+      </div>
+
+      <div class="sheet door">
+        <h3>商家平台</h3>
+        <div class="door-url">drsell.szchada.top</div>
+        <dl>
+          <div><dt>面向</dt><dd>一个账号名下的所有店</dd></div>
+          <div><dt>认证</dt><dd>账号登录（邮箱 / Google）+ Membership 授权</dd></div>
+          <div><dt>能做</dt><dd>跨店总览、切店、坐席邀请、指定组内计费店</dd></div>
+          <div><dt>不能</dt><dd>在这里发起扣费——套餐确认必须回 Shopify Admin</dd></div>
+        </dl>
+      </div>
+
+      <div class="sheet door is-internal">
+        <h3>运营台</h3>
+        <div class="door-url">ops.drsell.szchada.top</div>
+        <dl>
+          <div><dt>面向</dt><dd>drsell 内部：支持、财务、我们自己</dd></div>
+          <div><dt>认证</dt><dd>superadmin + 强制两步验证 + IP 白名单</dd></div>
+          <div><dt>能做</dt><dd>全部账号、全部店铺、全部订阅与可用期</dd></div>
+          <div><dt>不能</dt><dd>无痕操作。代登录和改期一律写审计</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="sheet" style="padding: 20px; display: flex; flex-direction: column; gap: 10px;">
+      <h3>为什么运营台必须是独立域名</h3>
+      <p class="note">
+        商家端要活在 Shopify 的 iframe 里，它的 CSP、cookie 策略、frame-ancestors 全部被 Shopify 规定死；
+        运营台的要求正好相反——它需要严格的同源隔离和第一方 cookie。两者同源，等于商家端的任何一次 XSS
+        都能读到全租户数据。
+      </p>
+      <p class="note">
+        现状：<code class="data">apps/web/app/admin/page.tsx</code> 是个直接 redirect 到 <code class="data">/app</code> 的占位，
+        nginx 把 <code class="data">/admin</code> 指向 web:5012。改造时把它整体搬到独立 server_name，
+        <b>不要在商家端开 <code class="data">/admin</code> 路由</b>。
+      </p>
+    </div>
+  </section>
+
+  <!-- ── 功能清单 ─────────────────────────────── -->
+  <section>
+    <div class="section-head">
+      <span class="eyebrow">功能</span>
+      <h2>按「你来这里要干什么」分组</h2>
+      <p class="note">不按数据表分组。运营的一天是由几件具体的事组成的，导航就照着那几件事排。</p>
+    </div>
+
+    <div class="sheet" style="padding: 24px;">
+      <div class="groups">
+
+        <div class="group">
+          <div class="group-title">
+            <h3>账号</h3>
+            <p class="note">谁在用，名下有哪些店</p>
+          </div>
+          <div class="items">
+            <div class="item">
+              <span class="item-name">账号检索</span>
+              <span class="item-desc">邮箱、注册方式（密码 / Google）、名下店铺数、最近登录时间。支持按店铺域名反查账号——支持工单进来时手上只有域名。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">名下店铺</span>
+              <span class="item-desc">一个账号的 <code>Membership</code> 全景：每家店的角色是安装者还是被邀请的坐席，哪一家是组内计费店。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">代登录</span>
+              <span class="item-desc">以商家视角复现问题，进入即写审计、限时失效、顶部常驻横幅提示当前处于代登录。这是支持工作最省时间的一个工具，也是最需要留痕的一个。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">强制登出 / 发重置链接</span>
+              <span class="item-desc">吊销该账号全部会话，或发一封自助重置邮件。不看密码，也不代设密码。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">
+            <h3>店铺</h3>
+            <p class="note">钱与权都落在店铺这一层</p>
+          </div>
+          <div class="items">
+            <div class="item">
+              <span class="item-name">订阅状态</span>
+              <span class="item-desc">直接映射 Shopify 的 <code>AppSubscriptionStatus</code>，不自造一套状态词。我们这边只做镜像和解释，权威在 Shopify。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">计费店标记</span>
+              <span class="item-desc">Shopify 的计费接口按店收费，没有跨店合并账单。多店账号只能指定一家收全额、其余建 $0 charge。这一列必须一眼看清，改指定要能一键完成。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">套餐与额度</span>
+              <span class="item-desc">会话数与 AI 解决数的用量对比额度。同类产品普遍按 AI 解决数计价（Gorgias 每次 $0.90–1.00，Tidio 约 $0.50–0.65），额度设计要跟得上这个口径。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">超额与预估</span>
+              <span class="item-desc">本周期已超出的部分和预估金额。超额是商家最容易投诉的一栏，值要能追溯到哪几天冲上去的。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">授权范围</span>
+              <span class="item-desc">已授予的 scopes，缺失项标红。商品 / 订单同步失败十次里有八次是 scope 没给全。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">
+            <h3>可用期</h3>
+            <p class="note">每天要看的那一屏</p>
+          </div>
+          <div class="items">
+            <div class="item">
+              <span class="item-name">试用倒计时</span>
+              <span class="item-desc">试用最后 3 天进队列。这是转付费前唯一还能干预的窗口。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">计费周期结束日</span>
+              <span class="item-desc">下一次扣费的日期与金额。周期结束前若额度已用尽，同一行要能看出来。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">解冻窗口</span>
+              <span class="item-desc">欠费转 <code>FROZEN</code> 后，Shopify 在 30 天内恢复付款可自动解冻，逾期即进终态。这 30 天是唯一可挽回的时间，倒计时必须比状态词更醒目。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">手动延长试用</span>
+              <span class="item-desc">谁批的、批了几天、为什么——三样一起存，不然三个月后没人说得清这家店为什么一直免费。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">
+            <h3>排查</h3>
+            <p class="note">出事的时候</p>
+          </div>
+          <div class="items">
+            <div class="item">
+              <span class="item-name">安装 / 卸载事件流</span>
+              <span class="item-desc">webhook 原始记录与处理结果。卸载没收到会直接导致该店永远停在 active，账单继续挂着。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">同步任务状态</span>
+              <span class="item-desc">商品 / 订单 / 客户三条同步链路的最近一次结果、条数、失败原因，可重跑。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">AI 调用错误与配额</span>
+              <span class="item-desc">按店铺聚合的失败率与限流命中，用来判断是这家店的配置问题还是我们上游挂了。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">审计日志</span>
+              <span class="item-desc">谁、什么时候、对哪家店做了什么。代登录、改期、改套餐、改计费店全部入账。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title">
+            <h3>配置</h3>
+            <p class="note">改一次影响所有人</p>
+          </div>
+          <div class="items">
+            <div class="item">
+              <span class="item-name">套餐定义</span>
+              <span class="item-desc">价格、包含额度、超额单价、试用天数。改动只对新订阅生效，存量按签约时的快照走。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">功能开关</span>
+              <span class="item-desc">按账号或店铺灰度放量，新功能先给愿意当小白鼠的几家。</span>
+            </div>
+            <div class="item">
+              <span class="item-name">公告与维护窗口</span>
+              <span class="item-desc">写一次，商家端和内嵌端同时挂出。</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 店铺详情 ─────────────────────────────── -->
+  <section>
+    <div class="section-head">
+      <span class="eyebrow">主屏</span>
+      <h2>店铺详情</h2>
+      <p class="note">从队列点进来落在这里。钱、量、期三栏并排，动作在底部一行。</p>
+    </div>
+
+    <div class="sheet">
+      <div class="detail-head">
+        <div class="detail-id">
+          <span class="dom">nordic-cycles.myshopify.com</span>
+          <span class="note">归属 mia@nordiccycles.se · 名下 2 家店 · 安装于 2026-03-12</span>
+        </div>
+        <span class="chip is-frozen">frozen · 欠费</span>
+      </div>
+
+      <div class="panels">
+        <div class="panel">
+          <span class="eyebrow">计费</span>
+          <dl class="kv">
+            <div class="kv-row"><dt>套餐</dt><dd>Growth · $79/月</dd></div>
+            <div class="kv-row"><dt>Shopify 状态</dt><dd>FROZEN</dd></div>
+            <div class="kv-row"><dt>组内计费店</dt><dd>是</dd></div>
+            <div class="kv-row"><dt>Charge ID</dt><dd>gid://…/28451903</dd></div>
+            <div class="kv-row"><dt>上次成功扣费</dt><dd>2026-07-28</dd></div>
+          </dl>
+        </div>
+
+        <div class="panel">
+          <span class="eyebrow">本周期用量</span>
+          <div class="meter">
+            <div class="meter-top"><span>对话</span><b>2,840 / 3,000</b></div>
+            <div class="meter-track"><div class="meter-fill" style="--pct: 94.7%"></div></div>
+          </div>
+          <div class="meter">
+            <div class="meter-top"><span>AI 解决</span><b class="is-over">1,206 / 1,000</b></div>
+            <div class="meter-track"><div class="meter-fill is-over" style="--pct: 100%"></div></div>
+          </div>
+          <div class="meter">
+            <div class="meter-top"><span>坐席</span><b>3 / 5</b></div>
+            <div class="meter-track"><div class="meter-fill" style="--pct: 60%"></div></div>
+          </div>
+          <p class="note">超出 206 次 AI 解决，按 $0.90 计约 <b class="data">$185.40</b>，欠费解决前不出账。</p>
+        </div>
+
+        <div class="panel">
+          <span class="eyebrow">可用期</span>
+          <div class="countdown">
+            <span class="countdown-num" data-state="frozen">4</span>
+            <span class="countdown-unit">天后订阅终止</span>
+          </div>
+          <div class="runway runway--lg">
+            <div class="runway-track" style="--i:0; --spent:87%">
+              <div class="runway-spent"></div>
+              <div class="runway-left" data-state="frozen"></div>
+              <div class="runway-now"></div>
+            </div>
+          </div>
+          <dl class="kv">
+            <div class="kv-row"><dt>转冻结</dt><dd>2026-08-05</dd></div>
+            <div class="kv-row"><dt>解冻截止</dt><dd>2026-09-04</dd></div>
+            <div class="kv-row"><dt>逾期后果</dt><dd>订阅终止</dd></div>
+          </dl>
+          <p class="note">商家补缴即自动恢复，无需我们操作。逾期后只能重新走一次订阅。</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" type="button">发催缴提醒</button>
+        <button class="btn" type="button">延长解冻期</button>
+        <button class="btn" type="button">改指定计费店</button>
+        <button class="btn" type="button">重跑同步</button>
+        <button class="btn" type="button">代登录</button>
+        <button class="btn is-grave" type="button">停用聊天窗</button>
+      </div>
+    </div>
+    <p class="note">
+      按钮说的就是按下去会发生的事。「发催缴提醒」发出去之后的提示是「已发送催缴提醒」，不是「操作成功」。
+      危险动作只有一个，放在最右，用终态色——不做二次确认弹窗，做的是可撤销。
+    </p>
+  </section>
+
+  <!-- ── 状态机 ───────────────────────────────── -->
+  <section>
+    <div class="section-head">
+      <span class="eyebrow">依据</span>
+      <h2>状态由 Shopify 定，我们只做镜像</h2>
+      <p class="note">这是真正的时序，所以画成图。三个终态一旦进入不可回头，运营台要在进入前就把人拦下来。</p>
+    </div>
+
+    <div class="sheet machine scroll-x">
+      <svg viewBox="0 0 760 300" role="img" aria-label="Shopify 应用订阅状态机：PENDING 经商家批准转 ACTIVE，未批准两天转 EXPIRED，被拒转 DECLINED；ACTIVE 欠费转 FROZEN，付款恢复回 ACTIVE；ACTIVE 卸载或换订阅转 CANCELLED。DECLINED、EXPIRED、CANCELLED 为终态。">
+        <defs>
+          <marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L8,4 L0,8 z" fill="var(--ink-2)"></path>
+          </marker>
+        </defs>
+
+        <!-- edges -->
+        <path class="edge" d="M140,162 L292,162" marker-end="url(#ah)"></path>
+        <text class="lbl" x="216" y="152" text-anchor="middle">商家批准</text>
+
+        <path class="edge" d="M340,140 L340,82" marker-end="url(#ah)"></path>
+        <text class="lbl" x="332" y="115" text-anchor="end">欠费</text>
+
+        <path class="edge" d="M382,82 L382,140" marker-end="url(#ah)"></path>
+        <text class="lbl" x="392" y="115" text-anchor="start">30 天内付款恢复</text>
+
+        <path class="edge" d="M440,162 L582,162" marker-end="url(#ah)"></path>
+        <text class="lbl" x="511" y="152" text-anchor="middle">卸载 / 换订阅</text>
+
+        <path class="edge" d="M55,184 L55,238" marker-end="url(#ah)"></path>
+        <text class="lbl" x="63" y="216" text-anchor="start">拒绝</text>
+
+        <path class="edge" d="M115,184 L115,212 L235,212 L235,238" marker-end="url(#ah)"></path>
+        <text class="lbl" x="245" y="208" text-anchor="start">两天未批</text>
+
+        <!-- nodes -->
+        <rect class="box" x="20" y="140" width="120" height="44" rx="3"></rect>
+        <text x="80" y="167" text-anchor="middle">PENDING</text>
+
+        <rect class="box" x="292" y="140" width="148" height="44" rx="3"></rect>
+        <text x="366" y="167" text-anchor="middle">ACTIVE</text>
+
+        <rect class="box t-frozen" x="292" y="38" width="148" height="44" rx="3"></rect>
+        <text x="366" y="65" text-anchor="middle" fill="var(--frozen)">FROZEN</text>
+
+        <rect class="box t-lost" x="582" y="140" width="148" height="44" rx="3"></rect>
+        <text x="656" y="167" text-anchor="middle" fill="var(--lost)">CANCELLED</text>
+
+        <rect class="box t-lost" x="20" y="238" width="130" height="44" rx="3"></rect>
+        <text x="85" y="265" text-anchor="middle" fill="var(--lost)">DECLINED</text>
+
+        <rect class="box t-lost" x="170" y="238" width="130" height="44" rx="3"></rect>
+        <text x="235" y="265" text-anchor="middle" fill="var(--lost)">EXPIRED</text>
+      </svg>
+    </div>
+    <p class="note">
+      唯一有色的可恢复状态是 <b style="color: var(--frozen)">FROZEN</b>，因为它是唯一还能被我们的动作改变结局的。
+      终态用带删除线的锈色签，说明「记录还在，路已经断了」。
+    </p>
+  </section>
+
+  <!-- ── 现状对照 ─────────────────────────────── -->
+  <section>
+    <div class="section-head">
+      <span class="eyebrow">落地</span>
+      <h2>仓库里已经有什么</h2>
+    </div>
+    <div class="sheet gap">
+      <div>
+        <h3>已存在</h3>
+        <ul>
+          <li><code>apps/api/src/admin/</code> 三个端点：<code>dashboard</code> / <code>shops</code> / <code>users</code>，已挂 <code>@Auth()</code></li>
+          <li><code>Subscription</code> 表已有 <code>planCode</code> / <code>status</code> / <code>trialEnds</code></li>
+          <li><code>Shop.uninstalledAt</code> 已由卸载 webhook 写入</li>
+          <li>角色字段已区分 <code>superadmin</code></li>
+        </ul>
+      </div>
+      <div>
+        <h3>还缺</h3>
+        <ul>
+          <li>独立 server_name 与 IP 白名单——现在 <code>/admin</code> 还指着商家端</li>
+          <li><code>Membership</code> 表：账号与店铺的归属，运营台的「账号」一级建立在它之上</li>
+          <li>Shopify 订阅状态的回写：本地 <code>status</code> 目前不跟 <code>AppSubscriptionStatus</code> 同步</li>
+          <li>用量计数：<code>ChatStatDaily</code> 只记对话数，没有 AI 解决数与坐席数</li>
+          <li>审计表：代登录和改期还无处留痕</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p class="note">
+      调研来源：Shopify <code class="data">AppSubscriptionStatus</code> 枚举与应用扣费文档（含冻结 30 天恢复规则）、
+      Gorgias 与 Tidio 的计费与用量页公开文档、SaaS 管理后台功能综述。
+      配色与商家端的 Shopify 绿刻意分家——这两个面绝不该被认错。
+    </p>
+  </footer>
+
+</div>

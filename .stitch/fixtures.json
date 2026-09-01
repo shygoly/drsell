@@ -1,0 +1,112 @@
+{
+  "_说明": "阶段 C 的确定性数据源。由 scripts/stitch-ops-shoot.mjs 经 Playwright 路由拦截注入，不进产品代码（TBD-5 明令禁止把种子数据放回 lib/api.ts）。数据对齐 .stitch/rebuild/ 四屏，让 project.png 与 target.png 可比。",
+  "_基准时间": "2026-09-01T00:00:00.000Z —— 截图脚本会冻结 Date.now() 到这一刻，否则倒计时每天都在变，diff 不可复现。",
+
+  "/ops/me": { "email": "admin@drsell.szchada.top" },
+
+  "/ops/shops": [
+    { "shopDomain": "kettle-coffee.myshopify.com" },
+    { "shopDomain": "nordic-cycles.myshopify.com" },
+    { "shopDomain": "studio-mano.myshopify.com" },
+    { "shopDomain": "atlas-outfitters.myshopify.com" },
+    { "shopDomain": "verdant-home.myshopify.com" },
+    { "shopDomain": "maison-perle.myshopify.com" }
+  ],
+
+  "/ops/queue": [
+    {
+      "shopDomain": "kettle-coffee.myshopify.com", "status": "PENDING", "ownerEmail": "ops@kettle.co",
+      "daysRemaining": 2, "queueKind": "trial",
+      "windowStart": "2026-08-20T00:00:00.000Z", "windowEnd": "2026-09-03T00:00:00.000Z"
+    },
+    {
+      "shopDomain": "nordic-cycles.myshopify.com", "status": "FROZEN", "ownerEmail": "mia@nordiccycles.se",
+      "daysRemaining": 4, "queueKind": "unfreeze",
+      "windowStart": "2026-08-05T00:00:00.000Z", "windowEnd": "2026-09-04T00:00:00.000Z"
+    },
+    {
+      "shopDomain": "studio-mano.myshopify.com", "status": "ACTIVE", "ownerEmail": "hello@studiomano.jp",
+      "daysRemaining": 6, "queueKind": "period",
+      "windowStart": "2026-08-08T00:00:00.000Z", "windowEnd": "2026-09-07T00:00:00.000Z"
+    },
+    {
+      "shopDomain": "atlas-outfitters.myshopify.com", "status": "PENDING", "ownerEmail": "mia@nordiccycles.se",
+      "daysRemaining": 9, "queueKind": "trial",
+      "windowStart": "2026-08-27T00:00:00.000Z", "windowEnd": "2026-09-10T00:00:00.000Z"
+    },
+    {
+      "shopDomain": "verdant-home.myshopify.com", "status": "FROZEN", "ownerEmail": "team@verdant.home",
+      "daysRemaining": 18, "queueKind": "unfreeze",
+      "windowStart": "2026-08-19T00:00:00.000Z", "windowEnd": "2026-09-19T00:00:00.000Z"
+    },
+    {
+      "shopDomain": "maison-perle.myshopify.com", "status": "CANCELLED", "ownerEmail": "contact@maisonperle.fr",
+      "daysRemaining": 0, "queueKind": "period",
+      "windowStart": "2026-07-25T00:00:00.000Z", "windowEnd": "2026-08-24T00:00:00.000Z"
+    }
+  ],
+
+  "/ops/shops/nordic-cycles.myshopify.com": {
+    "shopDomain": "nordic-cycles.myshopify.com",
+    "status": "FROZEN",
+    "trialEnds": null,
+    "currentPeriodEnd": "2026-09-05T00:00:00.000Z",
+    "unfreezeBy": "2026-09-05T00:00:00.000Z",
+    "frozenAt": "2026-08-05T00:00:00.000Z",
+    "periodStart": "2026-08-05T00:00:00.000Z",
+    "isBillingShop": true,
+    "chatCount": 2840, "chatLimit": 3000,
+    "aiResolved": 1206, "aiResolvedLimit": 1000,
+    "agentSeats": 3, "agentSeatsLimit": 5,
+    "overQuotaNote": "超出 206 次 AI 解决，按 $0.90 计约 $185.40，欠费解决前不出账。",
+    "widgetVisible": true,
+    "ownerEmail": "mia@nordiccycles.se",
+    "accountShopCount": 2,
+    "installedAt": "2026-03-12T00:00:00.000Z",
+    "planCode": "growth", "planName": "Growth", "planPriceUsd": 79,
+    "shopifyChargeId": "gid://shopify/AppSubscription/28451903",
+    "lastSuccessfulChargeAt": "2026-07-28T00:00:00.000Z"
+  },
+
+  "/ops/accounts/usr_8849a01f": {
+    "id": "usr_8849a01f",
+    "email": "mia@nordiccycles.se",
+    "role": "owner",
+    "createdAt": "2026-02-02T00:00:00.000Z",
+    "authProvider": "google",
+    "lastLoginAt": "2026-08-31T22:00:00.000Z",
+    "totalShops": 2,
+    "shops": [
+      {
+        "shopDomain": "nordic-cycles.myshopify.com", "role": "owner", "status": "FROZEN",
+        "isBillingShop": true, "installedAt": "2026-03-12T00:00:00.000Z"
+      },
+      {
+        "shopDomain": "atlas-outfitters.myshopify.com", "role": "owner", "status": "PENDING",
+        "isBillingShop": false, "installedAt": "2026-08-22T00:00:00.000Z"
+      }
+    ],
+    "auditPreview": [
+      { "id": "a1", "actorEmail": "admin@drsell.szchada.top", "action": "shop.extend_freeze", "shopDomain": "nordic-cycles.myshopify.com", "result": "ok", "createdAt": "2026-08-31T14:32:01.000Z" },
+      { "id": "a2", "actorEmail": "admin@drsell.szchada.top", "action": "shop.dunning", "shopDomain": "nordic-cycles.myshopify.com", "result": "ok", "createdAt": "2026-08-31T14:15:22.000Z" },
+      { "id": "a3", "actorEmail": "ops@drsell.szchada.top", "action": "shop.impersonate", "shopDomain": "atlas-outfitters.myshopify.com", "result": "failed", "createdAt": "2026-08-30T13:58:10.000Z" },
+      { "id": "a4", "actorEmail": "admin@drsell.szchada.top", "action": "shop.resync", "shopDomain": "nordic-cycles.myshopify.com", "result": "ok", "createdAt": "2026-08-30T12:40:00.000Z" }
+    ]
+  },
+
+  "/ops/audit-logs": {
+    "total": 2481,
+    "limit": 50,
+    "offset": 0,
+    "items": [
+      { "id": "l1", "actorEmail": "admin_ops_01", "action": "shop.dunning", "shopDomain": "shop_9921_alpha", "result": "ok", "ip": "192.168.1.45", "createdAt": "2026-08-31T14:32:01.000Z" },
+      { "id": "l2", "actorEmail": "sys_auto_bot", "action": "shop.extend_freeze", "shopDomain": "shop_1044_beta", "result": "ok", "ip": "10.0.0.12", "createdAt": "2026-08-31T14:15:22.000Z" },
+      { "id": "l3", "actorEmail": "sec_admin_99", "action": "shop.impersonate", "shopDomain": "shop_7732_gamma", "result": "failed", "ip": "192.168.1.106", "createdAt": "2026-08-31T13:58:10.000Z" },
+      { "id": "l4", "actorEmail": "mgr_sales_v2", "action": "shop.billing_shop", "shopDomain": "shop_8810_delta", "result": "ok", "ip": "172.16.0.5", "createdAt": "2026-08-31T12:40:00.000Z" },
+      { "id": "l5", "actorEmail": "admin_ops_02", "action": "shop.dunning", "shopDomain": "shop_3319_eps", "result": "ok", "ip": "192.168.1.45", "createdAt": "2026-08-31T11:20:15.000Z" },
+      { "id": "l6", "actorEmail": "admin_ops_01", "action": "shop.resync", "shopDomain": "shop_9921_alpha", "result": "ok", "ip": "192.168.1.45", "createdAt": "2026-08-31T10:05:44.000Z" },
+      { "id": "l7", "actorEmail": "sys_auto_bot", "action": "shop.disable_widget", "shopDomain": "global_sys", "result": "ok", "ip": "10.0.0.12", "createdAt": "2026-08-31T09:30:12.000Z" },
+      { "id": "l8", "actorEmail": "admin_ops_03", "action": "shop.extend_freeze", "shopDomain": "shop_4455_zeta", "result": "ok", "ip": "192.168.1.88", "createdAt": "2026-08-31T08:15:00.000Z" }
+    ]
+  }
+}
