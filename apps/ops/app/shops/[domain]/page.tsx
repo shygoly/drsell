@@ -232,7 +232,7 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
 
         {/* 稿子里动作条是 main 的直接子元素，贴底满宽，不在内容容器的内边距里 */}
         {domain ? (
-          <div className="border-ink bg-card-surface sticky bottom-0 z-20 mt-auto shrink-0 border-t">
+          <div className="border-ink bg-card-surface sticky bottom-0 z-20 mt-auto shrink-0 border-t p-4 md:p-[16px]">
             <ShopActions
               domain={domain}
               onDone={reload}

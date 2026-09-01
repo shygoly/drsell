@@ -1,16 +1,15 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Gauge } from 'lucide-react';
-import { setToken } from '@/lib/api';
+import { setToken } from '@/lib/auth';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:3001/api';
 
-/**
- * 登录页。Stitch 四屏都没画这一屏，所以没有像素参照物 ——
- * 按侧栏品牌块的语言写：图标块 + 名称 + INTERNAL ONLY。不加插图、不加渐变。
- */
-export default function LoginPage() {
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -30,7 +29,8 @@ export default function LoginPage() {
       if (!res.ok) throw new Error('登录失败');
       const data = (await res.json()) as { accessToken: string };
       setToken(data.accessToken);
-      window.location.href = '/';
+      const next = searchParams.get('next');
+      router.replace(next && next.startsWith('/') ? next : '/');
     } catch {
       setError('邮箱或密码不正确，或该账号没有 superadmin 权限。');
     } finally {
@@ -103,5 +103,14 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+/** 登录页。Stitch 四屏都没画这一屏 —— 按侧栏品牌块语言写。 */
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="bg-page-bg min-h-screen" />}>
+      <LoginForm />
+    </Suspense>
   );
 }

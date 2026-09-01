@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight, ListFilter } from 'lucide-react';
 import { AuthGate } from '@/app/components/auth-gate';
 import { OpsShell } from '@/app/components/shell';
 import { queueAction, queueKindLabel, Runway, runwayState } from '@/app/components/runway';
 import { opsFetch, type QueueItem } from '@/lib/api';
+import { runQueueAction } from '@/lib/shop-actions';
 
 /** Stitch 稿的列比与格线：5 列网格，非 <table>。见 .stitch/rebuild/expiry_queue.html */
 const GRID = 'grid grid-cols-[1.5fr_1fr_1fr_2fr_1fr]';
@@ -35,9 +37,12 @@ function StatusChip({ status }: { status: string }) {
 }
 
 export default function HomePage() {
+  const router = useRouter();
   const [items, setItems] = useState<QueueItem[]>([]);
   const [totalShops, setTotalShops] = useState(0);
   const [error, setError] = useState('');
+  const [toast, setToast] = useState('');
+  const [busyDomain, setBusyDomain] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -51,12 +56,29 @@ export default function HomePage() {
       .catch((e) => setError(String(e.message ?? e)));
   }, []);
 
+  async function handleQueueAction(item: QueueItem) {
+    if (busyDomain) return;
+    setToast('');
+    setBusyDomain(item.shopDomain);
+    try {
+      const outcome = await runQueueAction(item);
+      if (outcome.type === 'navigate') {
+        router.push(outcome.href);
+      } else {
+        setToast(`${item.shopDomain.replace('.myshopify.com', '')}：${outcome.message}`);
+      }
+    } catch (e) {
+      setError(String((e as Error).message));
+    } finally {
+      setBusyDomain('');
+    }
+  }
+
   const today = new Date().toISOString().slice(0, 10);
 
   return (
     <AuthGate>
       <OpsShell active="queue" padded={false} chrome={false}>
-        {/* Header —— Stitch 稿 h-16，与主区同底 */}
         <header className="border-ink bg-card-surface flex h-16 items-center justify-between border-b px-[16px]">
           <h1 className="font-headline-md text-headline-md text-ink m-0">到期队列</h1>
           <div className="flex items-center gap-4">
@@ -72,6 +94,7 @@ export default function HomePage() {
 
         <div className="flex-1 overflow-auto p-[16px]">
           {error ? <p className="text-error mb-3 text-sm">{error}</p> : null}
+          {toast ? <p className="text-on-surface-variant mb-3 text-sm">{toast}</p> : null}
 
           <div className="bg-card-surface border-ink border shadow-none">
             <div className={`${GRID} border-ink bg-surface-container-low border-b`}>
@@ -84,6 +107,8 @@ export default function HomePage() {
 
             {items.map((item) => {
               const state = runwayState(item.queueKind, item.status);
+              const actionLabel = queueAction(item.queueKind, item.status);
+              const busy = busyDomain === item.shopDomain;
               return (
                 <div
                   key={item.shopDomain}
@@ -114,9 +139,11 @@ export default function HomePage() {
                   <div className="flex items-center justify-center px-3">
                     <button
                       type="button"
-                      className="bg-card-surface text-ink border-ink font-label-caps text-label-caps hover:bg-surface-container border px-3 py-1 transition-colors"
+                      disabled={busy}
+                      onClick={() => void handleQueueAction(item)}
+                      className="bg-card-surface text-ink border-ink font-label-caps text-label-caps hover:bg-surface-container border px-3 py-1 transition-colors disabled:opacity-50"
                     >
-                      {queueAction(item.queueKind, item.status)}
+                      {busy ? '…' : actionLabel}
                     </button>
                   </div>
                 </div>

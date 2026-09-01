@@ -3,7 +3,7 @@
 import { OpsSidebar } from '@/app/components/nav';
 
 type Props = {
-  active: 'queue' | 'shops' | 'accounts' | 'audit' | 'plans' | 'system';
+  active: 'queue' | 'shops' | 'accounts' | 'audit' | 'plans' | 'system' | 'impersonation';
   title?: string;
   subtitle?: string;
   meta?: string;

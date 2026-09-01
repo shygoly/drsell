@@ -67,7 +67,7 @@ function ImpersonationPage() {
 
   return (
     <AuthGate>
-      <OpsShell active="shops" padded={false}>
+      <OpsShell active="impersonation" padded={false}>
         <div className="flex min-h-full flex-col gap-4 overflow-auto p-4 md:p-6">
           {/* IMPERSONATION ACTIVE 条 */}
           <div className="border-outline-variant bg-primary-container flex flex-col items-start justify-between gap-3 rounded-lg border p-4 md:flex-row md:items-center">

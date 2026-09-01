@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Bell, ListFilter, Search, Settings } from 'lucide-react';
 import { AuthGate } from '@/app/components/auth-gate';
 import { OpsShell } from '@/app/components/shell';
-import { formatAuditAction, getToken, opsFetch, type AuditLogPage } from '@/lib/api';
+import { formatAuditAction, opsFetch, type AuditLogPage } from '@/lib/api';
 
 const ACTION_OPTIONS = [
   { value: '', label: '全部动作' },
@@ -35,10 +35,6 @@ export default function AuditPage() {
   const [range, setRange] = useState('7d');
   const [offset, setOffset] = useState(0);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (!getToken()) window.location.href = '/login';
-  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -179,7 +175,7 @@ export default function AuditPage() {
                       key={row.id}
                       className={
                         failed
-                          ? 'bg-error-container transition-colors'
+                          ? 'bg-error-container/20 transition-colors'
                           : 'hover:bg-surface-container transition-colors'
                       }
                     >

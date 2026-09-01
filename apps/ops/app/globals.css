@@ -106,34 +106,32 @@
   --color-ink: var(--ink);
   --color-page-bg: var(--stock);
   --color-card-surface: var(--sheet);
-  --color-surface: var(--sheet-3);
-  --color-surface-bright: var(--sheet-3);
-  --color-surface-container: var(--sheet-4);
+  --color-surface: var(--st-surface-dim);
+  --color-surface-bright: var(--st-surface-bright);
+  --color-surface-container: var(--st-surface-container);
   --color-surface-container-low: var(--st-surface-container-low);
   --color-surface-container-high: var(--st-surface-container-high);
-  --color-surface-container-highest: var(--rule-2);
-  --color-surface-variant: var(--rule-2);
+  --color-surface-container-highest: var(--st-surface-container-highest);
+  --color-surface-variant: var(--st-surface-variant);
   --color-surface-dim: var(--st-surface-dim);
-  --color-on-surface: var(--ink-alt);
-  --color-on-surface-variant: var(--ink-3);
+  --color-on-surface: var(--st-on-surface);
+  --color-on-surface-variant: var(--st-on-surface-variant);
   --color-outline: var(--st-outline);
-  --color-outline-variant: var(--rule-3);
+  --color-outline-variant: var(--st-outline-variant);
   --color-primary: var(--st-primary);
-  --color-primary-container: var(--ink);
-  --color-on-primary: var(--sheet);                      /* ⚠️ 原 #ffffff */
+  --color-primary-container: var(--st-primary-container);
+  --color-on-primary: var(--sheet);                      /* 原 #283044 → 深色 on-primary */
   --color-on-primary-container: var(--st-on-primary-container);
-  /* Stitch 的 secondary（实心紫 #5a4fb8）与 shadcn 的 secondary（次要表面）同名不同义，
-     注册它会把主按钮染成紫色 —— 不注册。
-     但 secondary-container（淡紫）只用于侧栏导航选中态：那是导航状态，
-     与订阅健康态正交，不违反「健康不给颜色」，故注册。 */
+  /* Stitch 的 secondary 与 shadcn secondary 同名不同义，不注册为 shadcn secondary。
+     secondary-container 只用于侧栏导航选中态，故注册。 */
   --color-secondary-container: var(--st-secondary-container);
   --color-on-secondary-container: var(--st-on-secondary-container);
   --color-trial-accent: var(--trial);
   --color-frozen-accent: var(--frozen);
-  --color-error: var(--lost);                            /* ⚠️ 原 #ba1a1a */
-  --color-error-container: var(--st-error-container);    /* ⚠️ 原 #ffdad6 */
-  --color-on-error: var(--sheet);                        /* ⚠️ 原 #ffffff */
-  --color-on-error-container: var(--lost);               /* ⚠️ 原 #93000a */
+  --color-error: var(--lost);                            /* Stitch error #ffb4ab */
+  --color-error-container: var(--st-error-container);    /* 重映射，原 #93000a 撞 DS-8 */
+  --color-on-error: var(--st-on-error);                  /* Stitch on-error #690005 */
+  --color-on-error-container: var(--st-on-error-container); /* 重映射，原 #ffdad6 撞 DS-8 */
   --color-tertiary-fixed: var(--st-tertiary-fixed);
 
   /* Stitch 字号阶（fontSize 名与 fontFamily 名同名，Tailwind v4 下分别注册） */

@@ -27,7 +27,7 @@ const ACTIVE =
 const IDLE =
   'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high';
 
-export function OpsSidebar({ active }: { active: (typeof LINKS)[number]['key'] }) {
+export function OpsSidebar({ active }: { active: (typeof LINKS)[number]['key'] | 'impersonation' }) {
   const [operatorEmail, setOperatorEmail] = useState<string | null>(null);
 
   useEffect(() => {

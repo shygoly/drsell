@@ -2,12 +2,11 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { History, Link2, LogIn, Store, User } from 'lucide-react';
+import { Check, History, KeyRound, Link2, LogIn, Store, User } from 'lucide-react';
 import { AuthGate } from '@/app/components/auth-gate';
 import { OpsShell } from '@/app/components/shell';
 import {
   formatAuditAction,
-  getToken,
   ImpersonateResult,
   openImpersonationSession,
   opsFetch,
@@ -38,7 +37,6 @@ export default function AccountDetailPage({ params }: { params: Promise<{ id: st
   const [id, setId] = useState('');
 
   useEffect(() => {
-    if (!getToken()) window.location.href = '/login';
     void params.then((p) => setId(p.id));
   }, [params]);
 
@@ -139,24 +137,36 @@ export default function AccountDetailPage({ params }: { params: Promise<{ id: st
                 </h3>
               </div>
               <div className={`${SHOP_GRID} border-ink bg-surface-container-low border-b`}>
-                <div className={HEAD}>店铺</div>
-                <div className={HEAD}>角色</div>
-                <div className={HEAD}>订阅</div>
-                <div className={HEAD}>计费店</div>
-                <div className={`${HEAD} border-r-0`}>安装时间</div>
+                <div className={HEAD}>店铺 (SHOP)</div>
+                <div className={HEAD}>角色 (ROLE)</div>
+                <div className={HEAD}>订阅 (SUBSCRIPTION)</div>
+                <div className={HEAD}>计费店 (BILLING)</div>
+                <div className={`${HEAD} border-r-0`}>安装时间 (INSTALLED)</div>
               </div>
               {shops.map((s) => (
                 <div
                   key={s.shopDomain}
-                  className={`${SHOP_GRID} border-ink hover:bg-surface-container-low h-[44px] border-b transition-colors last:border-b-0`}
+                  className={`${SHOP_GRID} border-ink hover:bg-surface-container-low border-b transition-colors last:border-b-0`}
                 >
                   <div className={`${CELL} truncate`}>
                     <Link href={`/shops/${encodeURIComponent(s.shopDomain)}`}>{s.shopDomain}</Link>
                   </div>
                   <div className={CELL}>{s.role === 'owner' ? '安装者' : '坐席'}</div>
-                  <div className={CELL}>{(s.status ?? '—').toUpperCase()}</div>
+                  <div className={CELL}>
+                    <span
+                      className={
+                        (s.status ?? '').toUpperCase() === 'FROZEN'
+                          ? 'bg-frozen-accent text-on-primary font-label-caps text-label-caps border-ink inline-flex items-center border px-2 py-0.5'
+                          : 'bg-surface text-on-surface-variant font-label-caps text-label-caps border-ink inline-flex items-center border px-2 py-0.5'
+                      }
+                    >
+                      {(s.status ?? '—').toUpperCase()}
+                    </span>
+                  </div>
                   {/* 不做成 checkbox —— 切换计费店是带审计的写操作，在店铺详情页完成 */}
-                  <div className={CELL}>{s.isBillingShop ? '收全额' : '$0'}</div>
+                  <div className={`${CELL} justify-center`} title={s.isBillingShop ? '收全额' : '$0'}>
+                    {s.isBillingShop ? <Check className="h-4 w-4" aria-hidden="true" /> : '—'}
+                  </div>
                   <div className={`${CELL} border-r-0`}>{fmtDate(s.installedAt)}</div>
                 </div>
               ))}
@@ -183,13 +193,20 @@ export default function AccountDetailPage({ params }: { params: Promise<{ id: st
               </div>
               <div className="divide-ink/15 flex flex-col divide-y">
                 {(account?.auditPreview ?? []).map((row) => (
-                  <div key={row.id} className="flex flex-col gap-0.5 p-3">
-                    <span className="text-ink text-[13px]">{formatAuditAction(row.action)}</span>
-                    <span className="font-data-mono text-on-surface-variant text-[11px]">
-                      {row.actorEmail} · {relTime(row.createdAt)}
-                      {row.result !== 'ok' ? (
-                        <span className="text-error font-bold"> · 失败</span>
-                      ) : null}
+                  <div key={row.id} className="flex items-start gap-3 p-3">
+                    <span className="border-ink bg-surface flex h-8 w-8 shrink-0 items-center justify-center border">
+                      <KeyRound className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <span className="font-data-mono text-ink text-[13px]">
+                        {formatAuditAction(row.action)}
+                      </span>
+                      <span className="font-data-mono text-on-surface-variant text-[11px]">
+                        {row.actorEmail} · {relTime(row.createdAt)}
+                        {row.result !== 'ok' ? (
+                          <span className="text-error font-bold"> · 失败</span>
+                        ) : null}
+                      </span>
                     </span>
                   </div>
                 ))}
