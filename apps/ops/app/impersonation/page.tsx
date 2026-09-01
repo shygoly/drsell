@@ -3,7 +3,16 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { ExternalLink, LogOut, ShieldAlert, Timer } from 'lucide-react';
+import {
+  CreditCard,
+  ExternalLink,
+  LogOut,
+  Package,
+  ScrollText,
+  ShieldAlert,
+  Timer,
+  User,
+} from 'lucide-react';
 import { AuthGate } from '@/app/components/auth-gate';
 import { OpsShell } from '@/app/components/shell';
 import {
@@ -39,7 +48,7 @@ function ImpersonationPage() {
       .then(setDetail)
       .catch(() => undefined);
     opsFetch<AuditLogPage>(
-      `/ops/audit-logs?q=${encodeURIComponent(shop)}&action=shop.impersonate&limit=6&offset=0`,
+      `/ops/audit-logs?q=${encodeURIComponent(shop)}&limit=4&offset=0`,
     )
       .then(setAudit)
       .catch(() => undefined);
@@ -100,103 +109,185 @@ function ImpersonationPage() {
   return (
     <AuthGate>
       <OpsShell active="impersonation" padded={false} banner={banner}>
-        <div className="flex min-h-full flex-col gap-4 overflow-auto p-4 md:p-6">
-          {/* 店铺概览 */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div className="bg-primary-container border-outline-variant rounded-lg border p-4">
-              <div className="text-on-surface-variant font-label-caps mb-1 text-[10px] uppercase">
-                Subscription Status
+        {/* 逐字移植自 designs/07_Active_Support_Session_(Impersonation).html 的 <main>。
+            稿子那三张卡是商户业务数据（Total Revenue / Active Orders / Customers），
+            /ops/* 无对应接口 —— 结构照搬，字段换成我们真有数据源的三项。
+            左表同理：稿子是 Recent Orders，我们用店铺审计事件。 */}
+        <main className="bg-background flex-1 overflow-y-auto p-[24px]">
+          <div className="mx-auto max-w-7xl space-y-6">
+            {/* Dashboard Header */}
+            <div className="border-outline-variant flex items-end justify-between border-b pb-4">
+              <div>
+                <h1 className="font-display-sm text-display-sm text-on-surface m-0">
+                  {shop || '—'} 支援会话
+                </h1>
+                <p className="font-body-md text-body-md text-on-surface-variant m-0 mt-1">
+                  以商户视角排查问题，本会话全程写审计。
+                </p>
               </div>
-              <div className="text-on-surface font-display text-2xl font-bold">
-                {detail?.status?.toUpperCase() ?? '—'}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={openMerchant}
+                  className="bg-surface-container text-on-surface border-outline-variant hover:bg-surface-variant font-label-caps text-label-caps flex items-center gap-2 rounded border px-4 py-2 transition-colors"
+                >
+                  <ExternalLink className="h-[18px] w-[18px]" aria-hidden="true" />
+                  进入商户端
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearToken();
+                    window.location.href = '/login';
+                  }}
+                  className="bg-primary text-on-primary hover:bg-primary/90 font-label-caps text-label-caps flex items-center gap-2 rounded px-4 py-2 transition-colors"
+                >
+                  <LogOut className="h-[18px] w-[18px]" aria-hidden="true" />
+                  结束会话
+                </button>
               </div>
             </div>
-            <div className="bg-primary-container border-outline-variant rounded-lg border p-4">
-              <div className="text-on-surface-variant font-label-caps mb-1 text-[10px] uppercase">
-                Plan
-              </div>
-              <div className="text-on-surface font-data-mono text-sm">
-                {detail?.planName ?? detail?.planCode ?? '—'}
-              </div>
-            </div>
-            <div className="bg-primary-container border-outline-variant rounded-lg border p-4">
-              <div className="text-on-surface-variant font-label-caps mb-1 text-[10px] uppercase">
-                Owner
-              </div>
-              <div className="text-on-surface font-data-mono text-sm">
-                {detail?.ownerEmail ?? '—'}
-              </div>
-            </div>
-          </div>
 
-          {/* 稿子屏 07：左宽表 + 右 Impersonation Context */}
-          <div className="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-3">
-            <div className="bg-primary-container border-outline-variant rounded-lg border lg:col-span-2">
-              <div className="border-outline-variant flex items-center justify-between border-b px-4 py-3">
-                <h2 className="text-on-surface m-0 text-sm font-bold">最近店铺事件</h2>
-                <Link href="/audit" className="text-secondary text-[12px] no-underline">
-                  View All
-                </Link>
+            {/* Bento Grid Layout */}
+            <div className="grid grid-cols-12 gap-[12px]">
+            <div className="bg-primary-container border-outline-variant group relative col-span-12 overflow-hidden rounded border p-4 md:col-span-4">
+              <div className="from-primary/5 pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent" />
+              <div className="relative z-10 mb-4 flex items-start justify-between">
+                <div className="text-on-surface-variant font-body-sm flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" aria-hidden="true" /> 订阅状态
+                </div>
               </div>
-              <div className="flex flex-col">
-                {(audit?.items ?? []).map((row) => (
-                  <div
-                    key={row.id}
-                    className="border-outline-variant font-data-mono text-on-surface-variant flex items-center justify-between gap-3 border-b px-4 py-2.5 text-[12px] last:border-b-0"
+              <div className="font-display-sm text-display-sm text-on-surface relative z-10">{detail?.status?.toUpperCase() ?? '—'}</div>
+              <div className="text-data-mono font-data-mono text-on-surface-variant/70 mt-2 text-[10px]">当前 Shopify 订阅状态</div>
+            </div>
+            <div className="bg-primary-container border-outline-variant group relative col-span-12 overflow-hidden rounded border p-4 md:col-span-4">
+              <div className="from-secondary/5 pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent" />
+              <div className="relative z-10 mb-4 flex items-start justify-between">
+                <div className="text-on-surface-variant font-body-sm flex items-center gap-2">
+                  <Package className="h-4 w-4" aria-hidden="true" /> 套餐
+                </div>
+              </div>
+              <div className="font-display-sm text-display-sm text-on-surface relative z-10">{detail?.planName ?? detail?.planCode ?? '—'}</div>
+              <div className="text-data-mono font-data-mono text-on-surface-variant/70 mt-2 text-[10px]">本店计费套餐</div>
+            </div>
+            <div className="bg-primary-container border-outline-variant group relative col-span-12 overflow-hidden rounded border p-4 md:col-span-4">
+              <div className="from-tertiary/5 pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent" />
+              <div className="relative z-10 mb-4 flex items-start justify-between">
+                <div className="text-on-surface-variant font-body-sm flex items-center gap-2">
+                  <User className="h-4 w-4" aria-hidden="true" /> 归属
+                </div>
+              </div>
+              <div className="font-display-sm text-display-sm text-on-surface relative z-10">{detail?.ownerEmail ?? '—'}</div>
+              <div className="text-data-mono font-data-mono text-on-surface-variant/70 mt-2 text-[10px]">账号所有者</div>
+            </div>
+
+              {/* Recent Events Table (Dense) */}
+              <div className="bg-surface-container border-outline-variant col-span-12 flex flex-col rounded border lg:col-span-8">
+                <div className="border-outline-variant flex items-center justify-between border-b p-4">
+                  <h2 className="font-headline-md text-headline-md text-on-surface m-0">最近店铺事件</h2>
+                  <Link href="/audit" className="text-primary font-body-sm no-underline hover:underline">
+                    全部
+                  </Link>
+                </div>
+                <div className="flex-1 overflow-x-auto">
+                  <table className="font-body-sm w-full text-left">
+                    <thead className="text-on-surface-variant font-label-caps text-label-caps border-outline-variant bg-surface-container-highest sticky top-0 border-b">
+                      <tr>
+                        <th className="px-4 py-2 font-medium">时间</th>
+                        <th className="px-4 py-2 font-medium">操作者</th>
+                        <th className="px-4 py-2 font-medium">动作</th>
+                        <th className="px-4 py-2 text-right font-medium">结果</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-outline-variant/50 divide-y">
+                      {(audit?.items ?? []).map((row) => {
+                        const failed = row.result !== 'ok';
+                        return (
+                          <tr
+                            key={row.id}
+                            className={`hover:bg-surface-variant/50 h-[32px] transition-colors${failed ? ' bg-error/5' : ''}`}
+                          >
+                            <td className="font-data-mono text-primary px-4 py-1">
+                              {row.createdAt.slice(11, 19)}
+                            </td>
+                            <td className="text-on-surface px-4 py-1">{row.actorEmail}</td>
+                            <td className="px-4 py-1">
+                              <span
+                                className={
+                                  failed
+                                    ? 'bg-error/10 text-error font-label-caps inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px]'
+                                    : 'bg-primary/10 text-primary font-label-caps inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px]'
+                                }
+                              >
+                                <span className={failed ? 'bg-error h-1.5 w-1.5 rounded-full' : 'bg-primary h-1.5 w-1.5 rounded-full'} />
+                                {formatAuditAction(row.action)}
+                              </span>
+                            </td>
+                            <td className="font-data-mono px-4 py-1 text-right">
+                              {failed ? 'FAIL' : 'OK'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Admin Audit Context Pane */}
+              <div className="bg-surface-container-highest border-amber-500/50 relative col-span-12 flex flex-col overflow-hidden rounded border shadow-[0_0_15px_rgba(245,158,11,0.05)] lg:col-span-4">
+                <div className="from-amber-500/0 via-amber-500 to-amber-500/0 absolute left-0 top-0 h-1 w-full bg-gradient-to-r opacity-50" />
+                <div className="border-outline-variant bg-surface-container-low flex items-center justify-between border-b p-4">
+                  <h2 className="font-headline-md text-headline-md text-amber-500 m-0 flex items-center gap-2">
+                    <ShieldAlert className="h-[18px] w-[18px]" aria-hidden="true" />
+                    Impersonation Context
+                  </h2>
+                </div>
+                <div className="flex-1 space-y-4 p-4">
+                  <div className="bg-surface-container border-outline-variant text-body-sm rounded border p-3">
+                    <div className="text-on-surface-variant font-label-caps mb-1">Target Merchant</div>
+                    <div className="font-data-mono text-on-surface text-[11px]">Store: {shop || '—'}</div>
+                    <div className="mt-1 font-medium">{email || '—'}</div>
+                  </div>
+                  <div>
+                    <div className="text-on-surface-variant font-label-caps mb-2">
+                      Live Audit Trail
+                    </div>
+                    <div className="bg-canvas-deep border-card-border font-data-mono text-on-surface-variant/80 h-32 space-y-1 overflow-y-auto rounded border p-2 text-[10px]">
+                      <div className="flex gap-2">
+                        <span className="text-primary">[{remaining ?? '--:--'}]</span>
+                        <span>SESSION_START</span>
+                        <span className="text-on-surface truncate">INIT IMPERSONATION → {shop || '—'}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-primary">[{remaining ?? '--:--'}]</span>
+                        <span>ACTOR</span>
+                        <span className="text-on-surface truncate">{email || '—'}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-primary">[{remaining ?? '--:--'}]</span>
+                        <span>REASON</span>
+                        <span className="text-amber-400 truncate">{reason}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-primary">[{remaining ?? '--:--'}]</span>
+                        <span className="animate-pulse text-amber-500">AWAITING_INPUT</span>
+                        <span className="text-on-surface">...</span>
+                      </div>
+                    </div>
+                  </div>
+                  <Link
+                    href="/audit"
+                    className="bg-surface-container hover:bg-surface-variant border-outline-variant text-on-surface font-label-caps text-label-caps mt-auto flex w-full items-center justify-center gap-2 rounded border py-2 no-underline transition-colors"
                   >
-                    <span className="text-on-surface shrink-0">
-                      {row.createdAt.slice(0, 19).replace('T', ' ')}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate text-right">
-                      {row.actorEmail} · {formatAuditAction(row.action)}
-                    </span>
-                    <span
-                      className={
-                        row.result === 'ok'
-                          ? 'text-on-surface-variant w-10 shrink-0 text-right'
-                          : 'text-error w-10 shrink-0 text-right font-bold'
-                      }
-                    >
-                      {row.result === 'ok' ? 'OK' : 'FAIL'}
-                    </span>
-                  </div>
-                ))}
-                {!audit?.items.length ? (
-                  <div className="text-on-surface-variant px-4 py-6 text-[12px]">
-                    暂无代登录审计记录
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="bg-primary-container border-amber-500 rounded-lg border">
-              <h2 className="text-amber-400 border-outline-variant m-0 flex items-center gap-2 border-b px-4 py-3 text-sm font-bold">
-                <ShieldAlert className="h-4 w-4" aria-hidden="true" />
-                Impersonation Context
-              </h2>
-              <div className="flex flex-col gap-4 p-4">
-                <div className="border-outline-variant bg-surface-container-high rounded border p-3">
-                  <div className="text-on-surface-variant font-label-caps mb-1 text-[10px] uppercase">
-                    Target Merchant
-                  </div>
-                  <div className="font-data-mono text-on-surface-variant text-[11px]">
-                    Store: {shop || '—'}
-                  </div>
-                  <div className="text-on-surface mt-1 text-[13px]">{email || '—'}</div>
-                </div>
-                <div>
-                  <div className="text-on-surface mb-2 text-[13px]">Live Audit Trail</div>
-                  <pre className="border-outline-variant bg-background text-on-surface-variant m-0 overflow-x-auto rounded border p-3 font-data-mono text-[11px] leading-relaxed">
-{`[${remaining ?? '--:--'}] SESSION_START  INIT IMPERSONATION → ${shop || '—'}
-[${remaining ?? '--:--'}] ACTOR          ${email || '—'}
-[${remaining ?? '--:--'}] REASON         ${reason}
-[${remaining ?? '--:--'}] AWAITING_INPUT ...`}
-                  </pre>
+                    <ScrollText className="h-4 w-4" aria-hidden="true" />
+                    查看完整审计日志
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </OpsShell>
     </AuthGate>
   );
