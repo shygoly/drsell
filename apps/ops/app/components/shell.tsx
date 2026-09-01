@@ -14,6 +14,11 @@ type Props = {
   padded?: boolean;
   /** 保留参数（历史调用兼容）。壳本身不再叠加第二层顶栏。 */
   chrome?: boolean;
+  /**
+   * 置顶通栏。稿子屏 07 把冒名横幅放在全局顶栏**之上**（y 0-63），
+   * 其余层依次下移；有 banner 时不再叠加 REC 审计条（稿子 07 也没有）。
+   */
+  banner?: React.ReactNode;
   children: React.ReactNode;
 };
 
@@ -40,9 +45,10 @@ function GlobalAuditBar() {
  * spacing 令牌按 skill 门禁第 5 条不迁移，一律 arbitrary：
  * row-height-standard 48px / container-padding 24px。
  */
-function GlobalTopBar() {
+function GlobalTopBar({ offsetTop = 0 }: { offsetTop?: number }) {
   return (
-    <header className="bg-surface-container-highest border-outline-variant fixed top-0 z-[60] flex h-[48px] w-full items-center justify-between border-b px-[24px]">
+    <header className="bg-surface-container-highest border-outline-variant fixed z-[60] flex h-[48px] w-full items-center justify-between border-b px-[24px]"
+      style={{ top: offsetTop }}>
       <div className="flex h-full min-w-0 items-center gap-6">
         <span className="font-headline-md text-headline-md text-primary flex shrink-0 items-center whitespace-nowrap font-bold">
           drsell Admin
@@ -106,13 +112,21 @@ function GlobalTopBar() {
   );
 }
 
-export function OpsShell({ active, title, subtitle, meta, padded = true, children }: Props) {
+export function OpsShell({ active, title, subtitle, meta, padded = true, banner, children }: Props) {
   return (
     <div className="bg-background min-h-screen">
-      <GlobalTopBar />
-      <GlobalAuditBar />
-      <OpsSidebar active={active} />
-      <div className="ml-[240px] flex min-h-screen min-w-0 flex-col pt-[80px]">
+      {banner ? (
+        <div className="fixed top-0 z-[70] h-16 w-full">{banner}</div>
+      ) : null}
+      <div className={banner ? 'top-16' : 'top-0'} data-topbar-slot>
+        <GlobalTopBar offsetTop={banner ? 64 : 0} />
+      </div>
+      {banner ? null : <GlobalAuditBar />}
+      <OpsSidebar active={active} offsetTop={banner ? 112 : 80} />
+      <div
+        className="ml-[240px] flex min-h-screen min-w-0 flex-col"
+        style={{ paddingTop: banner ? 112 : 80 }}
+      >
         <main
           className={
             padded

@@ -27,7 +27,13 @@ const ACTIVE =
 const IDLE =
   'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high';
 
-export function OpsSidebar({ active }: { active: (typeof LINKS)[number]['key'] | 'impersonation' }) {
+export function OpsSidebar({
+  active,
+  offsetTop = 80,
+}: {
+  active: (typeof LINKS)[number]['key'] | 'impersonation';
+  offsetTop?: number;
+}) {
   const [operatorEmail, setOperatorEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,7 +43,8 @@ export function OpsSidebar({ active }: { active: (typeof LINKS)[number]['key'] |
   }, []);
 
   return (
-    <aside className="bg-surface-container-low border-outline-variant fixed left-0 top-[80px] z-40 flex h-[calc(100vh-80px)] w-[240px] shrink-0 flex-col border-r py-4">
+    <aside className="bg-surface-container-low border-outline-variant fixed left-0 z-40 flex w-[240px] shrink-0 flex-col border-r py-4"
+      style={{ top: offsetTop, height: `calc(100vh - ${offsetTop}px)` }}>
       <div className="mb-8 flex items-center gap-3 px-4">
         <div className="bg-primary text-on-primary flex h-8 w-8 items-center justify-center rounded">
           <span className="font-data text-[11px] font-bold">DS</span>
