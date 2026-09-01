@@ -1,0 +1,80 @@
+/* apps/ops/app/tokens.css — ADR-12 运营台设计令牌（三态） */
+:root {
+  --stock:   #e6ebe7;
+  --sheet:   #fafcfa;
+  --sheet-2: #f1f4f1;
+  --ink:     #14211e;
+  --ink-2:   #55635d;
+  --rule:    #c4cdc7;
+  --trial:   #4b3fa8;
+  --frozen:  #a66009;
+  --lost:    #8e3b2f;
+
+  /* Stitch 稿实测扩充（用量 ≥4，见 .stitch/spec/*.spec.json） */
+  --ink-alt: #171d1b;
+  --ink-3:   #424846;
+  --sheet-3: #f6fbf6;
+  --sheet-4: #eaefeb;
+  --rule-2:  #dfe4e0;
+  --rule-3:  #c2c8c5;
+  --tint-trial:  rgba(75, 63, 168, .1);
+  --tint-frozen: rgba(166, 96, 9, .12);
+  --tint-lost:   rgba(142, 59, 47, .1);
+  --shadow: 0 1px 2px rgba(20, 33, 30, .06), 0 8px 24px -16px rgba(20, 33, 30, .3);
+
+  --f-display: "Bricolage Grotesque", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --f-body: "Instrument Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --f-data: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --stock:   #101614;
+    --sheet:   #19201d;
+    --sheet-2: #212926;
+    --ink:     #e3eae5;
+    --ink-2:   #93a19b;
+    --rule:    #2f3a36;
+    --trial:   #9a8fee;
+    --frozen:  #e0a03c;
+    --lost:    #e08878;
+    --ink-alt: #eef2ef;
+    --ink-3:   #a8b4ae;
+    --sheet-3: #141a18;
+    --sheet-4: #232b28;
+    --rule-2:  #29332f;
+    --rule-3:  #3a4642;
+    --tint-trial:  rgba(154, 143, 238, .14);
+    --tint-frozen: rgba(224, 160, 60, .14);
+    --tint-lost:   rgba(224, 136, 120, .13);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+    --f-display: "Bricolage Grotesque", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --f-body: "Instrument Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --f-data: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+}
+
+:root[data-theme="dark"] {
+  --stock:   #101614;
+  --sheet:   #19201d;
+  --sheet-2: #212926;
+  --ink:     #e3eae5;
+  --ink-2:   #93a19b;
+  --rule:    #2f3a36;
+  --trial:   #9a8fee;
+  --frozen:  #e0a03c;
+  --lost:    #e08878;
+  --ink-alt: #eef2ef;
+  --ink-3:   #a8b4ae;
+  --sheet-3: #141a18;
+  --sheet-4: #232b28;
+  --rule-2:  #29332f;
+  --rule-3:  #3a4642;
+  --tint-trial:  rgba(154, 143, 238, .14);
+  --tint-frozen: rgba(224, 160, 60, .14);
+  --tint-lost:   rgba(224, 136, 120, .13);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+  --f-display: "Bricolage Grotesque", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --f-body: "Instrument Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --f-data: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
