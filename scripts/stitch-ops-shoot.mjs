@@ -101,9 +101,18 @@ for (const { name, path } of PAGES) {
       continue;
     }
     // dev 工具徽标压在侧栏尾部，会污染 diff —— 截前藏掉。
-    // （不要动 position：曾试过全局 position:static，既无必要又打乱了绝对定位元素。）
     await page.addStyleTag({
       content: 'nextjs-portal, [data-nextjs-dev-tools-button], #__next-build-watcher { display: none !important; }',
+    });
+    // Chromium 截高于视口的图时按块重绘，position:sticky 的元素会在页尾被再画一遍
+    // （DOM 里只有一份，实测 querySelectorAll 计数为 1）。只改 sticky，不动其它定位 ——
+    // 曾试过全局 position:static，打乱了绝对定位元素。
+    await page.evaluate(() => {
+      for (const el of document.querySelectorAll('*')) {
+        if (getComputedStyle(el).position === 'sticky') {
+          el.style.position = 'relative';
+        }
+      }
     });
     await page.waitForTimeout(200);
 
