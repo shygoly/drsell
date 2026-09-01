@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Search, Store, User } from 'lucide-react';
+import { ArrowRight, Search, Store, User, UserCog } from 'lucide-react';
 import { AuthGate } from '@/app/components/auth-gate';
 import { OpsShell } from '@/app/components/shell';
 import { opsFetch, type AccountSummary } from '@/lib/api';
@@ -85,15 +85,28 @@ export default function AccountsPage() {
 
   return (
     <AuthGate>
-      <OpsShell
-        chrome="both"
-        active="accounts"
-        title="Account Search & Directory"
-        subtitle="Global directory for merchant accounts, cross-store roles, and billing designation."
-      >
-        <div className="grid grid-cols-12 gap-4">
+      <OpsShell chrome="both" active="accounts" padded={false}>
+        {/* 逐字移植自 designs/02_Accounts_&_Membership_Overview.html 的 <main> 外框：
+            p-container-padding(24) / gap-6 / bg-[#020617] / 栅格 xl:grid-cols-12 gap-6 */}
+        <main className="bg-canvas-deep relative flex flex-col gap-6 p-[24px]">
+          <div className="from-primary/5 pointer-events-none absolute right-0 top-0 h-64 w-1/2 bg-gradient-to-bl to-transparent" />
+
+          {/* Page Header */}
+          <div className="border-outline-variant relative z-10 flex flex-col items-start justify-between gap-4 border-b pb-4 md:flex-row md:items-end">
+            <div>
+              <h1 className="font-display-sm text-display-sm text-on-surface m-0 mb-1 flex items-center gap-3">
+                <UserCog className="text-primary h-7 w-7" aria-hidden="true" />
+                账号检索与目录
+              </h1>
+              <p className="font-body-sm text-body-sm text-on-surface-variant m-0">
+                跨店角色、计费归属与账号反查（Stitch 02）
+              </p>
+            </div>
+          </div>
+
+          <div className="relative z-10 grid min-h-0 flex-1 grid-cols-1 items-start gap-6 xl:grid-cols-12">
           {/* 左：Lookup + 结果表 */}
-          <div className="col-span-12 flex flex-col gap-4 xl:col-span-8">
+          <div className="col-span-12 flex h-full flex-col gap-4 xl:col-span-7">
             <div className="bg-primary-container border-outline-variant rounded-lg border p-4">
               <div className="flex flex-wrap items-end gap-3">
                 <label className="flex flex-col gap-1">
@@ -271,7 +284,8 @@ export default function AccountsPage() {
               )}
             </div>
           </div>
-        </div>
+          </div>
+        </main>
       </OpsShell>
     </AuthGate>
   );
