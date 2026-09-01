@@ -2,7 +2,12 @@
 
 import { useState } from 'react';
 import { Ban, LogIn, Megaphone, RefreshCw, Repeat2, TimerReset } from 'lucide-react';
-import { ImpersonateResult, openImpersonationSession, opsFetch } from '@/lib/api';
+import {
+  extendFreeze,
+  impersonateShop,
+  postShopAction,
+  sendDunning,
+} from '@/lib/shop-actions';
 
 type Props = {
   domain: string;
@@ -19,16 +24,13 @@ export function ShopActions({ domain, widgetVisible, onDone }: Props) {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState('');
 
-  async function act(path: string, label: string, body: object = {}) {
+  async function act(path: string, fallback: string, body: object = {}) {
     setErr('');
     setMsg('');
     setBusy(path);
     try {
-      const res = await opsFetch<{ message?: string }>(
-        `/ops/shops/${encodeURIComponent(domain)}/${path}`,
-        { method: 'POST', body: JSON.stringify(body) },
-      );
-      setMsg(res?.message ?? label);
+      const res = await postShopAction(domain, path, body);
+      setMsg(res?.message ?? fallback);
       onDone();
     } catch (e) {
       setErr(String((e as Error).message));
@@ -37,17 +39,28 @@ export function ShopActions({ domain, widgetVisible, onDone }: Props) {
     }
   }
 
-  async function impersonate() {
+  async function onDunning() {
+    setErr('');
+    setMsg('');
+    setBusy('dunning');
+    try {
+      const res = await sendDunning(domain);
+      setMsg(res.message ?? '已排队催缴提醒');
+      onDone();
+    } catch (e) {
+      setErr(String((e as Error).message));
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function onImpersonate() {
     setErr('');
     setMsg('');
     setBusy('impersonate');
     try {
-      const res = await opsFetch<ImpersonateResult>(
-        `/ops/shops/${encodeURIComponent(domain)}/impersonate`,
-        { method: 'POST', body: JSON.stringify({}) },
-      );
-      openImpersonationSession(res);
-      setMsg('已打开商户端代登录窗口');
+      const res = await impersonateShop(domain);
+      setMsg(res.message ?? '已打开商户端代登录窗口');
       onDone();
     } catch (e) {
       setErr(String((e as Error).message));
@@ -56,8 +69,7 @@ export function ShopActions({ domain, widgetVisible, onDone }: Props) {
     }
   }
 
-  /** 延长天数不占动作条的位置：点按钮时问一次，默认 7 天 */
-  function extendFreeze() {
+  function onExtendFreeze() {
     const input = window.prompt('延长解冻期多少天？（1–30）', '7');
     if (input === null) return;
     const days = Number(input);
@@ -65,22 +77,24 @@ export function ShopActions({ domain, widgetVisible, onDone }: Props) {
       setErr('天数需要是 1 到 30 之间的整数。');
       return;
     }
-    void act('extend-freeze', `已延长解冻期 ${days} 天`, { days });
+    setBusy('extend-freeze');
+    extendFreeze(domain, days)
+      .then((res) => {
+        setMsg(res.message ?? `已延长解冻期 ${days} 天`);
+        onDone();
+      })
+      .catch((e) => setErr(String((e as Error).message)))
+      .finally(() => setBusy(''));
   }
 
   return (
     <>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-        <button
-          type="button"
-          className={CELL}
-          disabled={!!busy}
-          onClick={() => act('dunning', '已发送催缴提醒')}
-        >
+        <button type="button" className={CELL} disabled={!!busy} onClick={() => void onDunning()}>
           <Megaphone className="h-4 w-4" aria-hidden="true" />
           发催缴提醒
         </button>
-        <button type="button" className={CELL} disabled={!!busy} onClick={extendFreeze}>
+        <button type="button" className={CELL} disabled={!!busy} onClick={onExtendFreeze}>
           <TimerReset className="h-4 w-4" aria-hidden="true" />
           延长解冻期
         </button>
@@ -102,7 +116,7 @@ export function ShopActions({ domain, widgetVisible, onDone }: Props) {
           <RefreshCw className="h-4 w-4" aria-hidden="true" />
           重跑同步
         </button>
-        <button type="button" className={CELL} disabled={!!busy} onClick={impersonate}>
+        <button type="button" className={CELL} disabled={!!busy} onClick={() => void onImpersonate()}>
           <LogIn className="h-4 w-4" aria-hidden="true" />
           代登录
         </button>

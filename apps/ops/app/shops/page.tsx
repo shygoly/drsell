@@ -6,7 +6,8 @@ import { AuthGate } from '@/app/components/auth-gate';
 import { OpsShell } from '@/app/components/shell';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Input } from '@/app/components/ui/input';
-import { getToken, opsFetch } from '@/lib/api';
+import { opsFetch } from '@/lib/api';
+import { normalizeShopQuery } from '@/lib/search-route';
 
 type ShopRow = {
   shopDomain: string;
@@ -19,11 +20,13 @@ export default function ShopsPage() {
   const [lookup, setLookup] = useState<{ shopDomain: string; accounts: Array<{ email: string }> } | null>(null);
 
   useEffect(() => {
-    if (!getToken()) window.location.href = '/login';
     opsFetch<ShopRow[]>('/ops/shops').then(setShops).catch(() => undefined);
+    const q = new URLSearchParams(window.location.search).get('q');
+    if (q) void reverseLookup(q);
   }, []);
 
-  async function reverseLookup(domain: string) {
+  async function reverseLookup(raw: string) {
+    const domain = normalizeShopQuery(raw);
     setShopQ(domain);
     if (!domain.trim()) {
       setLookup(null);
@@ -38,6 +41,11 @@ export default function ShopsPage() {
       setLookup(null);
     }
   }
+
+  const needle = shopQ.trim().toLowerCase();
+  const filtered = needle
+    ? shops.filter((s) => s.shopDomain.toLowerCase().includes(needle))
+    : shops;
 
   return (
     <AuthGate>
@@ -70,7 +78,7 @@ export default function ShopsPage() {
                 </tr>
               </thead>
               <tbody>
-                {shops.map((s) => (
+                {filtered.map((s) => (
                   <tr key={s.shopDomain} className="border-b border-border last:border-0">
                     <td className="px-3.5 py-2.5">
                       <Link href={`/shops/${encodeURIComponent(s.shopDomain)}`} className="font-data">
@@ -80,6 +88,13 @@ export default function ShopsPage() {
                     <td className="font-data px-3.5 py-2.5">{s.status}</td>
                   </tr>
                 ))}
+                {!filtered.length ? (
+                  <tr>
+                    <td colSpan={2} className="px-3.5 py-2.5 text-muted-foreground">
+                      无匹配店铺
+                    </td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           </CardContent>

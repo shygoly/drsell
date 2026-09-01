@@ -653,6 +653,6 @@ export class ShopifyService {
     const row = await this.prisma.chatStatDaily.findUnique({
       where: { shopDomain_day: { shopDomain, day } },
     });
-    return { shopDomain, day, count: row?.count ?? 0 };
+    return { shopDomain, day, count: row?.count ?? 0, aiResolvedCount: row?.aiResolvedCount ?? 0 };
   }
 }

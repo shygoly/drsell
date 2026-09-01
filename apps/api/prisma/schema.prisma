@@ -127,14 +127,36 @@ model Subscription {
   shopId    String
   shop      Shop     @relation(fields: [shopId], references: [id])
   planCode  String
-  status    String
+  /// 镜像 Shopify AppSubscriptionStatus：PENDING ACTIVE FROZEN DECLINED EXPIRED CANCELLED
+  status        String
   trialEnds DateTime?
+  frozenAt      DateTime?
+  /// frozenAt + 30 天。Shopify 在此之前恢复付款可自动解冻，逾期进终态。
+  unfreezeBy    DateTime?
+  currentPeriodEnd DateTime?
   /// 组内唯一收全额的店；其余店建 $0 charge
   isBillingShop  Boolean @default(false)
   shopifyChargeId String?
   seats          Int     @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// 运营台操作留痕。INV-3 的落地载体。
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actorEmail String
+  action     String
+  shopDomain String?
+  targetId   String?
+  payload    Json?
+  result     String   @default("ok")
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([shopDomain, createdAt])
+  @@index([actorId, createdAt])
 }
 
 model MailSubscriber {
@@ -158,12 +180,13 @@ model KnowledgeSyncJob {
 }
 
 model ChatStatDaily {
-  id        String   @id @default(cuid())
-  shopDomain String
-  day       DateTime
-  count     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(cuid())
+  shopDomain       String
+  day              DateTime
+  count            Int      @default(0)
+  aiResolvedCount  Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@unique([shopDomain, day])
 }

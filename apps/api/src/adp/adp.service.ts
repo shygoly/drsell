@@ -97,6 +97,9 @@ export class AdpService {
     ]);
 
     await this.bumpChatStat(params.shopDomain);
+    if (thread.status === 'ai') {
+      await this.bumpAiResolvedStat(params.shopDomain);
+    }
   }
 
   async bumpChatStat(shopDomain: string) {
@@ -106,6 +109,16 @@ export class AdpService {
       where: { shopDomain_day: { shopDomain, day } },
       create: { shopDomain, day, count: 1 },
       update: { count: { increment: 1 } },
+    });
+  }
+
+  async bumpAiResolvedStat(shopDomain: string) {
+    const day = new Date();
+    day.setUTCHours(0, 0, 0, 0);
+    await this.prisma.chatStatDaily.upsert({
+      where: { shopDomain_day: { shopDomain, day } },
+      create: { shopDomain, day, aiResolvedCount: 1 },
+      update: { aiResolvedCount: { increment: 1 } },
     });
   }
 }
