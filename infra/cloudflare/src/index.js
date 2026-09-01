@@ -1,17 +1,15 @@
 /**
- * Edge reverse proxy: drsell.szchada.top → wjclaw (163.7.7.160)
- * Worker terminates TLS at edge; origin is plain HTTP on ORIGIN_PORT (self-signed HTTPS breaks fetch).
+ * Edge reverse proxy for Drsell hosts → wjclaw :443 (SNI → :8443 nginx).
+ * CF custom domain terminates TLS; origin uses stream passthrough on 443.
  */
 export default {
   async fetch(request, env) {
     const originIp = env.ORIGIN_IP || '163.7.7.160';
-    const originPort = env.ORIGIN_PORT || '8088';
-    const publicHost = 'drsell.szchada.top';
+    const publicHost = new URL(request.url).hostname;
 
     const url = new URL(request.url);
-    // Keep hostname as a domain (Workers reject literal IP URLs — error 1003).
-    url.protocol = 'http:';
-    url.port = originPort;
+    url.protocol = 'https:';
+    url.port = '443';
 
     const headers = new Headers(request.headers);
     headers.set('Host', publicHost);

@@ -20,9 +20,14 @@
 - 今日对话统计
 - 真实 Inbox（当前为占位）
 
+## 运营台（已完成）
+
+- 独立域名 `ops.drsell.szchada.top` + `apps/ops`（见 `ADR-11`）
+- superadmin 鉴权 + 写操作审计（`INV-3`）
+- 到期队列、账号/店铺检索、六项处置动作
+
 ## 明确不做（MVP 阶段）
 
-- Yudao 式 `/admin` 运营后台
 - Mail 模块、订阅计费模块
 - 旧 Java `chatbotadmin` / `chatbotapi` 行为对齐
 - PG 公网 SNI（`wjclawpg`）— 运维需要时再开

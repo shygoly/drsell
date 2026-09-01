@@ -37,6 +37,7 @@ upsert_a() {
 
 echo "Zone szchada.top (${CF_ZONE_ID}) → ${WJC_LAW_IP}"
 upsert_a "drsell.szchada.top" "True"
+upsert_a "ops.szchada.top" "True"
 # Optional PG public hostname (DNS only / gray cloud) — skip unless requested
 # upsert_a "wjclawpg.szchada.top" "False"
 
