@@ -1,0 +1,156 @@
+@import './tokens.css';
+@import 'tailwindcss';
+
+/*
+ * Ops Stitch → shadcn 令牌映射（stitch-to-shadcn-pro P3）
+ * 源稿：design/stitch-export/drsell_ops_console/ + .stitch/designs/
+ * hex 权威源：tokens.css（DS-7 / DS-8 / DS-9）
+ */
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.25rem;
+
+  --background: var(--stock);
+  --foreground: var(--ink);
+
+  --card: var(--sheet);
+  --card-foreground: var(--ink);
+
+  --popover: var(--sheet);
+  --popover-foreground: var(--ink);
+
+  --primary: var(--ink);
+  --primary-foreground: var(--sheet);
+
+  --secondary: var(--sheet-2);
+  --secondary-foreground: var(--ink);
+
+  --muted: var(--sheet-2);
+  --muted-foreground: var(--ink-2);
+
+  --accent: var(--sheet-2);
+  --accent-foreground: var(--ink);
+
+  --destructive: var(--lost);
+  --destructive-foreground: var(--sheet);
+
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--ink-2);
+
+  --sidebar: var(--sheet);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--ink);
+  --sidebar-primary-foreground: var(--sheet);
+  --sidebar-accent: var(--sheet-2);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--rule);
+  --sidebar-ring: var(--ink-2);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-stock: var(--stock);
+  --color-sheet: var(--sheet);
+  --color-sheet-2: var(--sheet-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-rule: var(--rule);
+  --color-trial: var(--trial);
+  --color-frozen: var(--frozen);
+  --color-lost: var(--lost);
+  --color-tint-trial: var(--tint-trial);
+  --color-tint-frozen: var(--tint-frozen);
+  --color-tint-lost: var(--tint-lost);
+
+  /* Stitch 稿实测扩充。注册成具名 utility（bg-sheet-3 / text-ink-3 / border-rule-2），
+     而非 arbitrary bg-[var(--sheet-3)] —— 具名 utility 不含 hex，天然满足 DS-7，
+     且与 twMerge 的颜色组判定无歧义。 */
+  --color-ink-alt: var(--ink-alt);
+  --color-ink-3: var(--ink-3);
+  --color-sheet-3: var(--sheet-3);
+  --color-sheet-4: var(--sheet-4);
+  --color-rule-2: var(--rule-2);
+  --color-rule-3: var(--rule-3);
+
+  --font-sans: var(--f-body);
+  --font-display: var(--f-display);
+  --font-mono: var(--f-data);
+
+  --radius-sm: calc(var(--radius) - 1px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased min-h-screen;
+    font-family: var(--f-body);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  a {
+    @apply text-inherit underline-offset-[3px] no-underline hover:underline;
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: var(--f-display);
+  }
+
+  .font-data {
+    font-family: var(--f-data);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .runway-hatch-frozen {
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--frozen) 0 3px,
+      transparent 3px 6px
+    );
+    background-color: var(--tint-frozen);
+  }
+
+  .runway-hatch-over {
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--lost) 0 3px,
+      color-mix(in srgb, var(--lost) 45%, transparent) 3px 6px
+    );
+  }
+}
