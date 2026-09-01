@@ -24,10 +24,10 @@
       "checks": []
     },
     "axis2": {
-      "fullPageDiff": 38.07,
-      "maskedDiff": 34.62,
-      "structuralDiff": 34.07,
-      "layoutDiff": 34.62,
+      "fullPageDiff": 35.63,
+      "maskedDiff": 32.37,
+      "structuralDiff": 31.8,
+      "layoutDiff": 32.37,
       "hasAssetMask": false,
       "assetMaskPixels": 0,
       "assetChanged": 0,
@@ -37,8 +37,8 @@
   "diffImage": {
     "path": ".stitch/project-11226504772808429506/work/reports/accounts/project-diff.png",
     "red": 0,
-    "orange": 1177532,
-    "yellow": 138024
+    "orange": 1099030,
+    "yellow": 132351
   },
   "elements": [],
   "topFixes": [],

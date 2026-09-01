@@ -24,10 +24,10 @@
       "checks": []
     },
     "axis2": {
-      "fullPageDiff": 25.28,
-      "maskedDiff": 21.59,
+      "fullPageDiff": 25.37,
+      "maskedDiff": 21.67,
       "structuralDiff": 21.07,
-      "layoutDiff": 21.59,
+      "layoutDiff": 21.67,
       "hasAssetMask": false,
       "assetMaskPixels": 0,
       "assetChanged": 0,
@@ -37,8 +37,8 @@
   "diffImage": {
     "path": ".stitch/project-11226504772808429506/work/reports/impersonation/project-diff.png",
     "red": 0,
-    "orange": 728149,
-    "yellow": 145598
+    "orange": 728228,
+    "yellow": 148675
   },
   "elements": [],
   "topFixes": [],

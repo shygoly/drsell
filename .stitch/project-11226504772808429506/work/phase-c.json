@@ -1,0 +1,30 @@
+{
+ "说明": "新设计源（superadmin-dark 四屏）的阶段 C 记录。基准 = work/reports/<屏>/baseline.png。",
+ "判据": "skill fidelity-rubric §4 阶梯 B：A 级 = fullPage ≤5% 且 masked ≤1% 且 structural ≤0.3%。",
+ "遮罩后 mismatch": {
+  "accounts": "32.37%",
+  "system": "64.20%",
+  "impersonation": "21.67%",
+  "shop_detail": "16.69%"
+ },
+ "起点": {
+  "accounts": "34.62%",
+  "system": "65.56%",
+  "impersonation": "21.59%",
+  "shop_detail": "17.05%"
+ },
+ "红": "四屏均为 0 —— 元素不缺不多，差异全是几何与内容组成",
+ "本轮做了什么": [
+  "补齐全局顶栏（h-48px，稿子 02/08 有、我们没有），顺序按稿子：品牌 → 导航 → 检索",
+  "壳的纵向次序改为 顶栏(0-47) → 审计条(48-79) → 侧栏/内容(80-)，与稿子 02 一致",
+  "侧栏起点 top-8 → top-[80px]，高度随之改 calc(100vh-80px)",
+  "修掉顶栏文字竖排（缺 whitespace-nowrap / shrink-0）"
+ ],
+ "剩下的是屏级重建，不是像素微调": {
+  "accounts": "缺右侧账号详情栏（Created/Location/Total MRR + Membership Panopticon），结果表在无检索时为空态而稿子有 4 行；侧栏比稿子多一项「到期队列」",
+  "system": "稿子内容延伸到 y=2375，我们只到 963 —— 缺一半以上的板块",
+  "impersonation": "待逐屏比对",
+  "shop_detail": "卡片组成不同：稿子是 订阅状态 / AI 解决用量 / 授权范围（含 Days Remaining 与 Extend Trial 在第一张卡内），我们是 计费 / 本周期用量 / 可用期；稿子第二卡是单个大数字 850 / 1000 Limit，我们是三条计量"
+ },
+ "为什么停在这里": "屏级重建正是并行会话在做的事（25a57f6..70d595f 共 8 个提交）。两边同时重写同四屏必然冲突。测量设施与逐屏定位已交付，重建由那条线继续。"
+}
