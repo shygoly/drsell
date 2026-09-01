@@ -50,10 +50,12 @@ export default function SystemPage() {
     <AuthGate>
       <OpsShell
         chrome="audit"
+        padded={false}
         active="system"
         title="System Health & Telemetry"
         subtitle="Real-time monitoring of platform vitals, task queues, and API limits."
       >
+        <main className="bg-sheet flex min-h-full flex-1 flex-col gap-6 p-[24px]">
         {error ? <p className="text-error text-sm">{error}</p> : null}
 
         <div className="grid grid-cols-12 gap-4">
@@ -221,6 +223,7 @@ export default function SystemPage() {
             </section>
           </div>
         </div>
+        </main>
       </OpsShell>
     </AuthGate>
   );
