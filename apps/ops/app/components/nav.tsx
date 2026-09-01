@@ -25,7 +25,7 @@ export function OpsSidebar({ active }: { active: (typeof LINKS)[number]['key'] }
   }, []);
 
   return (
-    <aside className="sticky top-0 flex h-screen w-[212px] shrink-0 flex-col border-r border-border bg-card py-4">
+    <aside className="sticky top-0 flex h-screen w-[200px] shrink-0 flex-col border-r border-ink bg-surface py-4">
       {/* 品牌块：Stitch 两稿都有，用来在多标签页里一眼认出是哪个面 */}
       <div className="mb-3 flex items-center gap-2.5 border-b border-border px-4 pb-4">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-foreground text-background">
@@ -56,8 +56,8 @@ export function OpsSidebar({ active }: { active: (typeof LINKS)[number]['key'] }
         ))}
       </nav>
 
-      <div className="mt-3 border-t border-border px-3 pt-3">
-        <div className="mb-2 flex items-center gap-2">
+      <div className="mt-3 flex flex-col gap-2 border-t border-border px-3 pt-3">
+        <div className="flex items-center gap-2">
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border text-[11px] font-medium text-muted-foreground">
             {operatorEmail ? operatorEmail.slice(0, 1).toUpperCase() : '—'}
           </span>

@@ -47,7 +47,7 @@ export function Runway({
   const spent = Math.round((elapsed / total) * 100);
 
   return (
-    <div className={cn('flex items-center gap-3', large && 'flex-col items-stretch gap-2')}>
+    <div className={cn('flex min-w-0 flex-1 items-center gap-3', large && 'flex-col items-stretch gap-2')}>
       {daysLabel && !large ? (
         <span
           className={cn(

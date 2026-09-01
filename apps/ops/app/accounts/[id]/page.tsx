@@ -68,7 +68,7 @@ export default function AccountDetailPage({ params }: { params: Promise<{ id: st
   return (
     <AuthGate>
       <OpsShell active="accounts" padded={false}>
-        <div className="max-w-container-max mx-auto flex w-full flex-1 flex-col gap-6 overflow-auto p-[16px] md:p-6 lg:p-8">
+        <div className="max-w-[1280px] mx-auto flex w-full flex-1 flex-col gap-6 overflow-auto p-[16px] md:p-6 lg:p-8">
           {error ? <p className="text-error text-sm">{error}</p> : null}
 
           {/* 账号头卡 */}
