@@ -76,8 +76,8 @@ function ImpersonationPage() {
   }
 
   const banner = (
-    <div className="bg-amber-900/30 border-amber-500 flex h-16 w-full items-center gap-4 border-b px-[24px]">
-      <span className="bg-amber-500 text-amber-900 font-label-caps text-label-caps flex shrink-0 items-center gap-2 px-3 py-1.5 uppercase">
+    <div className="bg-amber-900 border-amber-500 flex h-16 w-full items-center gap-4 border-b px-[24px]">
+      <span className="bg-amber-500 text-amber-900 font-label-caps text-label-caps flex h-10 shrink-0 items-center gap-2 px-3 uppercase">
         <ShieldAlert className="h-4 w-4" aria-hidden="true" />
         Impersonation Active
       </span>

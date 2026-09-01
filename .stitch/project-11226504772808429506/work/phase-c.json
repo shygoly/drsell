@@ -2,9 +2,9 @@
  "说明": "新设计源（superadmin-dark 四屏）的阶段 C 记录。基准 = work/reports/<屏>/baseline.png。",
  "判据": "skill fidelity-rubric §4 阶梯 B：A 级 = fullPage ≤5% 且 masked ≤1% 且 structural ≤0.3%。",
  "遮罩后 mismatch": {
-  "accounts": "32.34%",
-  "system": "67.39%",
-  "impersonation": "13.83%",
+  "accounts": "27.24%",
+  "system": "15.31%",
+  "impersonation": "12.18%",
   "shop_detail": "7.17%"
  },
  "起点": {
@@ -67,10 +67,23 @@
   "impersonation": "21.80%：需同样的逐字移植；商户业务面板无数据源"
  },
  "收敛轨迹": {
-  "shop_detail": "17.50 → 7.17（逐字移植 + limit 修正 + 字号阶修正）",
-  "impersonation": "21.59 → 13.83（逐字移植 + 横幅/侧栏偏移修正）",
-  "accounts": "34.62 → 32.34（仅壳层与令牌，未做逐字移植）",
-  "system": "65.56 → 67.39（同上；且缺一半以上板块与后端接口）"
+  "shop_detail": "17.50 → 7.17  （降 59%）",
+  "impersonation": "21.59 → 12.18 （降 44%）",
+  "system": "65.56 → 15.31 （降 77%）",
+  "accounts": "34.62 → 27.24 （降 21%）"
  },
- "还需多少": "已做逐字移植的两屏（shop_detail 7.17% / impersonation 13.83%）距 A 级（≤1%）仍有一段逐像素精修：卡片内部高度差、分隔线位置、行数与稿子对齐。未做移植的两屏（accounts 32.34% / system 67.39%）需要先走同样的移植。system 另有硬阻塞：稿子的 429 监控与同步任务表在 /ops/* 没有接口，不是对齐能解决的。"
+ "还需多少": "已做逐字移植的两屏（shop_detail 7.17% / impersonation 13.83%）距 A 级（≤1%）仍有一段逐像素精修：卡片内部高度差、分隔线位置、行数与稿子对齐。未做移植的两屏（accounts 32.34% / system 67.39%）需要先走同样的移植。system 另有硬阻塞：稿子的 429 监控与同步任务表在 /ops/* 没有接口，不是对齐能解决的。",
+ "本轮最有效的五个杠杆": [
+  "主区底色：system 稿子铺 --sheet 我们露页面底色 —— 单这一项 67.39 → 15.36",
+  "fixture 不尊重 limit：页面渲染行数与稿子对不上 —— shop_detail 12.84 → 6.82",
+  "字号阶用的是旧亮色源的值，display-sm / body-sm 根本没注册 —— 修完横线完全对齐",
+  "顶部装饰固定 80px，而稿子四屏各不相同（05:32 / 08:48 / 02:80 / 07:横幅64+侧栏紧接）",
+  "accounts 截图是空态，稿子画的是检索后状态 —— 截图脚本加交互步骤"
+ ],
+ "剩余工作（按性价比排序）": [
+  "accounts 27.24%：右栏差距最大 —— 稿子是 头像+UUID+ACTIVE 签 / Created·Location·Total MRR 三格 / Membership Panopticon 店铺卡；我们是简单列表。Location 无数据源，Total MRR 口径未定。",
+  "system 15.31%：内容量仍差（稿子有 429 监控与同步任务表，/ops/* 无接口）",
+  "impersonation 12.18%：稿子左栏是商户业务面板（营收/订单/客户），无数据源",
+  "shop_detail 7.17%：最接近，剩卡片内部约 11px 高度差，纯逐像素精修"
+ ]
 }
