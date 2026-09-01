@@ -8,6 +8,8 @@ type Props = {
   title?: string;
   subtitle?: string;
   meta?: string;
+  /** Stitch 稿自带页头与内边距的页面传 false，由页面自己排版 */
+  padded?: boolean;
   children: React.ReactNode;
 };
 
@@ -48,13 +50,13 @@ function OpsTopBar() {
   );
 }
 
-export function OpsShell({ active, title, subtitle, meta, children }: Props) {
+export function OpsShell({ active, title, subtitle, meta, padded = true, children }: Props) {
   return (
     <div className="flex min-h-screen">
       <OpsSidebar active={active} />
       <div className="flex min-w-0 flex-1 flex-col">
         <OpsTopBar />
-        <main className="min-w-0 flex-1 px-7 pb-12 pt-6">
+        <main className={padded ? "min-w-0 flex-1 px-7 pb-12 pt-6" : "flex min-w-0 flex-1 flex-col overflow-hidden"}>
           {(title || meta) && (
             <header className="mb-5 flex flex-wrap items-start justify-between gap-4">
               <div>
