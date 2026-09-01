@@ -16,8 +16,9 @@ type Props = {
 };
 
 /** 六等分通栏，逐字对齐 .stitch/rebuild/shop_detail.html 的动作条 */
+/** 页头用的紧凑动作按钮，样式取自稿子 08 的 Manual Resync */
 const CELL =
-  'font-label-caps text-label-caps border-outline-variant hover:bg-surface-container flex items-center justify-center gap-2 border-r px-2 py-3 uppercase transition-colors last:border-r-0 disabled:opacity-50';
+  'bg-surface-container-low border-outline-variant text-on-surface hover:bg-surface-container-high font-label-caps text-label-caps flex items-center gap-2 rounded border px-3 py-2 transition-colors disabled:opacity-50';
 
 export function ShopActions({ domain, widgetVisible, onDone }: Props) {
   const [msg, setMsg] = useState('');
@@ -89,7 +90,7 @@ export function ShopActions({ domain, widgetVisible, onDone }: Props) {
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+      <div className="flex flex-wrap items-center gap-2">
         <button type="button" className={CELL} disabled={!!busy} onClick={() => void onDunning()}>
           <Megaphone className="h-4 w-4" aria-hidden="true" />
           发催缴提醒
@@ -142,8 +143,8 @@ export function ShopActions({ domain, widgetVisible, onDone }: Props) {
           </button>
         )}
       </div>
-      {msg ? <p className="text-on-surface-variant m-0 pt-2 text-[13px]">{msg}</p> : null}
-      {err ? <p className="text-error m-0 pt-2 text-[13px]">{err}</p> : null}
+      {msg ? <span className="text-on-surface-variant text-[12px]">{msg}</span> : null}
+      {err ? <span className="text-error text-[12px]">{err}</span> : null}
     </>
   );
 }
