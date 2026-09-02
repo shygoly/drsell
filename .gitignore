@@ -67,3 +67,4 @@ test-coze-*.js
 .stitch/project-11226504772808429506/work/reports/*/project-diff.png
 .stitch/project-11226504772808429506/work/reports/*/boxes.json
 .stitch/project-11226504772808429506/work/rebuild/
+/opencode.json
