@@ -6,8 +6,10 @@ import {
   Activity,
   BadgeCheck,
   CheckCircle2,
+  CircleHelp,
   CreditCard,
   ListChecks,
+  Lock,
   Mail,
   RefreshCw,
   ShieldCheck,
@@ -19,6 +21,7 @@ import { ShopActions } from '@/app/shops/[domain]/actions';
 import { formatAuditAction, opsFetch, type AuditLogPage, type ShopDetail } from '@/lib/api';
 import { extendFreeze, postShopAction } from '@/lib/shop-actions';
 
+/** 稿子屏 08 实测卡高 306px（y 235→541）；我们的内容一致短 5px，钉住高度 */
 const CARD = 'bg-primary-container border-card-border rounded-xl border p-6';
 
 /** Shopify 安装需要的 scope，用于「授权范围」卡的缺失检测 */
@@ -149,9 +152,9 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
           {/* Bento Grid Layout */}
           <div className="mb-8 grid grid-cols-12 gap-[12px]">
             {/* Subscription Status Card (Span 4) */}
-            <div className="bg-primary-container border-card-border group relative col-span-12 overflow-hidden rounded-xl border p-6 lg:col-span-4">
+            <div className="bg-primary-container border-card-border group relative col-span-12 min-h-[306px] overflow-hidden rounded-xl border p-6 lg:col-span-4">
               <div className="bg-error-container absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-20 blur-2xl transition-opacity group-hover:opacity-30" />
-              <h3 className="font-label-caps text-label-caps text-on-surface-variant m-0 mb-4 flex items-center gap-2">
+              <h3 className="font-label-caps text-label-caps text-on-surface-variant m-0 mb-4 flex h-5 items-center gap-2">
                 <CreditCard className="h-3.5 w-3.5" aria-hidden="true" /> 订阅状态
               </h3>
               <div className="mb-6 flex items-center justify-between">
@@ -195,8 +198,8 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
             </div>
 
             {/* Billing Usage Card (Span 4) */}
-            <div className="bg-primary-container border-card-border relative col-span-12 rounded-xl border p-6 lg:col-span-4">
-              <h3 className="font-label-caps text-label-caps text-on-surface-variant m-0 mb-4 flex items-center gap-2">
+            <div className="bg-primary-container border-card-border relative col-span-12 min-h-[306px] rounded-xl border p-6 lg:col-span-4">
+              <h3 className="font-label-caps text-label-caps text-on-surface-variant m-0 mb-4 flex h-5 items-center gap-2">
                 <Activity className="h-3.5 w-3.5" aria-hidden="true" /> AI 解决用量
               </h3>
               <div className="mb-6">
@@ -235,8 +238,8 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
             </div>
 
             {/* Scope Checker Card (Span 4) */}
-            <div className="bg-primary-container border-card-border col-span-12 rounded-xl border p-6 lg:col-span-4">
-              <h3 className="font-label-caps text-label-caps text-on-surface-variant m-0 mb-4 flex items-center gap-2">
+            <div className="bg-primary-container border-card-border col-span-12 min-h-[306px] rounded-xl border p-6 lg:col-span-4">
+              <h3 className="font-label-caps text-label-caps text-on-surface-variant m-0 mb-4 flex h-5 items-center gap-2">
                 <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" /> 授权范围
               </h3>
               <ul className="m-0 list-none space-y-2 p-0">
@@ -247,8 +250,8 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
                       key={sc}
                       className={
                         granted
-                          ? 'bg-surface-container-low border-outline-variant flex items-center justify-between rounded border p-2'
-                          : 'bg-error-container/10 border-error/50 flex items-center justify-between rounded border p-2'
+                          ? 'bg-surface-container-low border-outline-variant flex h-[37px] items-center justify-between rounded border p-2'
+                          : 'bg-error-container/10 border-error/50 flex h-[37px] items-center justify-between rounded border p-2'
                       }
                     >
                       <span className={`font-data-mono text-data-mono ${granted ? 'text-on-surface' : 'text-error'}`}>
@@ -291,12 +294,21 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
                   {(events?.items ?? []).map((row) => {
                     const failed = row.result !== 'ok';
                     return (
-                      <tr key={row.id} className="border-card-border hover:bg-surface-container-high border-b transition-colors">
+                      <tr key={row.id} className="border-card-border hover:bg-surface-container-high h-[46px] border-b transition-colors">
                         <td className="text-on-surface-variant p-3">
                           {row.createdAt.slice(0, 19).replace('T', ' ')}
                         </td>
                         <td className="text-on-surface p-3">{formatAuditAction(row.action)}</td>
-                        <td className="text-on-surface-variant p-3">{row.actorEmail}</td>
+                        <td className="text-on-surface-variant p-3">
+                          <span className="flex items-center gap-2">
+                            {row.actorEmail === 'unknown' ? (
+                              <CircleHelp className="h-3 w-3 shrink-0" aria-hidden="true" />
+                            ) : (
+                              <Lock className="h-3 w-3 shrink-0" aria-hidden="true" />
+                            )}
+                            {row.actorEmail}
+                          </span>
+                        </td>
                         <td className="p-3">
                           <span className={failed ? 'text-error flex items-center gap-1' : 'text-primary flex items-center gap-1'}>
                             <div className={failed ? 'bg-error h-2 w-2 rounded-full' : 'bg-primary h-2 w-2 rounded-full'} />
