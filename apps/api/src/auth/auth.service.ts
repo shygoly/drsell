@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -19,6 +20,8 @@ export type JwtPayload = {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
@@ -92,9 +95,14 @@ export class AuthService {
 
   async ensureBootstrapAdmin() {
     const email = process.env.BOOTSTRAP_ADMIN_EMAIL || 'admin@drsell.szchada.top';
-    const password = process.env.BOOTSTRAP_ADMIN_PASSWORD || 'ChangeMe_Drsell_Admin_2026!';
+    const password = process.env.BOOTSTRAP_ADMIN_PASSWORD;
     const existing = await this.prisma.adminUser.findUnique({ where: { email } });
     if (existing) return existing;
+    // 密钥不硬编码兜底（AGENTS.md 陷阱 6）：未配置时跳过播种，只留警告。
+    if (!password) {
+      this.logger.warn('BOOTSTRAP_ADMIN_PASSWORD 未配置，跳过超管播种');
+      return null;
+    }
     const passwordHash = await bcrypt.hash(password, 12);
     return this.prisma.adminUser.create({
       data: { email, passwordHash, role: 'superadmin' },

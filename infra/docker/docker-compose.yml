@@ -38,7 +38,7 @@ services:
     env_file:
       - ../../apps/api/.env
     environment:
-      DATABASE_URL: postgresql://drsell_app:${DRSELL_DB_PASSWORD}@postgres:5432/drsell?sslmode=disable
+      DATABASE_URL: postgresql://drsell_app:${DRSELL_DB_PASSWORD:-ChangeMeLocalDb2026}@postgres:5432/drsell?sslmode=disable
       REDIS_URL: redis://redis:6379
       PORT: "3001"
     depends_on:
