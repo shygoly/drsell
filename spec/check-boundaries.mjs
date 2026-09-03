@@ -33,6 +33,29 @@ const RULES = [
     files: ['apps/web/package.json'],
     patterns: [/tailwind/i, /@radix-ui/, /class-variance-authority/],
   },
+  {
+    id: 'B-4',
+    desc: 'apps/ops 不得 import apps/web / apps/storefront',
+    roots: [{ dir: 'apps/ops', exts: ['.ts', '.tsx'] }],
+    files: ['apps/ops/package.json'],
+    patterns: [/@drsell\/(?:web|storefront)/, /\.\.\/\.\.\/(?:web|storefront)/],
+  },
+  {
+    id: 'B-5',
+    desc: 'apps/storefront / apps/web 不得 import apps/ops',
+    roots: [
+      { dir: 'apps/storefront/src', exts: ['.ts', '.tsx'] },
+      { dir: 'apps/web/app', exts: ['.ts', '.tsx'] },
+    ],
+    patterns: [/@drsell\/ops/, /\.\.\/\.\.\/ops/],
+  },
+  {
+    id: 'DS-10',
+    desc: 'apps/ops 不得引入 @shopify/polaris',
+    roots: [{ dir: 'apps/ops', exts: ['.ts', '.tsx', '.css'] }],
+    files: ['apps/ops/package.json'],
+    patterns: [/polaris/i],
+  },
 ];
 
 for (const rule of RULES) {

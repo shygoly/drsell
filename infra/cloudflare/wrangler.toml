@@ -4,9 +4,9 @@ compatibility_date = "2025-08-01"
 workers_dev = true
 account_id = "5732310593ba6c86ed574f3997731071"
 
-# Do NOT bind custom_domain here — it blocks manual A records in DNS.
-# Use orange-cloud A record → 163.7.7.160 (see configure-drsell-dns.sh).
+# ops.szchada.top uses proxied A → wjclaw :443 (SNI → nginx :8443), NOT Worker custom_domain.
+# DNS: CF_API_TOKEN=... ./infra/cloudflare/configure-ops-dns.sh
 
 [vars]
 ORIGIN_IP = "163.7.7.160"
-ORIGIN_PORT = "8088"
+ORIGIN_PORT = "443"

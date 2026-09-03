@@ -8,7 +8,7 @@ NGINX_CONF_DIR="${NGINX_CONF_DIR:-/opt/webrtc-ws-proxy/conf.d}"
 
 cd "$ROOT"
 
-echo "==> Build packages + api + web + storefront"
+echo "==> Build packages + api + web + storefront + ops"
 pnpm --filter @drsell/shared build
 pnpm --filter @drsell/shopify build
 pnpm --filter @drsell/adp build
@@ -33,8 +33,14 @@ export NEXT_PUBLIC_SHOPIFY_API_KEY="${NEXT_PUBLIC_SHOPIFY_API_KEY:-${SHOPIFY_API
 set +a
 pnpm --filter @drsell/storefront build
 
+set -a
+[[ -f apps/ops/.env ]] && . apps/ops/.env || true
+export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://ops.szchada.top/api}"
+set +a
+pnpm --filter @drsell/ops build
+
 echo "==> Prepare remote layout"
-ssh "$HOST" "mkdir -p ${REMOTE}/apps/{api,web,storefront} ${REMOTE}/packages/{shared,shopify,adp,openclaw} ${REMOTE}/node_modules"
+ssh "$HOST" "mkdir -p ${REMOTE}/apps/{api,web,storefront,ops} ${REMOTE}/packages/{shared,shopify,adp,openclaw} ${REMOTE}/node_modules"
 
 rsync -az --delete \
   "$ROOT/apps/api/dist/" "${HOST}:${REMOTE}/apps/api/dist/"
@@ -58,6 +64,10 @@ mkdir -p "$ROOT/apps/storefront/.next/static"
 rsync -az --delete "$ROOT/apps/storefront/.next/static/" "${HOST}:${REMOTE}/apps/storefront/standalone/apps/storefront/.next/static/"
 rsync -az --delete "$ROOT/apps/storefront/public/" "${HOST}:${REMOTE}/apps/storefront/standalone/apps/storefront/public/" 2>/dev/null || true
 
+rsync -az --delete "$ROOT/apps/ops/.next/standalone/" "${HOST}:${REMOTE}/apps/ops/standalone/"
+mkdir -p "$ROOT/apps/ops/.next/static"
+rsync -az --delete "$ROOT/apps/ops/.next/static/" "${HOST}:${REMOTE}/apps/ops/standalone/apps/ops/.next/static/" 2>/dev/null || true
+
 rsync -az "$ROOT/apps/api/.env" "${HOST}:${REMOTE}/apps/api/.env"
 rsync -az "$ROOT/apps/web/.env" "${HOST}:${REMOTE}/apps/web/.env"
 if [[ -f apps/storefront/.env ]]; then
@@ -68,7 +78,15 @@ rsync -az "$ROOT/package.json" "$ROOT/pnpm-workspace.yaml" "$ROOT/pnpm-lock.yaml
 
 echo "==> Sync nginx vhost"
 rsync -az "$ROOT/infra/nginx/drsell.szchada.top.conf" "${HOST}:${NGINX_CONF_DIR}/drsell.szchada.top.conf"
+rsync -az "$ROOT/infra/nginx/ops.szchada.top.conf" "${HOST}:${NGINX_CONF_DIR}/ops.szchada.top.conf"
 rsync -az "$ROOT/infra/nginx/drsell-proxy-headers.inc" "${HOST}:${NGINX_CONF_DIR}/drsell-proxy-headers.inc"
+ssh "$HOST" "rm -f ${NGINX_CONF_DIR}/ops.drsell.szchada.top.conf 2>/dev/null; \
+  if [ ! -f /opt/webrtc-ws-proxy/certs/ops.szchada.top.crt ]; then \
+    openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
+      -keyout /opt/webrtc-ws-proxy/certs/ops.szchada.top.key \
+      -out /opt/webrtc-ws-proxy/certs/ops.szchada.top.crt \
+      -subj '/CN=ops.szchada.top'; \
+  fi"
 
 echo "==> Install API prod deps on server + migrate + pm2"
 ssh "$HOST" bash -s <<EOF
@@ -96,10 +114,12 @@ pnpm install --prod --filter @drsell/api... --frozen-lockfile || pnpm install --
 cd apps/api
 export DATABASE_URL=\$(grep '^DATABASE_URL=' .env | cut -d= -f2- | tr -d '"' | tr -d "'")
 pnpm dlx prisma@6.9.0 migrate deploy
+pnpm dlx prisma@6.9.0 generate
 
 pm2 delete drsell-api 2>/dev/null || true
 pm2 delete drsell-web 2>/dev/null || true
 pm2 delete drsell-storefront 2>/dev/null || true
+pm2 delete drsell-ops 2>/dev/null || true
 
 cd ${REMOTE}/apps/api
 pm2 start dist/main.js --name drsell-api --env production
@@ -110,18 +130,28 @@ PORT=5010 HOSTNAME=127.0.0.1 pm2 start server.js --name drsell-storefront
 cd ${REMOTE}/apps/web/standalone/apps/web
 PORT=5012 HOSTNAME=127.0.0.1 pm2 start server.js --name drsell-web
 
+cd ${REMOTE}/apps/ops/standalone/apps/ops
+PORT=5013 HOSTNAME=127.0.0.1 pm2 start server.js --name drsell-ops
+
 pm2 save
 pm2 status
 
 curl -sf http://127.0.0.1:5011/api/health && echo
 curl -sf -o /dev/null -w "storefront:%{http_code}\n" http://127.0.0.1:5010/ || true
 curl -sf -o /dev/null -w "shopify-web:%{http_code}\n" http://127.0.0.1:5012/app || true
+curl -sf -o /dev/null -w "ops:%{http_code}\n" http://127.0.0.1:5013/login || true
 EOF
 
 echo "==> Reload nginx vhost"
 ssh "$HOST" 'docker exec webrtc-ws-proxy nginx -t && docker exec webrtc-ws-proxy nginx -s reload && echo nginx_ok'
 
+echo "==> Prune stale drsell nginx backups on wjclaw"
+ssh "$HOST" "rm -f ${NGINX_CONF_DIR}/drsell.szchada.com.conf.bak ${NGINX_CONF_DIR}/default.conf.bak 2>/dev/null || true"
+
+echo "==> Cloudflare: ops.szchada.top proxied A (optional — needs CF_API_TOKEN)"
+bash "$ROOT/infra/cloudflare/configure-ops-dns.sh" || echo "(configure-ops-dns skipped — run manually if DNS not set)"
+
 echo "Done."
 echo "Storefront: https://drsell.szchada.top/"
-echo "Shopify app: https://drsell.szchada.top/app"
+echo "Ops console: https://ops.szchada.top/"
 echo "OAuth: https://drsell.szchada.top/api/auth?shop=YOUR_STORE.myshopify.com"

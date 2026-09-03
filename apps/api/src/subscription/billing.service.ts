@@ -158,7 +158,7 @@ export class BillingService {
             data: {
               isBillingShop: true,
               shopifyChargeId: created.appSubscription?.id ?? null,
-              status: 'active',
+              status: 'ACTIVE',
               planCode: PLAN_CODE,
             },
           })
@@ -166,7 +166,7 @@ export class BillingService {
             data: {
               shopId: shop.id,
               planCode: PLAN_CODE,
-              status: 'active',
+              status: 'ACTIVE',
               isBillingShop: true,
               shopifyChargeId: created.appSubscription?.id ?? null,
             },
@@ -215,7 +215,7 @@ export class BillingService {
           data: {
             isBillingShop: true,
             shopifyChargeId: created.appSubscription?.id ?? null,
-            status: 'active',
+            status: 'ACTIVE',
             planCode: PLAN_CODE,
           },
         });
@@ -224,7 +224,7 @@ export class BillingService {
           data: {
             shopId: next.id,
             planCode: PLAN_CODE,
-            status: 'active',
+            status: 'ACTIVE',
             isBillingShop: true,
             shopifyChargeId: created.appSubscription?.id ?? null,
           },

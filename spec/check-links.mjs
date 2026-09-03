@@ -2,7 +2,7 @@
 // spec/check-links.mjs — 元语文档的相对路径链接目标必须存在。
 import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
-import { REPO_ROOT, Reporter, rejectFix } from './lib.mjs';
+import { REPO_ROOT, parseDecisions, Reporter, rejectFix } from './lib.mjs';
 
 rejectFix();
 const r = new Reporter('check-links — 元语文档链接');
@@ -12,8 +12,6 @@ const METALANG_FILES = ['DECISIONS.md'];
 
 // 尚未创建的出处文档白名单。移除时机绑定在 spec §5.2 的表里。
 const WHITELIST = new Map([
-  ['DESIGN.md', '子项目 2'],
-  ['ARCHITECTURE.md', '子项目 3'],
   ['DOMAIN.md', '子项目 4'],
   ['FLOWS.md', '子项目 4'],
   ['DEPLOY.md', '子项目 4'],
@@ -41,4 +39,27 @@ for (const f of METALANG_FILES) {
   });
 }
 if (!bad) r.pass(`${METALANG_FILES.length} 个元语文件的链接目标全部存在`);
+
+// ── 格式契约 7：出处文档必须为每个在册 ID 提供论证锚点 ──
+const { sections, byPrefix } = parseDecisions();
+
+const PROVENANCE = new Map();
+for (const line of sections['0'] ?? []) {
+  const m = line.match(/^\|\s*`([A-Z]+)-n`\s*\|[^|]*\|\s*\[`([^`]+)`\]/);
+  if (m) PROVENANCE.set(m[1], m[2]);
+}
+if (!PROVENANCE.size) r.fail('格式契约 7：§0 命名空间表解析为 0 行');
+
+for (const [prefix, file] of PROVENANCE) {
+  if (WHITELIST.has(file)) continue;
+  const abs = join(REPO_ROOT, file);
+  if (!existsSync(abs)) { r.fail(`${prefix} 出处 ${file} 不存在且不在白名单`); continue; }
+  const md = readFileSync(abs, 'utf8');
+  const missing = [...byPrefix[prefix]].filter(
+    (id) => !new RegExp(`^#{2,4}\\s+\`${id}\`\\s*$`, 'm').test(md),
+  );
+  if (missing.length) r.fail(`${file} 缺论证锚点：${missing.sort().join(', ')}`);
+  else r.pass(`${file} 为 ${byPrefix[prefix].size} 个 ${prefix} 提供了论证锚点`);
+}
+
 r.done();

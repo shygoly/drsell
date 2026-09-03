@@ -15,7 +15,7 @@ export class SubscriptionService {
       data: {
         shopId: shop.id,
         planCode,
-        status: 'active',
+        status: 'ACTIVE',
         trialEnds: new Date(Date.now() + 14 * 86400000),
       },
     });
@@ -24,7 +24,7 @@ export class SubscriptionService {
   async cancel(id: string) {
     return this.prisma.subscription.update({
       where: { id },
-      data: { status: 'cancelled' },
+      data: { status: 'CANCELLED' },
     });
   }
 

@@ -111,7 +111,7 @@ export class StorefrontDashboardService {
       const label = `${d.day.getUTCMonth() + 1}/${d.day.getUTCDate()}`;
       const human = humanMap.get(label) ?? 0;
       const total = d.count;
-      const ai = Math.max(total - human, 0);
+      const ai = d.aiResolvedCount ?? Math.max(total - human, 0);
       return {
         label,
         ai: Math.round((ai / maxTotal) * 100),

@@ -49,5 +49,13 @@ input, select {
   padding: 0.55rem 0.7rem;
 }
 .muted { color: var(--muted); }
+.impersonation-banner {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: color-mix(in srgb, var(--accent) 12%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--line));
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
 .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 h1, h2 { letter-spacing: -0.02em; }

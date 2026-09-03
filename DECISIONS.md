@@ -15,13 +15,13 @@
 
 | 前缀 | 含义 | 出处（论证在此） | 数量 |
 |---|---|---|---|
-| `INV-n` | **不变量**：任何实现都不得违反的硬约束 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 2 |
-| `ADR-n` | **架构决策**：工程层不可逆选择 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 10 |
-| `B-n` | **边界规矩**：模块/包之间的硬边界 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 3 |
-| `DS-n` | **UI 反模式**：呈现层禁止事项 | [`DESIGN.md`](DESIGN.md)（子项目 2 创建） | 6 |
+| `INV-n` | **不变量**：任何实现都不得违反的硬约束 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 3 |
+| `ADR-n` | **架构决策**：工程层不可逆选择 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 13 |
+| `B-n` | **边界规矩**：模块/包之间的硬边界 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 5 |
+| `DS-n` | **UI 反模式**：呈现层禁止事项 | [`DESIGN.md`](DESIGN.md) | 10 |
 
-> 出处文档在子项目 1 尚不存在。`check-links.mjs` 对其放行并打印 WARN，
-> 子项目 2/3 创建对应文件时从白名单移除。
+> `ARCHITECTURE.md` 等出处文档在子项目 3/4 尚不存在。`check-links.mjs` 对其放行并打印 WARN，
+> 子项目 3/4 创建对应文件时从白名单移除。
 
 ---
 
@@ -31,6 +31,7 @@
 |---|---|---|
 | `INV-1` | 所有租户数据必须经 `Shop` 外键可达（`tenantId` 或 `shopId`） | DB 外键约束；**未配** |
 | `INV-2` | `adp_reader` 不得持有任何表、视图或序列的权限 | `scripts/verify-adp-isolation.sh` 断言 1–8 |
+| `INV-3` | 运营台的每一次写操作都必须留下审计记录（操作者、对象店铺、动作、时间） | `spec/check-ops-audit.mjs` |
 
 ---
 
@@ -48,6 +49,9 @@
 | `ADR-8` | `Shop.accessToken` 落库 AES-256-GCM 加密（`SHOP_ACCESS_TOKEN_KEY`） | `apps/api/src/crypto/shop-token-cipher.ts` | 已守护 |
 | `ADR-9` | 客服对话经 wjclaw 本地 OpenClaw Gateway（`--profile drsell` :18790），不再调腾讯 ADP | `packages/openclaw` + `infra/openclaw/drsell/` | 已守护 |
 | `ADR-10` | `drsell.szchada.top` 根路径由 `apps/storefront` 服务（pm2 `drsell-storefront` :5010）；`apps/web` 暂停生产部署 | `scripts/deploy-mvp.sh` | 已守护 |
+| `ADR-11` | 运营台是独立应用 `apps/ops`，独立 `server_name` `ops.szchada.top`；商家端不得存在 `/admin` 或 `/ops` 路由 | `infra/nginx/ops.szchada.top.conf` + `spec/check-ops-entry.mjs` | 已守护 |
+| `ADR-12` | 运营台第三套设计令牌（`apps/ops/app/tokens.css` → `globals.css` shadcn 映射），经 `stitch-to-shadcn-pro` + Tailwind v4 + shadcn/ui 落地；禁止 Polaris | `apps/ops/app/globals.css` + `.stitch/` + `spec/check-design.mjs` | 已守护 |
+| `ADR-13` | 本地订阅状态只镜像 Shopify `AppSubscriptionStatus` 的六个取值，不自造状态词 | `apps/api/prisma/schema.prisma` + `spec/check-ops-status.mjs` | 已守护 |
 
 ---
 
@@ -58,6 +62,8 @@
 | `B-1` | `packages/*` 不得 import `apps/*` | `spec/check-boundaries.mjs` |
 | `B-2` | `apps/storefront` 不得引入 `@shopify/polaris` | `spec/check-boundaries.mjs`（剥离注释后匹配） |
 | `B-3` | `apps/web` 不得引入 tailwind / shadcn / radix | `spec/check-boundaries.mjs` |
+| `B-4` | `apps/ops` 不得 import `apps/web` / `apps/storefront` | `spec/check-boundaries.mjs` |
+| `B-5` | `apps/storefront` / `apps/web` 不得 import `apps/ops` | `spec/check-boundaries.mjs` |
 
 ---
 
@@ -71,6 +77,10 @@
 | `DS-4` | 禁止 Tailwind CDN 引用 | `scripts/check-stitch-gate.sh` |
 | `DS-5` | `apps/storefront/src/app/globals.css` 须含 `--primary` / `--ring` / `--border` 令牌 | `scripts/check-stitch-gate.sh` |
 | `DS-6` | 业务组件语义令牌引用次数 ≥ 10 | `scripts/check-stitch-gate.sh` |
+| `DS-7` | `apps/ops` 源码禁止 hex 字面量，颜色只能来自 `tokens.css` | `spec/check-design.mjs` |
+| `DS-8` | ops 令牌的 hex 值集合与 storefront 令牌的 hex 值集合交集必须为空 | `spec/check-design.mjs` |
+| `DS-9` | `tokens.css` 须在 `:root`、`@media (prefers-color-scheme: dark)`、`:root[data-theme="dark"]` 三处定义**同一套**令牌名 | `spec/check-design.mjs` |
+| `DS-10` | `apps/ops` 不得引入 `@shopify/polaris`（shadcn / tailwind 允许，见 ADR-12） | `spec/check-boundaries.mjs` |
 
 ---
 
@@ -94,6 +104,8 @@
 |---|---|---|---|
 | `TBD-2` | `apps/web/extensions/chatbot` 的令牌唯一源 | — | 禁止扩大 hex 散点，现值为棘轮上限 |
 | `TBD-3` | `apps/web` Shopify 嵌入后台恢复路径（子域或 `/shopify`） | — | 禁止改 Partner `application_url` 而不同步 nginx 与 OAuth 回调 |
+| `TBD-4` | 运营台的角色模型（支持 / 财务 / 只读的权限切分） | — | 决出前禁止在 `apps/ops` 里写任何 role 分支，一律按 superadmin 全权 |
+| `TBD-5` | 子项目 2 视觉回归的确定性来源（原方案依赖的 `FALLBACK_*` 种子数据已删除） | — | 禁止为了回归测试把种子数据加回 `apps/storefront/src/lib/api.ts` |
 
 ---
 
@@ -105,3 +117,5 @@
 4. 在册但全仓零引用 → **WARN，不红**。
 5. 相对路径链接目标必须存在（`check-links.mjs` 白名单除外）。
 6. **§1–§4 任一登记表解析为 0 行 = 格式契约破坏 = 红；§6/§7 少于 2 行 = 红。**
+7. §0 声明的出处文档一旦存在，必须为该命名空间**每个在册 ID** 提供可定位论证锚点
+   （形如 `### \`DS-3\``）。缺任一 = 红。出处文档仍在 `check-links.mjs` 白名单内时跳过。

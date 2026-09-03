@@ -9,6 +9,7 @@ import { PublicStorefrontModule } from './public-storefront/public-storefront.mo
 import { StorefrontDashboardModule } from './storefront-dashboard/storefront-dashboard.module';
 import { MembershipModule } from './membership/membership.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { OpsModule } from './ops/ops.module';
 import { HealthController } from './health.controller';
 
 /** MVP: Subscription / Mail / Admin deferred — see docs/MVP_SCOPE.md */
@@ -24,6 +25,7 @@ import { HealthController } from './health.controller';
     StorefrontDashboardModule,
     MembershipModule,
     SubscriptionModule,
+    OpsModule,
   ],
   controllers: [HealthController],
 })

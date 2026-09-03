@@ -97,6 +97,47 @@ const CASES = [
     expect: 1,
     expectMatch: /soft_tenant_models: \d+ > 基线/,
   },
+  {
+    name: 'check-design DS-7 抓 ops 源码 hex',
+    checker: 'check-design.mjs',
+    inject: () => tempFile('apps/ops/app/__negverify.tsx', 'export const c = "#ff0000";\n'),
+    expect: 1,
+    expectMatch: /DS-7 违反/,
+  },
+  {
+    name: 'check-design DS-7 注释里的 hex 必须不红',
+    checker: 'check-design.mjs',
+    inject: () => tempFile('apps/ops/app/__negverify.tsx', '// 原稿是 #ff0000\nexport {};\n'),
+    expect: 0,
+  },
+  {
+    name: 'check-design DS-8 抓两套令牌撞色',
+    checker: 'check-design.mjs',
+    inject: () => patchFile('apps/ops/app/tokens.css', '  --trial: #dec29a;', '  --trial: #006c49;'),
+    expect: 1,
+    expectMatch: /共用色值/,
+  },
+  {
+    name: 'check-design DS-9 抓暗色块缺令牌',
+    checker: 'check-design.mjs',
+    inject: () => patchFile('apps/ops/app/tokens.css', '    --lost: #ffb4ab;\n', ''),
+    expect: 1,
+    expectMatch: /暗色块缺令牌/,
+  },
+  {
+    name: '格式契约 7：DESIGN.md 缺 DS 论证锚点应红',
+    checker: 'check-links.mjs',
+    inject: () => patchFile('DESIGN.md', '### `DS-3`', '### DS-3 缺反引号'),
+    expect: 1,
+    expectMatch: /缺论证锚点：DS-3/,
+  },
+  {
+    name: '格式契约 7：正文提及 ID 不算论证锚点',
+    checker: 'check-links.mjs',
+    inject: () => patchFile('DESIGN.md', '### `DS-3`', '这里提一句 `DS-3`\n\n### DS-3'),
+    expect: 1,
+    expectMatch: /缺论证锚点：DS-3/,
+  },
 ];
 
 const gitStatus = () =>
