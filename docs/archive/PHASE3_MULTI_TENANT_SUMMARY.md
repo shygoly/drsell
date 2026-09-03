@@ -1,5 +1,12 @@
 # Phase 3: Multi-Tenant Integration - 实施总结
 
+> **⚠️ 已作废（2026-09-03）。仅作历史留档，不要据此判断本项目架构。**
+>
+> 本文围绕 `chatbot-node` 展开，而**本仓库已无该目录**（连同 Coze 集成一并作废）。
+> 当前多租户实现在 `apps/api`（NestJS + Prisma + PostgreSQL）。
+>
+> 现行架构与陷阱见仓库根目录 `AGENTS.md`。
+
 ## 已完成的工作
 
 ### 1. chatbot-node 多租户支持 ✅

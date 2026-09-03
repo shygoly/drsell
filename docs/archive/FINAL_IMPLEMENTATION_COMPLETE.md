@@ -1,5 +1,13 @@
 # 🎉 Final Implementation Complete - 完整实施报告
 
+> **⚠️ 已作废（2026-09-03）。仅作历史留档，不要据此判断本项目架构。**
+>
+> 本文是旧「三方多租户 SaaS 平台」的实施报告，其描述的服务拆分（Remix app +
+> 两个 Java Spring Boot 服务 + Coze）已整体被 `apps/{api,web,ops,storefront}` 取代。
+> 文中指向的其他报告路径亦已失效（相关文档均已移入本目录）。
+>
+> 现行架构与陷阱见仓库根目录 `AGENTS.md`。
+
 ## 项目总览
 
 成功完成三方多租户 SaaS 平台的完整实施，包含智能客服系统的端到端集成。

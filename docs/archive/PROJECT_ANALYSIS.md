@@ -1,5 +1,19 @@
 # 项目深度分析文档
 
+> **⚠️ 已作废（2026-09-03）。仅作历史留档，不要据此判断本项目架构。**
+>
+> 本文描述的「多服务 AI 聊天机器人平台 + Coze AI 平台集成」架构**整体已作废**：
+> Coze 已不再使用（AI 链路改为 `apps/api` → `packages/openclaw` → wjclaw 上的
+> OpenClaw gateway，provider DeepSeek-V4）；文中的 `chatbotapi`/`chatbotadmin`
+> 两个 Java Spring Boot 服务已被 `apps/api`（NestJS + Prisma）取代，目录移至
+> `obsolete/`（不入库）。
+>
+> **另注意：本文含 legacy jade app 的 client_id 与 secret 明文，且已入 git 历史。**
+> 该 app（`f286a4af8f1d80cb8e6228bc648f4786`）严禁用于生产。归档不消除泄漏，
+> 真正的处置是在 Shopify Partner 后台归档该 app 使其失效。
+>
+> 现行架构与陷阱见仓库根目录 `AGENTS.md`。
+
 ## 1. 项目功能概览
 
 这是一个**多服务 AI 聊天机器人平台**，专为 Shopify 店铺设计，集成 Coze AI 平台。核心业务流程：
