@@ -15,9 +15,11 @@ pnpm --filter @drsell/adp build
 pnpm --filter @drsell/openclaw build
 pnpm --filter @drsell/api exec prisma generate
 
-# 四个重构建并行跑：每个 app 在独立子壳里 source 自己的 .env 并 export 覆盖项，
-# 互不泄漏（历史上 ASSET_PREFIX 这类 env 串台会造成 /app 资产事故，见 AGENTS.md 陷阱 2）。
-echo "==> Build api + web + storefront + ops (parallel, per-app env isolated)"
+# 四个重构建并行跑，但**有界**：每波最多 2 个。无界四开在这台日常工作机上实测
+# 会内存/IO 争抢（墙钟反而比串行长）；每个 app 在独立子壳里 source 自己的 .env
+# 并 export 覆盖项，互不泄漏——ASSET_PREFIX 这类 env 串台正是 2026-09-02 /app
+# 资产事故的成因（AGENTS.md 陷阱 2）。
+echo "==> Build api + web (wave 1/2, parallel, per-app env isolated)"
 LOGDIR="$(mktemp -d /tmp/drsell-deploy.XXXXXX)"
 
 (
@@ -37,6 +39,11 @@ LOGDIR="$(mktemp -d /tmp/drsell-deploy.XXXXXX)"
   pnpm --filter @drsell/web build
 ) >"$LOGDIR/web.log" 2>&1 & P_WEB=$!
 
+BUILD_FAIL=0
+wait "$P_API" || BUILD_FAIL=1
+wait "$P_WEB" || BUILD_FAIL=1
+
+echo "==> Build storefront + ops (wave 2/2, parallel)"
 (
   set -a
   [[ -f apps/storefront/.env ]] && . apps/storefront/.env || true
@@ -54,10 +61,9 @@ LOGDIR="$(mktemp -d /tmp/drsell-deploy.XXXXXX)"
   pnpm --filter @drsell/ops build
 ) >"$LOGDIR/ops.log" 2>&1 & P_OPS=$!
 
-BUILD_FAIL=0
-for p in "$P_API" "$P_WEB" "$P_STOREFRONT" "$P_OPS"; do
-  wait "$p" || BUILD_FAIL=1
-done
+wait "$P_STOREFRONT" || BUILD_FAIL=1
+wait "$P_OPS" || BUILD_FAIL=1
+
 if [[ "$BUILD_FAIL" -ne 0 ]]; then
   echo "Build failed — per-app logs:"
   for n in api web storefront ops; do
