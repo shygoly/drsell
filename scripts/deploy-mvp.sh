@@ -8,38 +8,66 @@ NGINX_CONF_DIR="${NGINX_CONF_DIR:-/opt/webrtc-ws-proxy/conf.d}"
 
 cd "$ROOT"
 
-echo "==> Build packages + api + web + storefront + ops"
+echo "==> Build packages + prisma generate (sequential — apps 依赖 packages 的 dist)"
 pnpm --filter @drsell/shared build
 pnpm --filter @drsell/shopify build
 pnpm --filter @drsell/adp build
 pnpm --filter @drsell/openclaw build
 pnpm --filter @drsell/api exec prisma generate
-pnpm --filter @drsell/api build
 
-# shellcheck disable=SC1091
-set -a
-[[ -f apps/web/.env ]] && . apps/web/.env || true
-# Production: client calls /api via nginx; server routes use API_INTERNAL_URL at runtime.
-export API_INTERNAL_URL="http://127.0.0.1:5011"
-export NEXT_PUBLIC_API_BASE="/api"
-export NEXT_PUBLIC_SHOPIFY_API_KEY="${NEXT_PUBLIC_SHOPIFY_API_KEY:-${SHOPIFY_API_KEY:-}}"
-# 与 storefront 共用域名根，静态资产隔离到 /app/_next/（见 apps/web/next.config.ts）
-export ASSET_PREFIX="/app"
-set +a
-pnpm --filter @drsell/web build
+# 四个重构建并行跑：每个 app 在独立子壳里 source 自己的 .env 并 export 覆盖项，
+# 互不泄漏（历史上 ASSET_PREFIX 这类 env 串台会造成 /app 资产事故，见 AGENTS.md 陷阱 2）。
+echo "==> Build api + web + storefront + ops (parallel, per-app env isolated)"
+LOGDIR="$(mktemp -d /tmp/drsell-deploy.XXXXXX)"
 
-set -a
-[[ -f apps/storefront/.env ]] && . apps/storefront/.env || true
-export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://drsell.szchada.top/api}"
-export NEXT_PUBLIC_SHOPIFY_API_KEY="${NEXT_PUBLIC_SHOPIFY_API_KEY:-${SHOPIFY_API_KEY:-}}"
-set +a
-pnpm --filter @drsell/storefront build
+(
+  pnpm --filter @drsell/api build
+) >"$LOGDIR/api.log" 2>&1 & P_API=$!
 
-set -a
-[[ -f apps/ops/.env ]] && . apps/ops/.env || true
-export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://ops.szchada.top/api}"
-set +a
-pnpm --filter @drsell/ops build
+(
+  set -a
+  [[ -f apps/web/.env ]] && . apps/web/.env || true
+  # Production: client calls /api via nginx; server routes use API_INTERNAL_URL at runtime.
+  export API_INTERNAL_URL="http://127.0.0.1:5011"
+  export NEXT_PUBLIC_API_BASE="/api"
+  export NEXT_PUBLIC_SHOPIFY_API_KEY="${NEXT_PUBLIC_SHOPIFY_API_KEY:-${SHOPIFY_API_KEY:-}}"
+  # 与 storefront 共用域名根，静态资产隔离到 /app/_next/（见 apps/web/next.config.ts）
+  export ASSET_PREFIX="/app"
+  set +a
+  pnpm --filter @drsell/web build
+) >"$LOGDIR/web.log" 2>&1 & P_WEB=$!
+
+(
+  set -a
+  [[ -f apps/storefront/.env ]] && . apps/storefront/.env || true
+  export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://drsell.szchada.top/api}"
+  export NEXT_PUBLIC_SHOPIFY_API_KEY="${NEXT_PUBLIC_SHOPIFY_API_KEY:-${SHOPIFY_API_KEY:-}}"
+  set +a
+  pnpm --filter @drsell/storefront build
+) >"$LOGDIR/storefront.log" 2>&1 & P_STOREFRONT=$!
+
+(
+  set -a
+  [[ -f apps/ops/.env ]] && . apps/ops/.env || true
+  export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://ops.szchada.top/api}"
+  set +a
+  pnpm --filter @drsell/ops build
+) >"$LOGDIR/ops.log" 2>&1 & P_OPS=$!
+
+BUILD_FAIL=0
+for p in "$P_API" "$P_WEB" "$P_STOREFRONT" "$P_OPS"; do
+  wait "$p" || BUILD_FAIL=1
+done
+if [[ "$BUILD_FAIL" -ne 0 ]]; then
+  echo "Build failed — per-app logs:"
+  for n in api web storefront ops; do
+    echo "----- $n -----"
+    cat "$LOGDIR/$n.log"
+  done
+  rm -rf "$LOGDIR"
+  exit 1
+fi
+rm -rf "$LOGDIR"
 
 echo "==> Prepare remote layout"
 ssh "$HOST" "mkdir -p ${REMOTE}/apps/{api,web,storefront,ops} ${REMOTE}/packages/{shared,shopify,adp,openclaw} ${REMOTE}/node_modules"
@@ -69,6 +97,8 @@ rsync -az --delete "$ROOT/apps/storefront/public/" "${HOST}:${REMOTE}/apps/store
 rsync -az --delete "$ROOT/apps/ops/.next/standalone/" "${HOST}:${REMOTE}/apps/ops/standalone/"
 mkdir -p "$ROOT/apps/ops/.next/static"
 rsync -az --delete "$ROOT/apps/ops/.next/static/" "${HOST}:${REMOTE}/apps/ops/standalone/apps/ops/.next/static/" 2>/dev/null || true
+# ops 的 /brand 图标走 public/ 静态目录（middleware 已豁免 brand 路径）——漏同步会让 favicon 全 404
+rsync -az --delete "$ROOT/apps/ops/public/" "${HOST}:${REMOTE}/apps/ops/standalone/apps/ops/public/" 2>/dev/null || true
 
 rsync -az "$ROOT/apps/api/.env" "${HOST}:${REMOTE}/apps/api/.env"
 rsync -az "$ROOT/apps/web/.env" "${HOST}:${REMOTE}/apps/web/.env"
