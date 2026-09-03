@@ -13,6 +13,7 @@
     "db:migrate": "pnpm --filter @drsell/api prisma migrate deploy"
   },
   "devDependencies": {
+    "@shopify/cli": "^4.7.1",
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"
   }

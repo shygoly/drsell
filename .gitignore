@@ -69,3 +69,9 @@ test-coze-*.js
 .stitch/project-11226504772808429506/work/rebuild/
 /opencode.json
 .cursor/
+.gstack/
+
+# .stitch 设计基线整体不入库（2026-09-02 决定）：11.1MB 的截图/spec/基准只在本地保留。
+# 注意：这与上面第 50 行「baseline.png 与 spec.json 必须入库」的旧决定相悖，以本条为准。
+# 后果：scripts/stitch-*.sh|.mjs 依赖 .stitch/fixtures.json，clone 仓库者需自行获取该目录。
+.stitch/
