@@ -20,6 +20,15 @@ export const metadata: Metadata = {
   other: {
     "shopify-api-key": SHOPIFY_API_KEY,
   },
+  icons: {
+    icon: [
+      { url: "/brand/favicon.ico", sizes: "any", type: "image/x-icon" },
+      { url: "/brand/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [
+      { url: "/brand/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
 };
 
 export default function RootLayout({
