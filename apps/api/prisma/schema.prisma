@@ -294,3 +294,14 @@ model Customer {
   @@index([tenantId])
   @@map("customers")
 }
+
+/// Shopify 强制合规 webhook 留痕（customers/data_request、customers/redact、shop/redact）
+model ComplianceEvent {
+  id         String   @id @default(cuid())
+  topic      String
+  shopDomain String
+  payload    Json
+  createdAt  DateTime @default(now())
+
+  @@index([shopDomain])
+}

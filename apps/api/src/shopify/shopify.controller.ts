@@ -214,6 +214,14 @@ export class ShopifyController {
     if (topic === 'app/uninstalled' && shop) {
       return this.shopify.handleUninstall(shop);
     }
+    // Shopify 强制合规 webhook：HMAC 已通过，处理必须幂等且永不抛错（合规端点须 2xx）。
+    if (
+      topic === 'customers/data_request' ||
+      topic === 'customers/redact' ||
+      topic === 'shop/redact'
+    ) {
+      return this.shopify.handleComplianceEvent(topic, shop || 'unknown', req.body ?? raw);
+    }
     return { ok: true, topic };
   }
 }

@@ -24,6 +24,10 @@ api_version = "2025-04"
   "app/uninstalled",
   "app/scopes_update"
 ]
+
+  # Shopify 强制合规 webhook 单独走 /webhook（apps/web 代理 → apps/api 同一入口）
+  [[webhooks.subscriptions]]
+  uri = "/webhook"
   compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
 
 [access.admin]

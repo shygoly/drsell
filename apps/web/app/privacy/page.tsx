@@ -1,0 +1,192 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: '隐私政策 | Drsell',
+  description:
+    'Drsell 隐私政策：数据收集、使用、存储与 Shopify GDPR 合规说明 / Privacy policy for Drsell, a Shopify embedded app.',
+};
+
+const wrap: React.CSSProperties = {
+  maxWidth: 720,
+  margin: '0 auto',
+  padding: '3rem 1.25rem 4rem',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif',
+  lineHeight: 1.8,
+};
+
+const section = { marginTop: '2rem' } as const;
+
+const lastUpdated: React.CSSProperties = {
+  color: 'var(--muted)',
+  fontSize: '0.875rem',
+};
+
+export default function PrivacyPage() {
+  return (
+    <div style={wrap}>
+      <h1>隐私政策</h1>
+      <p style={lastUpdated}>最后更新：2026-09-03</p>
+
+      <section style={section}>
+        <h2>1. 我们是谁</h2>
+        <p>
+          Drsell（drsell.szchada.top）是一款 Shopify 嵌入式应用，为商家提供会员管理、多店铺运营以及
+          AI 智能客服聊天组件等服务。本政策说明我们通过该应用收集、使用、存储和保护信息的方式。
+          如对本政策有任何疑问，请联系 <a href="mailto:support@szchada.com">support@szchada.com</a>。
+        </p>
+      </section>
+
+      <section style={section}>
+        <h2>2. 我们收集的数据</h2>
+        <p>通过 Shopify API，我们在您安装并授权应用后收集以下数据：</p>
+        <ul>
+          <li>店铺信息：店铺域名、店铺名称等基本标识；</li>
+          <li>商品与订单数据：会员运营和客服会话所需的商品、订单摘要信息；</li>
+          <li>客户标识：会员识别与客服对话所需的客户编号、姓名、联系方式等标识信息；</li>
+          <li>应用配置：您在应用后台设置的知识库、聊天组件外观等配置项；</li>
+          <li>会话记录：访客通过聊天组件发起的对话内容及 AI 回复记录。</li>
+        </ul>
+      </section>
+
+      <section style={section}>
+        <h2>3. 数据的使用方式</h2>
+        <ul>
+          <li>为您提供建店、会员运营、多店铺管理等核心功能；</li>
+          <li>驱动 AI 智能客服：访客提问与会话上下文会经我们的 AI 网关处理，由模型服务商
+            DeepSeek 生成回复；</li>
+          <li>改进服务稳定性与质量（聚合统计，不涉及对个人身份的画像）。</li>
+        </ul>
+        <p>我们不会出售您的数据，也不会将其用于与提供服务无关的目的。</p>
+      </section>
+
+      <section style={section}>
+        <h2>4. 存储与保留</h2>
+        <p>
+          上述数据存储于我们的服务器（PostgreSQL 数据库）。在应用保持安装状态期间，我们会保留这些数据；
+          当您卸载应用，或依据下述 GDPR 合规流程提出删除请求时，相应数据将被删除。
+        </p>
+      </section>
+
+      <section style={section}>
+        <h2>5. Shopify 强制合规 Webhook</h2>
+        <p>
+          我们支持并遵守 Shopify 强制的合规 Webhook，接收端点为{' '}
+          <code>https://drsell.szchada.top/webhook</code>，并在 Shopify 规定的时限内响应：
+        </p>
+        <ul>
+          <li><code>customers/data_request</code>：商家收到终端客户的数据访问请求；</li>
+          <li><code>customers/redact</code>：商家收到终端客户的数据删除请求；</li>
+          <li><code>shop/redact</code>：店铺卸载应用或关闭后，Shopify 发起的全店数据删除请求。</li>
+        </ul>
+      </section>
+
+      <section style={section}>
+        <h2>6. 您的权利</h2>
+        <p>
+          如需访问、更正或删除与您相关的数据，请通过{' '}
+          <a href="mailto:support@szchada.com">support@szchada.com</a> 联系我们，
+          我们会在合理期限内处理您的请求。
+        </p>
+      </section>
+
+      <section style={section}>
+        <h2>7. 政策变更</h2>
+        <p>
+          我们可能不时更新本政策，重大变更会在本页面公布并更新「最后更新」日期。继续使用本应用即表示您
+          接受更新后的政策。
+        </p>
+      </section>
+
+      <hr style={{ margin: '3rem 0 0', border: 0, borderTop: '1px solid var(--line)' }} />
+
+      <h1>Privacy Policy</h1>
+      <p style={lastUpdated}>Last updated: 2026-09-03</p>
+
+      <section style={section}>
+        <h2>1. Who We Are</h2>
+        <p>
+          Drsell (drsell.szchada.top) is a Shopify embedded app that provides merchants with
+          membership management, multi-store operations, and an AI customer-service chat widget.
+          This policy explains how we collect, use, store, and protect information through the app.
+          If you have any questions, contact us at{' '}
+          <a href="mailto:support@szchada.com">support@szchada.com</a>.
+        </p>
+      </section>
+
+      <section style={section}>
+        <h2>2. Data We Collect</h2>
+        <p>After you install and authorize the app, we collect the following via the Shopify API:</p>
+        <ul>
+          <li>Shop information: shop domain, shop name, and other basic identifiers;</li>
+          <li>Products and orders: product and order details needed for membership operations and
+            customer-service conversations;</li>
+          <li>Customer identifiers: customer IDs, names, and contact details needed to recognize
+            members and route conversations;</li>
+          <li>App settings: knowledge base entries, chat widget appearance, and other configuration
+            you set in the app;</li>
+          <li>Conversation logs: messages sent by visitors through the chat widget and the replies
+            generated for them.</li>
+        </ul>
+      </section>
+
+      <section style={section}>
+        <h2>3. How We Use Data</h2>
+        <ul>
+          <li>To provide the membership and multi-store management features of the app;</li>
+          <li>To power the AI customer-service chat: visitor messages and conversation context are
+            processed through our AI gateway, and replies are generated by our model provider,
+            DeepSeek;</li>
+          <li>To monitor and improve service quality (aggregated statistics only, no individual
+            profiling).</li>
+        </ul>
+        <p>We do not sell your data or use it for any purpose unrelated to providing the service.</p>
+      </section>
+
+      <section style={section}>
+        <h2>4. Storage and Retention</h2>
+        <p>
+          Data is stored on our servers in a PostgreSQL database. We retain it for as long as the
+          app remains installed on your store. When you uninstall the app, or when a deletion
+          request is received through the GDPR compliance process described below, the
+          corresponding data is deleted.
+        </p>
+      </section>
+
+      <section style={section}>
+        <h2>5. Mandatory Shopify Compliance Webhooks</h2>
+        <p>
+          We honor the webhooks required by Shopify at the endpoint{' '}
+          <code>https://drsell.szchada.top/webhook</code>, and respond within the deadlines
+          Shopify specifies:
+        </p>
+        <ul>
+          <li><code>customers/data_request</code>: a merchant receives a data access request from an
+            end customer;</li>
+          <li><code>customers/redact</code>: a merchant receives a data deletion request from an end
+            customer;</li>
+          <li><code>shop/redact</code>: Shopify requests full shop data deletion after the app is
+            uninstalled or the store is closed.</li>
+        </ul>
+      </section>
+
+      <section style={section}>
+        <h2>6. Your Rights</h2>
+        <p>
+          To access, correct, or delete data relating to you, contact us at{' '}
+          <a href="mailto:support@szchada.com">support@szchada.com</a>. We will respond to your
+          request within a reasonable timeframe.
+        </p>
+      </section>
+
+      <section style={section}>
+        <h2>7. Changes to This Policy</h2>
+        <p>
+          We may update this policy from time to time. Material changes will be posted on this page
+          with an updated &ldquo;last updated&rdquo; date. Continued use of the app constitutes
+          acceptance of the updated policy.
+        </p>
+      </section>
+    </div>
+  );
+}

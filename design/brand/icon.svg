@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <!--
     DrSell app icon (master source).
-    Brand green: #4FA84B — deliberately close to, but distinct from, Shopify brand green
-    (#95BF47 bright / #5E8E3E dark). #4FA84B is a truer, slightly deeper green so the
-    product reads as Shopify-adjacent without cloning the brand.
+    Brand green: #008A57 — deliberately close to, but distinct from, Shopify brand green
+    (#008060 primary). #008A57 sits slightly greener and lighter so the product reads as
+    Shopify-adjacent without cloning the brand.
     Geometry: rounded square, corner radius 22% (112.64/512), bold white "D"
     (uniform 62/512 stroke weight, cap height 288/512), centered.
     No text other than the single letter "D".
   -->
-  <rect width="512" height="512" rx="112.64" fill="#4FA84B"/>
+  <rect width="512" height="512" rx="112.64" fill="#008A57"/>
   <path
     fill="#FFFFFF"
     fill-rule="evenodd"

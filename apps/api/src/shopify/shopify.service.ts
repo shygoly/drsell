@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+  Logger,
+} from '@nestjs/common';
 import '@shopify/shopify-api/adapters/node';
 import { ApiVersion, shopifyApi } from '@shopify/shopify-api';
 import { verifyShopifyWebhookHmac, shopifyGraphql } from '@drsell/shopify';
@@ -80,6 +85,8 @@ function dec(v: unknown): Decimal | undefined {
 
 @Injectable()
 export class ShopifyService {
+  private readonly logger = new Logger(ShopifyService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenants: TenantService,
@@ -384,6 +391,45 @@ export class ShopifyService {
         });
     }
     return { ok: true };
+  }
+
+  /**
+   * Shopify 强制合规 webhook（customers/data_request、customers/redact、shop/redact）。
+   * 只留痕（ComplianceEvent）+ 记日志，绝不抛错——Shopify 要求合规端点必须快速返回 2xx。
+   * shop/redact 刻意不复用 handleUninstall：后者会触发 billing.reassign（在其他店上
+   * 创建真实 AppSubscription charge，非幂等，风险不可接受）。店铺数据删除仍由
+   * app/uninstalled 流程负责——shop/redact 在店铺删除约 48h 后到达，届时卸载流程
+   * 通常已完成（token 置空、session 清理）。
+   */
+  async handleComplianceEvent(
+    topic: 'customers/data_request' | 'customers/redact' | 'shop/redact',
+    shopDomain: string,
+    payload: unknown,
+  ) {
+    let json: Prisma.InputJsonValue = {};
+    if (payload && typeof payload === 'object') {
+      json = payload as Prisma.InputJsonValue;
+    } else {
+      try {
+        json = JSON.parse(String(payload)) as Prisma.InputJsonValue;
+      } catch {
+        json = { raw: String(payload ?? '') };
+      }
+    }
+    try {
+      await this.prisma.complianceEvent.create({
+        data: { topic, shopDomain, payload: json },
+      });
+      this.logger.log(`compliance webhook ${topic} recorded for ${shopDomain}`);
+    } catch (error) {
+      // 留痕失败只记错误日志，不影响向 Shopify 返回 2xx。
+      this.logger.error(
+        `compliance webhook ${topic} persist failed for ${shopDomain}: ${
+          (error as Error).message
+        }`,
+      );
+    }
+    return { ok: true, topic };
   }
 
   async listProducts(tenantId: string, take = 50) {
