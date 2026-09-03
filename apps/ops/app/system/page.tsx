@@ -49,7 +49,7 @@ export default function SystemPage() {
   return (
     <AuthGate>
       <OpsShell
-        chrome="audit"
+        chrome="both"
         padded={false}
         active="system"
         title="System Health & Telemetry"

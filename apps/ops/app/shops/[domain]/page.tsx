@@ -105,7 +105,7 @@ export default function ShopDetailPage({ params }: { params: Promise<{ domain: s
 
   return (
     <AuthGate>
-      <OpsShell active="shops" padded={false} chrome="topbar">
+      <OpsShell active="shops" padded={false} chrome="both">
         {/* 逐字移植自 .stitch/project-.../designs/08_Store_&_Subscription_Details.html
             的 <main> 内容区。spacing 令牌按 skill 门禁第 5 条展开成 arbitrary：
             container-padding 24px / gutter 12px / row-height-dense 32px。

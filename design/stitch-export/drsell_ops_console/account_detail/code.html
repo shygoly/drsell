@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account Details - mia@nordiccycles.se</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&amp;family=Martian+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#d6dbd7",
+                        "surface": "#f6fbf6",
+                        "on-tertiary-container": "#bf7422",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb875",
+                        "on-primary-fixed": "#111e1b",
+                        "frozen-accent": "#a66009",
+                        "on-secondary-fixed-variant": "#42359f",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "outline": "#737876",
+                        "on-surface-variant": "#424846",
+                        "tertiary": "#0b0300",
+                        "tertiary-container": "#311800",
+                        "tertiary-fixed": "#ffdcc0",
+                        "surface-tint": "#53615d",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#2d1600",
+                        "surface-container-high": "#e4e9e5",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "inverse-on-surface": "#edf2ee",
+                        "secondary-container": "#9b90fe",
+                        "on-secondary-container": "#30208d",
+                        "surface-container-low": "#f0f5f1",
+                        "background": "#f6fbf6",
+                        "card-surface": "#fafcfa",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#dfe4e0",
+                        "primary-container": "#14211e",
+                        "primary-fixed": "#d7e6e1",
+                        "on-primary-fixed-variant": "#3c4a46",
+                        "secondary": "#5a4fb8",
+                        "page-bg": "#e6ebe7",
+                        "secondary-fixed-dim": "#c6bfff",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f6fbf6",
+                        "secondary-fixed": "#e4dfff",
+                        "on-secondary-fixed": "#160066",
+                        "error-container": "#ffdad6",
+                        "on-background": "#171d1b",
+                        "trial-accent": "#4b3fa8",
+                        "surface-container-highest": "#dfe4e0",
+                        "on-surface": "#171d1b",
+                        "primary-fixed-dim": "#bbcac5",
+                        "on-primary-container": "#7b8985",
+                        "on-error-container": "#93000a",
+                        "primary": "#000705",
+                        "inverse-primary": "#bbcac5",
+                        "ink": "#14211e",
+                        "inverse-surface": "#2c322f",
+                        "surface-container": "#eaefeb",
+                        "outline-variant": "#c2c8c5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "tight": "8px",
+                        "base": "4px",
+                        "standard": "16px",
+                        "container-max": "1280px",
+                        "gutter": "1px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Martian Mono"],
+                        "headline-sm": ["Bricolage Grotesque"],
+                        "headline-lg": ["Bricolage Grotesque"],
+                        "body-md": ["Bricolage Grotesque"],
+                        "headline-md": ["Bricolage Grotesque"],
+                        "body-lg": ["Bricolage Grotesque"],
+                        "data-mono": ["Martian Mono"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", { "lineHeight": "1", "fontWeight": "700" }],
+                        "headline-sm": ["18px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "data-mono": ["13px", { "lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.page-bg'); color: theme('colors.ink'); font-family: theme('fontFamily.body-md'); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .data-table-cell { border-right: 1px solid theme('colors.ink'); border-bottom: 1px solid theme('colors.ink'); padding: theme('spacing.tight'); }
+        .data-table-cell:last-child { border-right: none; }
+        .data-table-row:last-child .data-table-cell { border-bottom: none; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden antialiased">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col bg-surface dark:bg-surface-dim border-r border-ink dark:border-outline-variant w-[200px] h-screen flex-shrink-0">
+<div class="p-standard border-b border-ink dark:border-outline-variant flex items-center gap-tight">
+<div class="w-8 h-8 rounded-full bg-ink flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-surface text-[20px]">admin_panel_settings</span>
+</div>
+<div class="overflow-hidden">
+<h1 class="font-headline-sm text-headline-sm font-black text-ink dark:text-on-surface uppercase tracking-tighter truncate" title="AI Ops Console">AI Ops Console</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant truncate">Internal Admin</p>
+</div>
+</div>
+<div class="flex flex-col h-full overflow-y-auto py-tight font-body-md text-body-md Martian Mono: font-data-mono text-data-mono text-ink dark:text-on-surface">
+<!-- 到期队列 -->
+<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+<span class="truncate">到期队列</span>
+</a>
+<!-- 店铺 -->
+<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">storefront</span>
+<span class="truncate">店铺</span>
+</a>
+<!-- 账号 (ACTIVE) -->
+<a class="flex items-center gap-tight px-standard py-tight bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary font-bold border-y border-ink dark:border-outline-variant hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">person</span>
+<span class="truncate">账号</span>
+</a>
+<!-- 审计日志 -->
+<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">security</span>
+<span class="truncate">审计日志</span>
+</a>
+<!-- 套餐配置 -->
+<a class="flex items-center gap-tight px-standard py-tight text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="truncate">套餐配置</span>
+</a>
+</div>
+</nav>
+<!-- Main Canvas -->
+<main class="flex-1 flex flex-col h-full overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-card-surface dark:bg-surface-container flex justify-between items-center h-16 px-standard w-full border-b border-ink dark:border-outline-variant flex-shrink-0">
+<div class="flex items-center gap-tight md:hidden">
+<button class="p-tight text-ink dark:text-on-surface hover:text-primary dark:hover:text-inverse-primary scale-95 duration-100">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="font-headline-md text-headline-md font-bold text-ink dark:text-on-surface">AI Ops Console</span>
+</div>
+<div class="hidden md:flex items-center gap-standard font-headline-md text-headline-md font-bold text-ink dark:text-on-surface">
+<!-- Brand text handled by Sidebar on desktop -->
+</div>
+<div class="flex items-center gap-standard">
+<div class="relative hidden sm:block w-64 border border-ink bg-card-surface">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-[20px] text-on-surface-variant">search</span>
+<input class="w-full bg-transparent border-none pl-9 pr-2 py-1 font-data-mono text-data-mono text-ink focus:ring-0 placeholder:text-on-surface-variant" placeholder="Search..." type="text"/>
+</div>
+<div class="flex items-center gap-tight">
+<button class="p-1 text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary scale-95 duration-100">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-1 text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary scale-95 duration-100">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full border border-ink overflow-hidden ml-2 bg-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px] text-ink">face</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto p-standard md:p-6 lg:p-8 space-y-6">
+<!-- Account Header Card -->
+<div class="bg-card-surface border border-ink rounded-none relative">
+<!-- Action Button in top right -->
+<div class="absolute top-standard right-standard z-10">
+<button class="bg-trial-accent text-white px-4 py-2 border border-ink font-label-caps text-label-caps uppercase hover:bg-ink hover:text-surface transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">login</span>
+                        代登录
+                    </button>
+</div>
+<div class="p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-6 border-b border-ink">
+<div class="w-20 h-20 bg-surface border border-ink flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[40px] text-ink">person</span>
+</div>
+<div>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-ink mb-1">mia@nordiccycles.se</h2>
+<div class="flex items-center gap-2 font-data-mono text-data-mono text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">link</span>
+<span>Linked via Google SSO</span>
+<span class="w-1 h-1 bg-ink rounded-full mx-2"></span>
+<span>ID: USR-8849-01</span>
+<span class="px-2 py-0.5 bg-trial-accent text-white font-label-caps text-[9px] uppercase border border-ink ml-2">Active</span>
+</div>
+</div>
+</div>
+<!-- Quick Stats -->
+<div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-ink border-t border-ink bg-surface-container-low">
+<div class="p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-1">Total Shops</div>
+<div class="font-headline-md text-headline-md text-ink">2</div>
+</div>
+<div class="p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-1">Total Billed</div>
+<div class="font-headline-md text-headline-md text-ink font-data-mono">$1,450</div>
+</div>
+<div class="p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-1">Last Login</div>
+<div class="font-headline-sm text-headline-sm text-ink font-data-mono">2h ago</div>
+</div>
+<div class="p-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-1">Risk Score</div>
+<div class="font-headline-md text-headline-md text-ink font-data-mono text-green-700">0.05</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Owned Shops Table -->
+<div class="lg:col-span-2 bg-card-surface border border-ink flex flex-col">
+<div class="p-tight border-b border-ink bg-surface flex justify-between items-center">
+<h3 class="font-label-caps text-label-caps uppercase text-ink flex items-center gap-2 px-2">
+<span class="material-symbols-outlined text-[16px]">storefront</span>
+                            名下店铺
+                        </h3>
+<button class="text-on-surface-variant hover:text-ink">
+<span class="material-symbols-outlined text-[16px]">filter_list</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse font-data-mono text-data-mono">
+<thead class="bg-surface-container-low font-label-caps text-label-caps text-on-surface-variant uppercase">
+<tr>
+<th class="border-b border-r border-ink p-tight font-normal">店铺 (Shop)</th>
+<th class="border-b border-r border-ink p-tight font-normal">角色 (Role)</th>
+<th class="border-b border-r border-ink p-tight font-normal">订阅 (Subscription)</th>
+<th class="border-b border-r border-ink p-tight font-normal text-center">计费店 (Billing)</th>
+<th class="border-b border-ink p-tight font-normal text-right">安装时间 (Installed)</th>
+</tr>
+</thead>
+<tbody class="text-ink">
+<tr class="data-table-row hover:bg-surface transition-colors cursor-pointer group">
+<td class="data-table-cell group-hover:text-trial-accent">nordic-cycles.myshopify.com</td>
+<td class="data-table-cell">Owner</td>
+<td class="data-table-cell">
+<span class="px-2 py-0.5 bg-frozen-accent text-white font-label-caps text-[10px] border border-ink">FROZEN</span>
+</td>
+<td class="data-table-cell text-center">
+<span class="material-symbols-outlined text-[16px] text-ink">check_box</span>
+</td>
+<td class="data-table-cell text-right">2023-01-15</td>
+</tr>
+<tr class="data-table-row hover:bg-surface transition-colors cursor-pointer group">
+<td class="data-table-cell group-hover:text-trial-accent">atlas-outfitters.myshopify.com</td>
+<td class="data-table-cell">Admin</td>
+<td class="data-table-cell">
+<span class="px-2 py-0.5 bg-surface-container-high text-ink font-label-caps text-[10px] border border-ink">TRIAL</span>
+</td>
+<td class="data-table-cell text-center">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">check_box_outline_blank</span>
+</td>
+<td class="data-table-cell text-right">2023-11-20</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Recent Actions -->
+<div class="bg-card-surface border border-ink flex flex-col">
+<div class="p-tight border-b border-ink bg-surface flex justify-between items-center">
+<h3 class="font-label-caps text-label-caps uppercase text-ink flex items-center gap-2 px-2">
+<span class="material-symbols-outlined text-[16px]">history</span>
+                            最近操作
+                        </h3>
+<a class="font-label-caps text-[10px] text-trial-accent uppercase hover:underline pr-2" href="#">View All</a>
+</div>
+<div class="flex-1 flex flex-col divide-y divide-ink">
+<!-- Log Item 1 -->
+<div class="p-3 hover:bg-surface transition-colors flex gap-3">
+<div class="w-6 h-6 border border-ink bg-surface-container flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">key</span>
+</div>
+<div class="min-w-0 flex-1">
+<p class="font-data-mono text-data-mono text-ink truncate">Password reset requested</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-1">System • Today, 14:32</p>
+</div>
+</div>
+<!-- Log Item 2 -->
+<div class="p-3 hover:bg-surface transition-colors flex gap-3">
+<div class="w-6 h-6 border border-ink bg-surface-container flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">login</span>
+</div>
+<div class="min-w-0 flex-1">
+<p class="font-data-mono text-data-mono text-ink truncate">Login from new IP</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-1">User • Yesterday, 09:15</p>
+<p class="font-data-mono text-[11px] text-on-surface-variant mt-0.5">IP: 192.168.1.45 (SE)</p>
+</div>
+</div>
+<!-- Log Item 3 -->
+<div class="p-3 hover:bg-surface transition-colors flex gap-3">
+<div class="w-6 h-6 border border-ink bg-surface-container flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">credit_card</span>
+</div>
+<div class="min-w-0 flex-1">
+<p class="font-data-mono text-data-mono text-ink truncate">Updated billing info</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-1">User • Oct 12, 11:05</p>
+</div>
+</div>
+<!-- Log Item 4 -->
+<div class="p-3 hover:bg-surface transition-colors flex gap-3">
+<div class="w-6 h-6 border border-ink bg-surface-container flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">verified_user</span>
+</div>
+<div class="min-w-0 flex-1">
+<p class="font-data-mono text-data-mono text-ink truncate">SSO linkage established</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-1">System • Sep 01, 10:00</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

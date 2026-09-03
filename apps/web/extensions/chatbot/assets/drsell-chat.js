@@ -9,10 +9,29 @@
     en: { title: 'Drsell Assistant', placeholder: 'Type your message here…', send: 'Send', me: 'Me', bot: 'Assistant', close: 'Close', open: 'Chat with us' },
   }[lang];
 
+  /** Widget theme fallbacks — sole hex source until TBD-2 resolves token injection. */
+  var FALLBACK = {
+    primary: '#006c49',
+    onPrimary: '#ffffff',
+    text: '#181c1f',
+    textMuted: '#6b7280',
+    bubbleOther: '#ebedf3',
+    border: '#e5e7eb',
+    inputBorder: '#d1d5db',
+  };
+
+  function primaryColor() {
+    return config.widgetPrimaryColor || FALLBACK.primary;
+  }
+
+  function headerColor() {
+    return config.widgetHeaderColor || config.widgetPrimaryColor || FALLBACK.primary;
+  }
+
   var config = {
     shopName: '',
-    widgetPrimaryColor: '#006c49',
-    widgetHeaderColor: '#006c49',
+    widgetPrimaryColor: FALLBACK.primary,
+    widgetHeaderColor: FALLBACK.primary,
     widgetPosition: 'bottom-right',
     widgetWindowSize: 'medium',
     widgetLauncherStyle: 'chat',
@@ -82,14 +101,14 @@
       height: '52px',
       borderRadius: '50%',
       border: '0',
-      color: '#fff',
+      color: FALLBACK.onPrimary,
       fontSize: '22px',
       cursor: 'pointer',
       boxShadow: '0 6px 18px rgba(0,0,0,.25)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: config.widgetPrimaryColor || '#006c49',
+      background: primaryColor(),
     }, sideStyles()));
     launcher.textContent = launcherIcon();
     launcher.addEventListener('click', function () {
@@ -113,8 +132,8 @@
       fontSize: '13px',
       lineHeight: '1.45',
       alignSelf: mine ? 'flex-end' : 'flex-start',
-      background: mine ? (config.widgetPrimaryColor || '#006c49') : '#ebedf3',
-      color: mine ? '#fff' : '#181c1f',
+      background: mine ? primaryColor() : FALLBACK.bubbleOther,
+      color: mine ? FALLBACK.onPrimary : FALLBACK.text,
       borderBottomRightRadius: mine ? '4px' : '12px',
       borderBottomLeftRadius: mine ? '12px' : '4px',
     });
@@ -138,8 +157,8 @@
       maxWidth: '90vw',
       height: size.h + 'px',
       maxHeight: '80vh',
-      background: '#ffffff',
-      color: '#181c1f',
+      background: FALLBACK.onPrimary,
+      color: FALLBACK.text,
       borderRadius: '16px',
       boxShadow: '0 10px 30px rgba(0,0,0,.18)',
       fontFamily: 'system-ui,sans-serif',
@@ -151,8 +170,8 @@
     var header = document.createElement('div');
     cssText(header, {
       padding: '12px 14px',
-      background: config.widgetHeaderColor || config.widgetPrimaryColor || '#006c49',
-      color: '#fff',
+      background: headerColor(),
+      color: FALLBACK.onPrimary,
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -168,7 +187,7 @@
       height: '28px',
       borderRadius: '50%',
       background: 'rgba(255,255,255,.22)',
-      color: '#fff',
+      color: FALLBACK.onPrimary,
       fontSize: '13px',
       fontWeight: '700',
       display: 'flex',
@@ -206,7 +225,7 @@
     cssText(close, {
       background: 'transparent',
       border: '0',
-      color: '#fff',
+      color: FALLBACK.onPrimary,
       fontSize: '14px',
       cursor: 'pointer',
       flexShrink: '0',
@@ -228,7 +247,7 @@
       flexDirection: 'column',
       gap: '8px',
       fontSize: '13px',
-      background: '#ffffff',
+      background: FALLBACK.onPrimary,
     });
 
     var stamp = document.createElement('span');
@@ -236,7 +255,7 @@
     cssText(stamp, {
       textAlign: 'center',
       fontSize: '10px',
-      color: '#6b7280',
+      color: FALLBACK.textMuted,
       marginBottom: '2px',
     });
     log.appendChild(stamp);
@@ -256,9 +275,9 @@
       display: 'flex',
       gap: '8px',
       padding: '10px',
-      borderTop: '1px solid #e5e7eb',
+      borderTop: '1px solid ' + FALLBACK.border,
       flexShrink: '0',
-      background: '#ffffff',
+      background: FALLBACK.onPrimary,
     });
 
     var input = document.createElement('input');
@@ -268,9 +287,9 @@
       flex: '1',
       minWidth: '0',
       borderRadius: '999px',
-      border: '1px solid #d1d5db',
-      background: '#ffffff',
-      color: '#181c1f',
+      border: '1px solid ' + FALLBACK.inputBorder,
+      background: FALLBACK.onPrimary,
+      color: FALLBACK.text,
       padding: '9px 14px',
       fontSize: '13px',
       outline: 'none',
@@ -285,8 +304,8 @@
       height: '36px',
       borderRadius: '50%',
       border: '0',
-      background: config.widgetPrimaryColor || '#006c49',
-      color: '#fff',
+      background: primaryColor(),
+      color: FALLBACK.onPrimary,
       fontSize: '16px',
       cursor: 'pointer',
       display: 'flex',
@@ -302,9 +321,9 @@
       textAlign: 'center',
       padding: '7px 10px',
       fontSize: '10px',
-      color: '#6b7280',
-      borderTop: '1px solid #e5e7eb',
-      background: '#ffffff',
+      color: FALLBACK.textMuted,
+      borderTop: '1px solid ' + FALLBACK.border,
+      background: FALLBACK.onPrimary,
       flexShrink: '0',
     });
 
@@ -338,8 +357,8 @@
       chip.textContent = q;
       cssText(chip, {
         background: 'transparent',
-        border: '1px solid ' + (config.widgetPrimaryColor || '#006c49'),
-        color: config.widgetPrimaryColor || '#006c49',
+        border: '1px solid ' + primaryColor(),
+        color: primaryColor(),
         borderRadius: '999px',
         padding: '5px 11px',
         fontSize: '12px',

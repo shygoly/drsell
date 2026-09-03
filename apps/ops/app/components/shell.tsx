@@ -1,9 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { FormEvent, useState } from 'react';
 import { BellRing, LogOut, Search, ShieldCheck } from 'lucide-react';
 import { OpsSidebar } from '@/app/components/nav';
 import { clearToken } from '@/lib/auth';
+import { resolveSearchRoute } from '@/lib/search-route';
 
 type Props = {
   active: 'queue' | 'shops' | 'accounts' | 'audit' | 'plans' | 'system' | 'impersonation';
@@ -51,6 +54,24 @@ function GlobalAuditBar({ offsetTop = 0 }: { offsetTop?: number }) {
  * row-height-standard 48px / container-padding 24px。
  */
 function GlobalTopBar({ offsetTop = 0, insetLeft = 0 }: { offsetTop?: number; insetLeft?: number }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [query, setQuery] = useState('');
+
+  function onSearch(e: FormEvent) {
+    e.preventDefault();
+    const q = query.trim();
+    if (!q) return;
+    router.push(resolveSearchRoute(q));
+  }
+
+  const tabClass = (href: string) =>
+    `flex h-full shrink-0 items-center whitespace-nowrap border-b-2 px-4 font-medium no-underline transition-colors ${
+      pathname === href || (href !== '/system' && pathname.startsWith(href))
+        ? 'border-primary text-on-surface'
+        : 'text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border-transparent'
+    }`;
+
   return (
     <header className="bg-surface-container-highest border-outline-variant fixed z-[60] flex h-[48px] items-center justify-between border-b px-[24px]"
       style={{ top: offsetTop, left: insetLeft, width: `calc(100% - ${insetLeft}px)` }}>
@@ -59,28 +80,30 @@ function GlobalTopBar({ offsetTop = 0, insetLeft = 0 }: { offsetTop?: number; in
           drsell Admin
         </span>
         <nav className="hidden h-full shrink-0 items-center gap-4 md:flex">
-          <Link
-          href="/system"
-          className="text-on-surface-variant hover:bg-surface-variant hover:text-on-surface flex h-full shrink-0 items-center whitespace-nowrap border-b-2 border-transparent px-4 font-medium no-underline transition-colors"
-          >
-          系统健康
-        </Link>
-          <Link
-          href="/audit"
-          className="text-on-surface-variant hover:bg-surface-variant hover:text-on-surface flex h-full shrink-0 items-center whitespace-nowrap border-b-2 border-transparent px-4 font-medium no-underline transition-colors"
-          >
-          审计日志
-        </Link>
+          <Link href="/system" className={tabClass('/system')}>
+            系统健康
+          </Link>
+          <Link href="/audit" className={tabClass('/audit')}>
+            审计日志
+          </Link>
         </nav>
-        <div className="group relative hidden h-full w-full max-w-md min-w-0 items-center lg:flex">
+        <form
+          className="group relative hidden h-full w-full max-w-md min-w-0 items-center lg:flex"
+          onSubmit={onSearch}
+        >
           <Search
             className="text-on-surface-variant group-focus-within:text-primary absolute left-3 z-10 h-4 w-4 transition-colors"
             aria-hidden="true"
           />
-          <span className="sr-only">按邮箱、域名或用户 ID 检索</span>
+          <label className="sr-only" htmlFor="ops-global-search">
+            按邮箱、域名或用户 ID 检索
+          </label>
           <input
+            id="ops-global-search"
             type="search"
             placeholder="按邮箱、域名或用户 ID 检索"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             className="bg-background border-outline-variant text-on-surface placeholder:text-on-surface-variant focus:border-primary focus:ring-primary font-body-sm text-body-sm h-8 w-full rounded border py-1.5 pl-10 pr-16 transition-all focus:ring-1"
           />
           <span className="absolute right-2 top-1/2 flex -translate-y-1/2 gap-1">
@@ -93,7 +116,7 @@ function GlobalTopBar({ offsetTop = 0, insetLeft = 0 }: { offsetTop?: number; in
               </kbd>
             ))}
           </span>
-        </div>
+        </form>
       </div>
 
       <div className="flex items-center gap-4">
