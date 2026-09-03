@@ -25,81 +25,6 @@ const lastUpdated: React.CSSProperties = {
 export default function PrivacyPage() {
   return (
     <div style={wrap}>
-      <h1>隐私政策</h1>
-      <p style={lastUpdated}>最后更新：2026-09-03</p>
-
-      <section style={section}>
-        <h2>1. 我们是谁</h2>
-        <p>
-          Drsell（drsell.szchada.top）是一款 Shopify 嵌入式应用，为商家提供会员管理、多店铺运营以及
-          AI 智能客服聊天组件等服务。本政策说明我们通过该应用收集、使用、存储和保护信息的方式。
-          如对本政策有任何疑问，请联系 <a href="mailto:support@szchada.com">support@szchada.com</a>。
-        </p>
-      </section>
-
-      <section style={section}>
-        <h2>2. 我们收集的数据</h2>
-        <p>通过 Shopify API，我们在您安装并授权应用后收集以下数据：</p>
-        <ul>
-          <li>店铺信息：店铺域名、店铺名称等基本标识；</li>
-          <li>商品与订单数据：会员运营和客服会话所需的商品、订单摘要信息；</li>
-          <li>客户标识：会员识别与客服对话所需的客户编号、姓名、联系方式等标识信息；</li>
-          <li>应用配置：您在应用后台设置的知识库、聊天组件外观等配置项；</li>
-          <li>会话记录：访客通过聊天组件发起的对话内容及 AI 回复记录。</li>
-        </ul>
-      </section>
-
-      <section style={section}>
-        <h2>3. 数据的使用方式</h2>
-        <ul>
-          <li>为您提供建店、会员运营、多店铺管理等核心功能；</li>
-          <li>驱动 AI 智能客服：访客提问与会话上下文会经我们的 AI 网关处理，由模型服务商
-            DeepSeek 生成回复；</li>
-          <li>改进服务稳定性与质量（聚合统计，不涉及对个人身份的画像）。</li>
-        </ul>
-        <p>我们不会出售您的数据，也不会将其用于与提供服务无关的目的。</p>
-      </section>
-
-      <section style={section}>
-        <h2>4. 存储与保留</h2>
-        <p>
-          上述数据存储于我们的服务器（PostgreSQL 数据库）。在应用保持安装状态期间，我们会保留这些数据；
-          当您卸载应用，或依据下述 GDPR 合规流程提出删除请求时，相应数据将被删除。
-        </p>
-      </section>
-
-      <section style={section}>
-        <h2>5. Shopify 强制合规 Webhook</h2>
-        <p>
-          我们支持并遵守 Shopify 强制的合规 Webhook，接收端点为{' '}
-          <code>https://drsell.szchada.top/webhook</code>，并在 Shopify 规定的时限内响应：
-        </p>
-        <ul>
-          <li><code>customers/data_request</code>：商家收到终端客户的数据访问请求；</li>
-          <li><code>customers/redact</code>：商家收到终端客户的数据删除请求；</li>
-          <li><code>shop/redact</code>：店铺卸载应用或关闭后，Shopify 发起的全店数据删除请求。</li>
-        </ul>
-      </section>
-
-      <section style={section}>
-        <h2>6. 您的权利</h2>
-        <p>
-          如需访问、更正或删除与您相关的数据，请通过{' '}
-          <a href="mailto:support@szchada.com">support@szchada.com</a> 联系我们，
-          我们会在合理期限内处理您的请求。
-        </p>
-      </section>
-
-      <section style={section}>
-        <h2>7. 政策变更</h2>
-        <p>
-          我们可能不时更新本政策，重大变更会在本页面公布并更新「最后更新」日期。继续使用本应用即表示您
-          接受更新后的政策。
-        </p>
-      </section>
-
-      <hr style={{ margin: '3rem 0 0', border: 0, borderTop: '1px solid var(--line)' }} />
-
       <h1>Privacy Policy</h1>
       <p style={lastUpdated}>Last updated: 2026-09-03</p>
 
@@ -185,6 +110,81 @@ export default function PrivacyPage() {
           We may update this policy from time to time. Material changes will be posted on this page
           with an updated &ldquo;last updated&rdquo; date. Continued use of the app constitutes
           acceptance of the updated policy.
+        </p>
+      </section>
+
+      <hr style={{ margin: '3rem 0 0', border: 0, borderTop: '1px solid var(--line)' }} />
+
+      <h1>隐私政策</h1>
+      <p style={lastUpdated}>最后更新：2026-09-03</p>
+
+      <section style={section}>
+        <h2>1. 我们是谁</h2>
+        <p>
+          Drsell（drsell.szchada.top）是一款 Shopify 嵌入式应用，为商家提供会员管理、多店铺运营以及
+          AI 智能客服聊天组件等服务。本政策说明我们通过该应用收集、使用、存储和保护信息的方式。
+          如对本政策有任何疑问，请联系 <a href="mailto:support@szchada.com">support@szchada.com</a>。
+        </p>
+      </section>
+
+      <section style={section}>
+        <h2>2. 我们收集的数据</h2>
+        <p>通过 Shopify API，我们在您安装并授权应用后收集以下数据：</p>
+        <ul>
+          <li>店铺信息：店铺域名、店铺名称等基本标识；</li>
+          <li>商品与订单数据：会员运营和客服会话所需的商品、订单摘要信息；</li>
+          <li>客户标识：会员识别与客服对话所需的客户编号、姓名、联系方式等标识信息；</li>
+          <li>应用配置：您在应用后台设置的知识库、聊天组件外观等配置项；</li>
+          <li>会话记录：访客通过聊天组件发起的对话内容及 AI 回复记录。</li>
+        </ul>
+      </section>
+
+      <section style={section}>
+        <h2>3. 数据的使用方式</h2>
+        <ul>
+          <li>为您提供建店、会员运营、多店铺管理等核心功能；</li>
+          <li>驱动 AI 智能客服：访客提问与会话上下文会经我们的 AI 网关处理，由模型服务商
+            DeepSeek 生成回复；</li>
+          <li>改进服务稳定性与质量（聚合统计，不涉及对个人身份的画像）。</li>
+        </ul>
+        <p>我们不会出售您的数据，也不会将其用于与提供服务无关的目的。</p>
+      </section>
+
+      <section style={section}>
+        <h2>4. 存储与保留</h2>
+        <p>
+          上述数据存储于我们的服务器（PostgreSQL 数据库）。在应用保持安装状态期间，我们会保留这些数据；
+          当您卸载应用，或依据下述 GDPR 合规流程提出删除请求时，相应数据将被删除。
+        </p>
+      </section>
+
+      <section style={section}>
+        <h2>5. Shopify 强制合规 Webhook</h2>
+        <p>
+          我们支持并遵守 Shopify 强制的合规 Webhook，接收端点为{' '}
+          <code>https://drsell.szchada.top/webhook</code>，并在 Shopify 规定的时限内响应：
+        </p>
+        <ul>
+          <li><code>customers/data_request</code>：商家收到终端客户的数据访问请求；</li>
+          <li><code>customers/redact</code>：商家收到终端客户的数据删除请求；</li>
+          <li><code>shop/redact</code>：店铺卸载应用或关闭后，Shopify 发起的全店数据删除请求。</li>
+        </ul>
+      </section>
+
+      <section style={section}>
+        <h2>6. 您的权利</h2>
+        <p>
+          如需访问、更正或删除与您相关的数据，请通过{' '}
+          <a href="mailto:support@szchada.com">support@szchada.com</a> 联系我们，
+          我们会在合理期限内处理您的请求。
+        </p>
+      </section>
+
+      <section style={section}>
+        <h2>7. 政策变更</h2>
+        <p>
+          我们可能不时更新本政策，重大变更会在本页面公布并更新「最后更新」日期。继续使用本应用即表示您
+          接受更新后的政策。
         </p>
       </section>
     </div>
