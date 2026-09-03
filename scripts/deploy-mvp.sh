@@ -114,6 +114,7 @@ pnpm install --prod --filter @drsell/api... --frozen-lockfile || pnpm install --
 cd apps/api
 export DATABASE_URL=\$(grep '^DATABASE_URL=' .env | cut -d= -f2- | tr -d '"' | tr -d "'")
 pnpm dlx prisma@6.9.0 migrate deploy
+pnpm dlx prisma@6.9.0 generate
 
 pm2 delete drsell-api 2>/dev/null || true
 pm2 delete drsell-web 2>/dev/null || true

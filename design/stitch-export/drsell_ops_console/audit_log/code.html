@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Audit Log - AI Ops Console</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&amp;family=Martian+Mono:wght@100..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#eaefeb",
+                        "outline-variant": "#c2c8c5",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb875",
+                        "tertiary-fixed": "#ffdcc0",
+                        "primary": "#000705",
+                        "page-bg": "#e6ebe7",
+                        "secondary-fixed": "#e4dfff",
+                        "on-surface-variant": "#424846",
+                        "on-primary-fixed-variant": "#3c4a46",
+                        "surface-container-highest": "#dfe4e0",
+                        "surface": "#f6fbf6",
+                        "surface-container-low": "#f0f5f1",
+                        "inverse-primary": "#bbcac5",
+                        "surface-dim": "#d6dbd7",
+                        "surface-variant": "#dfe4e0",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#171d1b",
+                        "primary-container": "#14211e",
+                        "on-surface": "#171d1b",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f6fbf6",
+                        "on-primary-fixed": "#111e1b",
+                        "tertiary-container": "#311800",
+                        "on-tertiary-container": "#bf7422",
+                        "on-secondary-fixed-variant": "#42359f",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#2d1600",
+                        "ink": "#14211e",
+                        "on-error-container": "#93000a",
+                        "secondary": "#5a4fb8",
+                        "inverse-on-surface": "#edf2ee",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2c322f",
+                        "on-secondary-fixed": "#160066",
+                        "background": "#f6fbf6",
+                        "frozen-accent": "#a66009",
+                        "surface-container-high": "#e4e9e5",
+                        "on-tertiary-fixed-variant": "#6b3b00",
+                        "trial-accent": "#4b3fa8",
+                        "outline": "#737876",
+                        "tertiary": "#0b0300",
+                        "secondary-container": "#9b90fe",
+                        "surface-tint": "#53615d",
+                        "error": "#ba1a1a",
+                        "secondary-fixed-dim": "#c6bfff",
+                        "on-secondary-container": "#30208d",
+                        "card-surface": "#fafcfa",
+                        "primary-fixed-dim": "#bbcac5",
+                        "on-primary-container": "#7b8985",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#d7e6e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "standard": "16px",
+                        "base": "4px",
+                        "container-max": "1280px",
+                        "tight": "8px",
+                        "gutter": "1px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Bricolage Grotesque"],
+                        "headline-sm": ["Bricolage Grotesque"],
+                        "body-lg": ["Bricolage Grotesque"],
+                        "label-caps": ["Martian Mono"],
+                        "headline-lg": ["Bricolage Grotesque"],
+                        "data-mono": ["Martian Mono"],
+                        "headline-md": ["Bricolage Grotesque"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-sm": ["18px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label-caps": ["11px", { "lineHeight": "1", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "data-mono": ["13px", { "lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "1.2", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #e6ebe7; color: #171d1b; font-family: 'Bricolage Grotesque', sans-serif; margin: 0; padding: 0; }
+        .border-ink { border-color: #14211e; }
+        .text-ink { color: #14211e; }
+        .bg-surface { background-color: #f6fbf6; }
+        .bg-page { background-color: #e6ebe7; }
+        .table-cell { border: 1px solid #14211e; padding: 8px 12px; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden bg-page-bg font-body-md text-on-surface">
+<!-- SideNavBar -->
+<aside class="docked h-screen w-64 left-0 top-0 bg-surface flex flex-col h-full border-r border-ink shrink-0 hidden md:flex">
+<!-- Header -->
+<div class="p-standard border-b border-ink flex items-center gap-tight">
+<div class="w-10 h-10 rounded-full border border-ink overflow-hidden bg-surface-container-high shrink-0">
+<img alt="User Admin Profile" class="w-full h-full object-cover" data-alt="A highly professional and clean profile picture of a system administrator in an AI operations center. Minimalist white background, crisp lighting, high contrast monochromatic style with subtle sharp details, 8k resolution, photorealistic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7-FOJ_f1PE5dRcp5tbw0GTrlbW7K6RxHsPaYwZ3aMUE45MnXKaDZxzbwjKFuzKWbb5pGRHaLJGKgtDKkZi9u7SMnAWIRbcH5BqpgcXfcqVmzqhz92yOtLCnHHJJhdthx4vYOdL6WRTJ9nBhEEtmJMqrRSj0mp5-qGjNkgUvGoAAbq1dd9KQb4RdDlyBHk4ZypvBYYn0JCuiWwfhMZ_clnbZ9vqMB2WV61NH139UhkQ4qrgXLm-dHNwwN6evUCfj1ugnxMORVz3aQ"/>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-extrabold text-ink">AI Ops Console</h1>
+<div class="font-label-caps text-label-caps text-on-surface-variant mt-1">System Administrator</div>
+</div>
+</div>
+<!-- CTA -->
+<div class="p-standard border-b border-ink">
+<button class="w-full bg-trial-accent text-on-primary font-label-caps text-label-caps py-tight px-standard border border-ink flex items-center justify-center gap-tight hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[16px]">add</span>
+                New Request
+            </button>
+</div>
+<!-- Navigation -->
+<nav class="flex-1 overflow-y-auto p-base flex flex-col gap-base">
+<a class="flex items-center gap-tight p-tight text-on-surface-variant hover:bg-surface-container-highest transition-colors rounded-none font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+                Expiry Queue
+            </a>
+<a class="flex items-center gap-tight p-tight text-on-surface-variant hover:bg-surface-container-highest transition-colors rounded-none font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[18px]">storefront</span>
+                Shops
+            </a>
+<a class="flex items-center gap-tight p-tight text-on-surface-variant hover:bg-surface-container-highest transition-colors rounded-none font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[18px]">person_outline</span>
+                Accounts
+            </a>
+<a class="flex items-center gap-tight p-tight bg-primary-container text-on-primary-container font-bold border-l-4 border-ink rounded-none font-label-caps text-label-caps translate-x-1 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+                Audit Log
+            </a>
+<a class="flex items-center gap-tight p-tight text-on-surface-variant hover:bg-surface-container-highest transition-colors rounded-none font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[18px]">settings_input_component</span>
+                Package Config
+            </a>
+</nav>
+<!-- Footer -->
+<div class="p-base border-t border-ink flex flex-col gap-base mt-auto">
+<a class="flex items-center gap-tight p-tight text-on-surface-variant hover:bg-surface-container-highest transition-colors rounded-none font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[18px]">help_outline</span>
+                Support
+            </a>
+<a class="flex items-center gap-tight p-tight text-on-surface-variant hover:bg-surface-container-highest transition-colors rounded-none font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+                Settings
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0 bg-page-bg">
+<!-- TopNavBar (Mobile mainly, but keeping structure per prompt if needed, merging with header) -->
+<header class="flex justify-between items-center h-16 w-full px-standard border-b border-ink bg-surface shrink-0">
+<div class="flex items-center gap-standard">
+<button class="md:hidden text-ink">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="font-headline-md text-headline-md font-bold text-ink">审计日志</h2>
+</div>
+<div class="flex items-center gap-standard">
+<div class="relative hidden sm:flex items-center">
+<span class="material-symbols-outlined absolute left-tight text-outline text-[18px]">search</span>
+<input class="h-8 pl-8 pr-tight bg-card-surface border border-ink text-data-mono font-data-mono text-ink placeholder:text-outline focus:outline-none focus:ring-0" placeholder="Search logs..." type="text"/>
+</div>
+<button class="text-ink hover:bg-surface-container p-1 rounded-none transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-ink hover:bg-surface-container p-1 rounded-none transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+<button class="font-label-caps text-label-caps text-ink border border-ink px-tight py-1 hover:bg-surface-container transition-colors hidden sm:block">
+                    Docs
+                </button>
+<button class="bg-ink text-on-primary font-label-caps text-label-caps px-standard py-1 border border-ink hover:opacity-90 transition-opacity">
+                    Deploy
+                </button>
+<img alt="Admin Avatar" class="w-8 h-8 border border-ink object-cover md:hidden" data-alt="A highly professional and clean profile picture of a system administrator in an AI operations center. Minimalist white background, crisp lighting, high contrast monochromatic style with subtle sharp details, 8k resolution, photorealistic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmPBr0UFnpHgLULwqj0GNUF1wNsJvje0-0N3gDGKM6q1tsFc8b7JL_Bpl67adadbcbVJFB9K_dNEfC-e9F41fv7aKK69w7a9RrGhuFmTMlBuVKB41ccHBS4Y1sMG4Tb5FYwQDh7Sp5WxcVArFHnqjOFiq_uBtvPt5K1c1EQ8ZF-uKzcpaasqwxpKDcRUEtPRrpSaI-kIRcWU9vA-hB0JHXxgL-erSxb5-IYUUktW8nElJ0bSQ3mSEw7VuAvXQGlPVM2q1bRkeuQCU"/>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="flex-1 overflow-auto p-standard flex flex-col gap-standard">
+<!-- Filters -->
+<div class="bg-card-surface border border-ink p-tight flex flex-wrap gap-tight items-center justify-between">
+<div class="flex flex-wrap gap-tight items-center">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-outline text-[16px]">search</span>
+<input class="h-8 pl-7 pr-2 bg-surface border border-ink text-data-mono font-data-mono text-ink w-48 focus:outline-none focus:ring-1 focus:ring-ink focus:border-ink rounded-none" placeholder="Operator / Shop ID" type="text"/>
+</div>
+<div class="relative">
+<select class="h-8 pl-2 pr-8 bg-surface border border-ink text-label-caps font-label-caps text-ink appearance-none focus:outline-none focus:ring-1 focus:ring-ink focus:border-ink rounded-none">
+<option value="">动作 (Action)</option>
+<option value="reset">密码重置</option>
+<option value="freeze">店铺冻结</option>
+<option value="plan">套餐修改</option>
+<option value="perm">权限变更</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-ink pointer-events-none text-[16px]">arrow_drop_down</span>
+</div>
+<div class="relative">
+<select class="h-8 pl-2 pr-8 bg-surface border border-ink text-label-caps font-label-caps text-ink appearance-none focus:outline-none focus:ring-1 focus:ring-ink focus:border-ink rounded-none">
+<option value="">结果 (Result)</option>
+<option value="success">成功</option>
+<option value="fail">失败</option>
+<option value="pending">处理中</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-ink pointer-events-none text-[16px]">arrow_drop_down</span>
+</div>
+</div>
+<button class="h-8 bg-surface-container-high border border-ink text-ink font-label-caps text-label-caps px-standard hover:bg-surface-variant transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">filter_list</span>
+                    Filter
+                </button>
+</div>
+<!-- Data Table -->
+<div class="bg-card-surface border border-ink overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[800px]">
+<thead>
+<tr class="bg-surface-container-highest border-b-2 border-ink">
+<th class="table-cell font-label-caps text-label-caps text-ink w-40">时间 (Time)</th>
+<th class="table-cell font-label-caps text-label-caps text-ink">操作者 (Operator)</th>
+<th class="table-cell font-label-caps text-label-caps text-ink">动作 (Action)</th>
+<th class="table-cell font-label-caps text-label-caps text-ink">对象店铺 (Target Shop)</th>
+<th class="table-cell font-label-caps text-label-caps text-ink w-24 text-center">结果 (Result)</th>
+<th class="table-cell font-label-caps text-label-caps text-ink w-32">IP</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-data-mono text-on-surface">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="table-cell text-outline-variant group-hover:text-ink">2023-10-27 14:32:01</td>
+<td class="table-cell">admin_ops_01</td>
+<td class="table-cell">密码重置</td>
+<td class="table-cell">shop_9921_alpha</td>
+<td class="table-cell text-center">
+<span class="inline-block px-1 border border-ink bg-surface text-ink text-[10px]">成功</span>
+</td>
+<td class="table-cell text-outline-variant">192.168.1.45</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="table-cell text-outline-variant group-hover:text-ink">2023-10-27 14:15:22</td>
+<td class="table-cell">sys_auto_bot</td>
+<td class="table-cell">店铺冻结</td>
+<td class="table-cell">shop_1044_beta</td>
+<td class="table-cell text-center">
+<span class="inline-block px-1 border border-ink bg-surface text-ink text-[10px]">成功</span>
+</td>
+<td class="table-cell text-outline-variant">10.0.0.12</td>
+</tr>
+<!-- Row 3: Failure State -->
+<tr class="hover:bg-surface-container transition-colors group bg-error-container/20">
+<td class="table-cell text-outline-variant group-hover:text-ink">2023-10-27 13:58:10</td>
+<td class="table-cell font-bold">sec_admin_99</td>
+<td class="table-cell">权限变更</td>
+<td class="table-cell">shop_7732_gamma</td>
+<td class="table-cell text-center">
+<span class="inline-block px-1 border border-error bg-error-container text-on-error-container text-[10px] font-bold">失败</span>
+</td>
+<td class="table-cell text-outline-variant">192.168.1.104</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="table-cell text-outline-variant group-hover:text-ink">2023-10-27 12:45:00</td>
+<td class="table-cell">mgr_sales_v2</td>
+<td class="table-cell">套餐修改</td>
+<td class="table-cell">shop_8810_delta</td>
+<td class="table-cell text-center">
+<span class="inline-block px-1 border border-frozen-accent bg-tertiary-fixed text-frozen-accent text-[10px]">处理中</span>
+</td>
+<td class="table-cell text-outline-variant">172.16.0.5</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="table-cell text-outline-variant group-hover:text-ink">2023-10-27 11:20:15</td>
+<td class="table-cell">admin_ops_02</td>
+<td class="table-cell">密码重置</td>
+<td class="table-cell">shop_3319_eps</td>
+<td class="table-cell text-center">
+<span class="inline-block px-1 border border-ink bg-surface text-ink text-[10px]">成功</span>
+</td>
+<td class="table-cell text-outline-variant">192.168.1.46</td>
+</tr>
+<!-- Row 6 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="table-cell text-outline-variant group-hover:text-ink">2023-10-27 10:05:44</td>
+<td class="table-cell">admin_ops_01</td>
+<td class="table-cell">套餐修改</td>
+<td class="table-cell">shop_9921_alpha</td>
+<td class="table-cell text-center">
+<span class="inline-block px-1 border border-ink bg-surface text-ink text-[10px]">成功</span>
+</td>
+<td class="table-cell text-outline-variant">192.168.1.45</td>
+</tr>
+<!-- Row 7 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="table-cell text-outline-variant group-hover:text-ink">2023-10-27 09:30:12</td>
+<td class="table-cell">sys_auto_bot</td>
+<td class="table-cell">权限变更</td>
+<td class="table-cell">global_sys</td>
+<td class="table-cell text-center">
+<span class="inline-block px-1 border border-ink bg-surface text-ink text-[10px]">成功</span>
+</td>
+<td class="table-cell text-outline-variant">10.0.0.12</td>
+</tr>
+<!-- Row 8 -->
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="table-cell text-outline-variant group-hover:text-ink">2023-10-27 08:15:00</td>
+<td class="table-cell">admin_ops_03</td>
+<td class="table-cell">店铺冻结</td>
+<td class="table-cell">shop_4455_zeta</td>
+<td class="table-cell text-center">
+<span class="inline-block px-1 border border-ink bg-surface text-ink text-[10px]">成功</span>
+</td>
+<td class="table-cell text-outline-variant">192.168.1.88</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="flex flex-col sm:flex-row justify-between items-center mt-auto bg-card-surface border border-ink p-tight gap-tight">
+<div class="font-data-mono text-data-mono text-outline-variant">
+                    共 2,481 条
+                </div>
+<div class="flex gap-1">
+<button class="w-8 h-8 flex items-center justify-center border border-ink bg-surface text-ink hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center border border-ink bg-ink text-on-primary font-data-mono text-data-mono">
+                        1
+                    </button>
+<button class="w-8 h-8 flex items-center justify-center border border-ink bg-surface text-ink hover:bg-surface-container font-data-mono text-data-mono">
+                        2
+                    </button>
+<button class="w-8 h-8 flex items-center justify-center border border-ink bg-surface text-ink hover:bg-surface-container font-data-mono text-data-mono">
+                        3
+                    </button>
+<div class="w-8 h-8 flex items-center justify-center text-ink font-data-mono text-data-mono">
+                        ...
+                    </div>
+<button class="w-8 h-8 flex items-center justify-center border border-ink bg-surface text-ink hover:bg-surface-container font-data-mono text-data-mono">
+                        125
+                    </button>
+<button class="w-8 h-8 flex items-center justify-center border border-ink bg-surface text-ink hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</body></html>
