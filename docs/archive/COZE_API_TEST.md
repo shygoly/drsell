@@ -1,5 +1,12 @@
 # Coze API 测试指南
 
+> **⚠️ 已作废（2026-09-03）。仅作历史留档，不要据此判断本项目架构。**
+>
+> 本文档描述的 Coze 集成**已不再使用**。当前 AI 回复链路是
+> `apps/api` → `packages/openclaw` → wjclaw 上的 OpenClaw gateway
+> （`127.0.0.1:18790`，OpenAI 兼容，provider DeepSeek-V4）。
+> 现行架构与陷阱见仓库根目录 `AGENTS.md`。
+
 ## 概述
 
 本项目提供了两个 Coze API 测试脚本，用于验证 Coze API 是否可以正常调用。
