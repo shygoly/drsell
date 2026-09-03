@@ -1,7 +1,4 @@
-# Legacy stacks (separate repos — Java + old Remix chatbot)
-/chatbot/
-/chatbotadmin/
-/chatbotapi/
+# 已作废的旧实现统一放 obsolete/（见文件末尾规则与 obsolete/README.md）
 
 # Dependencies & build
 node_modules
@@ -39,7 +36,6 @@ apps/api/prisma/*.db
 _tmp_*
 
 # Legacy Coze test scripts (pre-ADP monorepo)
-test-coze-*.js
 
 # TypeScript build info
 *.tsbuildinfo
@@ -75,3 +71,7 @@ test-coze-*.js
 # 注意：这与上面第 50 行「baseline.png 与 spec.json 必须入库」的旧决定相悖，以本条为准。
 # 后果：scripts/stitch-*.sh|.mjs 依赖 .stitch/fixtures.json，clone 仓库者需自行获取该目录。
 .stitch/
+
+# obsolete/ — 已作废的旧实现（旧 Remix app、两个 Java Spring Boot 服务、Coze 联调脚本）。
+# 这些目录从未进过 git，移到此处只为不干扰活代码与 agent 判断。见 obsolete/README.md。
+obsolete/

@@ -38,8 +38,10 @@ infra/            nginx vhost · cloudflare · docker · openclaw profile
 scripts/          deploy-mvp.sh 等
 ```
 
-**`chatbot/`、`chatbotapi/`、`chatbotadmin/` 是遗留目录，git 里零提交，不属于本仓库。**
-不要读它们、不要照它们判断架构、不要在里面改东西。
+**`obsolete/` 不属于本项目——不要读、不要改、不要据此判断架构。**
+它被 `.gitignore` 忽略，也不在 pnpm workspace / turbo / tsconfig 范围内，里面是已作废的
+旧实现（旧 Remix app `chatbot/`、两个 Java Spring Boot 服务 `chatbotapi/`
+`chatbotadmin/`、Coze 联调脚本）。这些目录从未进过 git。明细见 `obsolete/README.md`。
 
 ## 常用命令
 
@@ -76,8 +78,9 @@ bash scripts/deploy-mvp.sh   # 构建 + rsync 到 wjclaw + pm2 重启四进程 +
 4. **Shopify app 只有一个合法身份**：client_id `0b36b70772220b71b2fe296b3deba914`
    （name `Drsell`，handle `drseller-alpha`，App ID 264501002241）。
    legacy jade app `f286a4af8f1d80cb8e6228bc648f4786` **严禁用于生产**——
-   注意 `chatbot/shopify.app.toml` 是一份**可用的** legacy 配置，
-   `shopify app deploy` **必须带 `--path apps/web`**，否则可能把 legacy app 发出去。
+   它那份**可用的** `shopify.app.toml` 现已移入 `obsolete/chatbot/`（不再位于仓库根附近），
+   但 `shopify app deploy` **仍必须带 `--path apps/web`**：仓库根没有 toml，路径写错就可能
+   发错 app。
    CLI 4.7.1 起 deploy 会**覆盖 Partner 后台配置**（含 name/handle）。
 
 5. **`.stitch/` 不在版本库**（2026-09-03 决定，见 `docs/RELEASE-2026-09-02.md`）。
