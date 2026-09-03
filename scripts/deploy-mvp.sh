@@ -23,6 +23,8 @@ set -a
 export API_INTERNAL_URL="http://127.0.0.1:5011"
 export NEXT_PUBLIC_API_BASE="/api"
 export NEXT_PUBLIC_SHOPIFY_API_KEY="${NEXT_PUBLIC_SHOPIFY_API_KEY:-${SHOPIFY_API_KEY:-}}"
+# 与 storefront 共用域名根，静态资产隔离到 /app/_next/（见 apps/web/next.config.ts）
+export ASSET_PREFIX="/app"
 set +a
 pnpm --filter @drsell/web build
 
