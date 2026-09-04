@@ -31,12 +31,30 @@ export function useShopSession() {
   const [userToken, setUserToken] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [ready, setReady] = useState(false);
+  const [embedded, setEmbedded] = useState(false);
+  /**
+   * 嵌入态换发会话的进度。AuthGuard 靠它区分「还没换到」和「换不到」——
+   * 只看 token 是否为空会在 App Bridge 就绪前就把商家踢去 /login。
+   */
+  const [bridgeAuth, setBridgeAuth] = useState<"idle" | "pending" | "done" | "failed">(
+    "idle",
+  );
 
   useEffect(() => {
     const fromUrl =
       typeof window !== "undefined"
         ? new URLSearchParams(window.location.search).get("shop") || ""
         : "";
+    const search =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search)
+        : new URLSearchParams();
+    const isEmbedded =
+      typeof window !== "undefined" &&
+      (search.has("host") || search.get("embedded") === "1" || window.top !== window.self);
+    setEmbedded(isEmbedded);
+    if (isEmbedded) setBridgeAuth("pending");
+
     const storedShop = safeStorageGet(SHOP_KEY);
     const storedUserToken = safeStorageGet(USER_TOKEN_KEY);
     const storedUserEmail = safeStorageGet(USER_EMAIL_KEY);
@@ -158,10 +176,23 @@ export function useShopSession() {
     // 非嵌入场景没有店铺归属证明，只能用 OAuth 回调下发并已落盘的 token，
     // 不再允许「给个 shop 域名就换 token」。
     if (!ready || !shop || !bridge) return;
-    void loginWithAppBridge().catch(() => {
-      // token 尚未就绪时静默失败，下次渲染重试
-    });
+    setBridgeAuth("pending");
+    void loginWithAppBridge()
+      .then((t) => setBridgeAuth(t ? "done" : "failed"))
+      .catch(() => setBridgeAuth("failed"));
   }, [ready, shop, bridge, loginWithAppBridge]);
+
+  /**
+   * 嵌入态兜底：App Bridge 全局迟迟不出现（脚本被拦、非 admin 场景误判）时
+   * 解除 pending，否则守卫会永远等下去、页面卡在空壳。
+   */
+  useEffect(() => {
+    if (!embedded || bridgeAuth !== "pending") return;
+    const id = window.setTimeout(() => {
+      setBridgeAuth((s) => (s === "pending" ? "failed" : s));
+    }, 8000);
+    return () => window.clearTimeout(id);
+  }, [embedded, bridgeAuth]);
 
   const startOAuth = useCallback(
     (shopDomain: string) => {
@@ -229,6 +260,8 @@ export function useShopSession() {
     token,
     userToken,
     userEmail,
+    embedded,
+    bridgeAuth,
     bridge,
     loginWithPassword,
     register,
