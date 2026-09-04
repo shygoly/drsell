@@ -14,7 +14,7 @@ const SHOPIFY_API_KEY =
   "0b36b70772220b71b2fe296b3deba914";
 
 export const metadata: Metadata = {
-  title: "AIChat Merchant Dashboard",
+  title: "Dr Sell — AI customer support",
   description:
     "Shopify AI customer service dashboard — converted from Google Stitch via P0-P8 pipeline",
   other: {

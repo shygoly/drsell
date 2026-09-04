@@ -103,7 +103,7 @@ export default function LoginPage() {
           <div className="bg-primary-container text-primary-foreground mb-2 flex h-12 w-12 items-center justify-center rounded-xl">
             <Bot className="h-6 w-6" aria-hidden="true" />
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome to AIChat</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome to Dr Sell</CardTitle>
           <CardDescription>
             Log in with Google, your email, or your Shopify store.
           </CardDescription>

@@ -15,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useShopSession } from "@/hooks/useShopSession";
 
 /**
  * 侧边栏 — 对齐 Stitch home_dashboard/code.html 的 SideNavBar。
@@ -37,6 +38,7 @@ const FOOTER_ITEMS = [
 ];
 
 export function SidebarNav() {
+  const { shop } = useShopSession();
   const pathname = usePathname();
 
   const renderItem = (item: { href: string; label: string; icon: typeof Home }) => {
@@ -71,9 +73,12 @@ export function SidebarNav() {
         <div className="bg-primary-container text-primary-foreground flex h-10 w-10 items-center justify-center rounded-lg">
           <Bot className="h-5 w-5" aria-hidden="true" />
         </div>
-        <div>
-          <h1 className="text-lg leading-tight font-bold">AIChat</h1>
-          <p className="text-muted-foreground text-[13px]">Green Tech AI</p>
+        <div className="min-w-0">
+          <h1 className="text-lg leading-tight font-bold">Dr Sell</h1>
+          {/* 副标题显示实际连接的店铺；原稿这里是设计稿遗留的虚构公司名。 */}
+          <p className="text-muted-foreground truncate text-[13px]">
+            {shop || "AI customer support"}
+          </p>
         </div>
       </div>
 

@@ -26,7 +26,7 @@ const TOP_TABS = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { userEmail, userToken, bridge, logout } = useShopSession();
+  const { userEmail, userToken, bridge, embedded, logout } = useShopSession();
 
   // Stitch onboarding_welcome 是独立欢迎屏，不含 Sidebar/TopBar。
   // /login 也是独立认证页，不套后台壳。
@@ -43,7 +43,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
         <header className="bg-card flex h-14 w-full shrink-0 items-center justify-between border-b px-5">
           <div className="flex h-full items-center gap-6">
-            <div className="text-primary font-semibold md:hidden">AIChat</div>
+            <div className="text-primary font-semibold md:hidden">Dr Sell</div>
             <div className="relative hidden md:block">
               <Search
                 className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2"
@@ -124,7 +124,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   Log out
                 </Button>
               </div>
-            ) : (
+            ) : embedded ? null : (
+              // 嵌入态不显示登录入口：商家已经由 Shopify 认证，
+              // 在 admin 里再摆一个「Log in」正是审核判定「要求二次登录」的特征。
               <Button size="sm" asChild>
                 <Link href="/login">Log in</Link>
               </Button>

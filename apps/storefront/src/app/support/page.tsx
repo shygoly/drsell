@@ -4,7 +4,7 @@ export default function SupportPage() {
   return (
     <ComingSoon
       title="Support"
-      description="Reach the AIChat team for help with setup, billing or troubleshooting."
+      description="Reach the Dr Sell team for help with setup, billing or troubleshooting."
     />
   );
 }
