@@ -7,6 +7,25 @@ export const EMBED_BLOCK_HANDLE = 'chat-embed';
 export const CLIENT_ID =
   process.env.NEXT_PUBLIC_SHOPIFY_API_KEY || '0b36b70772220b71b2fe296b3deba914';
 
+/** App handle from apps/web/shopify.app.toml — the slug in Admin app URLs. */
+export const APP_HANDLE = 'drseller-alpha';
+
+/** Strip protocol/trailing slash and the .myshopify.com suffix. */
+export function storeHandleOf(shop: string) {
+  return shop
+    .replace(/^https?:\/\//, '')
+    .replace(/\/$/, '')
+    .replace(/\.myshopify\.com$/i, '');
+}
+
+/**
+ * Where a merchant must land after install: the app running inside the Admin.
+ * Shopify requires embedded apps to open in the Admin, not on an external page.
+ */
+export function buildAdminAppUrl(shop: string, appHandle = APP_HANDLE) {
+  return `https://admin.shopify.com/store/${storeHandleOf(shop)}/apps/${appHandle}`;
+}
+
 /** HTTPS Admin deep link — `shopify://` does nothing in embedded iframe without App Bridge. */
 export function buildEmbedDeepLink(
   shop: string,

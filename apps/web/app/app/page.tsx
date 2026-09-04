@@ -7,8 +7,10 @@ import { Page, BlockStack, Text } from '@shopify/polaris';
 import { useShopSession } from '@/hooks/useShopSession';
 import { fetchOnboarding } from '@/lib/onboarding';
 import { EmbedStatusBanner } from '@/components/EmbedStatusBanner';
+import { useTranslations } from '@/components/AppProviders';
 
 function AppHomeInner() {
+  const t = useTranslations();
   const router = useRouter();
   const { shop, token, ready } = useShopSession();
   const [activated, setActivated] = useState(false);
@@ -31,11 +33,11 @@ function AppHomeInner() {
       <BlockStack gap="400">
         <EmbedStatusBanner live={activated} shop={shop} />
         <Text as="p" tone="subdued">
-          店铺：{shop || '—'}
+          {t('home.store')}: {shop || '—'}
         </Text>
         <nav className="nav">
-          <Link href="/app/settings">设置</Link>
-          <Link href="/app/inbox">Inbox</Link>
+          <Link href="/app/settings">{t('nav.settings')}</Link>
+          <Link href="/app/inbox">{t('nav.inbox')}</Link>
         </nav>
       </BlockStack>
     </Page>

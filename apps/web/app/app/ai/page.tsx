@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { useTranslations } from '@/components/AppProviders';
 
 export default function AiAssistantPage() {
+  const t = useTranslations();
   const [shop, setShop] = useState('');
   const [token, setToken] = useState('');
-  const [text, setText] = useState('你好');
+  const [text, setText] = useState('Hello');
   const [out, setOut] = useState('');
 
   async function login() {
@@ -18,7 +20,7 @@ export default function AiAssistantPage() {
   }
 
   async function chat() {
-    setOut('连接中...');
+    setOut(t('ai.connecting'));
     const res = await fetch('/api/backend/adp/chat', {
       method: 'POST',
       headers: {
@@ -44,12 +46,12 @@ export default function AiAssistantPage() {
 
   return (
     <div className="panel">
-      <h2>AI 助手（ADP）</h2>
+      <h2>{t('ai.title')}</h2>
       <div style={{ display: 'grid', gap: '0.75rem' }}>
-        <input value={shop} onChange={(e) => setShop(e.target.value)} placeholder="shop domain" />
-        <button className="btn" type="button" onClick={login}>登录</button>
+        <input value={shop} onChange={(e) => setShop(e.target.value)} placeholder={t('ai.shopPlaceholder')} />
+        <button className="btn" type="button" onClick={login}>{t('ai.login')}</button>
         <input value={text} onChange={(e) => setText(e.target.value)} />
-        <button className="btn" type="button" disabled={!token} onClick={chat}>发送</button>
+        <button className="btn" type="button" disabled={!token} onClick={chat}>{t('ai.send')}</button>
         <pre style={{ whiteSpace: 'pre-wrap' }}>{out}</pre>
       </div>
     </div>

@@ -4,8 +4,10 @@ import { Suspense, useState } from 'react';
 import { Page, TextField, Button, BlockStack, Text, Banner } from '@shopify/polaris';
 import { apiFetch } from '@/lib/api';
 import { useShopSession } from '@/hooks/useShopSession';
+import { useTranslations } from '@/components/AppProviders';
 
 function SettingsInner() {
+  const t = useTranslations();
   const { shop, token, setShop, login } = useShopSession();
   const [chatLogo, setChatLogo] = useState('');
   const [status, setStatus] = useState('');
@@ -17,30 +19,28 @@ function SettingsInner() {
       token,
       body: JSON.stringify({ chatLogo, shopName: shop }),
     });
-    setStatus('已保存');
+    setStatus(t('settings.saved'));
   }
 
   return (
-    <Page title="机器人设置">
+    <Page title={t('settings.title')}>
       <BlockStack gap="400">
-        <Banner tone="info">
-          AI 知识库（政策页抓取、FAQ 模板）将在后续版本开放，请先完成店铺 Widget 上线。
-        </Banner>
+        <Banner tone="info">{t('settings.kbBanner')}</Banner>
         <TextField
-          label="Shop domain"
+          label={t('settings.shopDomain')}
           value={shop}
           onChange={setShop}
           autoComplete="off"
         />
-        <Button onClick={() => void login()}>登录店铺会话</Button>
+        <Button onClick={() => void login()}>{t('settings.connect')}</Button>
         <TextField
-          label="Chat logo URL"
+          label={t('settings.chatLogo')}
           value={chatLogo}
           onChange={setChatLogo}
           autoComplete="off"
         />
         <Button variant="primary" disabled={!token} onClick={() => void save()}>
-          保存
+          {t('settings.save')}
         </Button>
         {status && <Text as="p">{status}</Text>}
       </BlockStack>

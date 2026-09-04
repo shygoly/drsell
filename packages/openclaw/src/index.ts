@@ -59,13 +59,16 @@ export class OpenClawClient {
 
   async chatStream(params: OpenClawChatParams): Promise<string> {
     if (!this.gatewayToken) {
-      throw new Error('OPENCLAW_GATEWAY_TOKEN 未配置');
+      throw new Error('OPENCLAW_GATEWAY_TOKEN is not configured');
     }
     const key = sessionKey(params.shopDomain, params.visitorId, params.conversationId);
     const userMessage =
       `[shop=${params.shopDomain}] ${params.message}\n` +
-      '你是该 Shopify 店铺的客服。查商品/订单时只用 MCP 调用 adp_shop_summary、adp_search_products、adp_get_order，' +
-      '且 shop 参数必须是上面的店铺域名。不要泄露地址、token 或其他店铺数据。';
+      'You are the customer support agent for this Shopify store. ' +
+      'To look up products or orders, use only the MCP calls adp_shop_summary, adp_search_products and adp_get_order, ' +
+      'and the shop argument must be exactly the store domain above. ' +
+      'Never reveal the gateway address, tokens or any other store data. ' +
+      "Always reply in the same language the customer wrote in.";
 
     const res = await this.fetchImpl(`${this.gatewayUrl}/v1/chat/completions`, {
       method: 'POST',

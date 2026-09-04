@@ -5,11 +5,12 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AppProviders } from '@/components/AppProviders';
 import { useShopSession } from '@/hooks/useShopSession';
-import { resolveLocale } from '@/lib/i18n';
+import { createTranslator, resolveLocale } from '@/lib/i18n';
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
   const params = useSearchParams();
   const locale = resolveLocale(params.get('locale'));
+  const t = createTranslator(locale);
   const { isImpersonating } = useShopSession();
 
   return (
@@ -17,13 +18,13 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       <main style={{ maxWidth: 960, margin: '0 auto', padding: '1rem' }}>
         {isImpersonating ? (
           <div role="status" className="impersonation-banner">
-            代登录模式 — 操作将记入审计，30 分钟后失效
+            {t('app.impersonation')}
           </div>
         ) : null}
         <nav className="nav">
-          <Link href="/app">首页</Link>
-          <Link href="/app/settings">设置</Link>
-          <Link href="/app/onboarding">向导</Link>
+          <Link href="/app">{t('nav.home')}</Link>
+          <Link href="/app/settings">{t('nav.settings')}</Link>
+          <Link href="/app/onboarding">{t('nav.onboarding')}</Link>
         </nav>
         {children}
       </main>

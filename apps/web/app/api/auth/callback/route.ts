@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { shopify } from '@/lib/shopify';
 import { unsealInstallUserToken } from '@/lib/oauth-state';
+import { buildAdminAppUrl } from '@/lib/onboarding';
 
 export async function GET(req: NextRequest) {
   try {
@@ -31,8 +32,8 @@ export async function GET(req: NextRequest) {
     });
     const session = callback.session;
     const api = process.env.API_INTERNAL_URL || 'http://127.0.0.1:3001';
-    // OAuth 成功即是店铺归属证明，这里换发本服务的 shop JWT。
-    // 浏览器不能自己调这个端点（需要 INTERNAL_API_KEY），token 只能由这条回调下发。
+    // OAuth 成功即是店铺归属证明。这一调用负责落 Shop/Tenant 记录并写入
+    // Shopify access token；返回的 shop JWT 不再外带（嵌入端自行走 App Bridge 换发）。
     const res = await fetch(`${api}/api/shopify/auth/login`, {
       method: 'POST',
       headers: {
@@ -52,8 +53,6 @@ export async function GET(req: NextRequest) {
         { status: 502 },
       );
     }
-    const { accessToken } = (await res.json()) as { accessToken: string };
-
     // 安装归属：密封 cookie 里若有发起安装的 admin JWT，就建立 Membership。
     const sealed = req.cookies.get('drsell_install_u')?.value;
     const userToken = sealed
@@ -82,13 +81,10 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const appUrl = process.env.SHOPIFY_APP_URL || 'https://drsell.szchada.top';
-    // fragment 不会进服务端日志/Referer；前端读取后立刻清除（见 useShopSession）。
-    const target = new URL(`${appUrl}/widget-config`);
-    target.searchParams.set('shop', session.shop);
-    return NextResponse.redirect(
-      `${target.toString()}#shop_token=${encodeURIComponent(accessToken)}`,
-    );
+    // 装完必须回到 Admin 内的嵌入应用——Shopify 的硬性要求，落到站外页面会被驳回。
+    // 嵌入端自己用 App Bridge idToken 换会话（见 hooks/useShopSession.ts），
+    // 所以这里不再把 shop token 挂在 fragment 上外带。
+    return NextResponse.redirect(buildAdminAppUrl(session.shop));
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }

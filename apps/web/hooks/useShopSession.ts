@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
+import { fetchIdToken, waitForAppBridge } from '@/lib/app-bridge';
 
 const TOKEN_KEY = 'drsell_shop_token';
 const SHOP_KEY = 'drsell_shop';
@@ -17,6 +18,17 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
   }
 }
 
+/**
+ * Embedded session.
+ *
+ * Primary path is App Bridge token exchange: `shopify.idToken()` produces a
+ * short-lived Shopify session token, which the API verifies (signature +
+ * audience) and swaps for our own shop JWT. That is the only path a normally
+ * installed merchant has — storage written outside the Admin is in a different
+ * partition and is not visible inside the iframe.
+ *
+ * `impersonation_token` remains the ops support path.
+ */
 export function useShopSession() {
   const params = useSearchParams();
   const [shop, setShop] = useState('');
@@ -24,59 +36,76 @@ export function useShopSession() {
   const [ready, setReady] = useState(false);
   const [isImpersonating, setIsImpersonating] = useState(false);
 
+  const persist = useCallback((nextShop: string, nextToken: string) => {
+    try {
+      localStorage.setItem(SHOP_KEY, nextShop);
+      localStorage.setItem(TOKEN_KEY, nextToken);
+    } catch {
+      // partitioned or blocked storage — the token still lives in React state
+    }
+    setShop(nextShop);
+    setToken(nextToken);
+    setIsImpersonating(decodeJwtPayload(nextToken)?.impersonation === true);
+  }, []);
+
+  /** Exchange an App Bridge session token for our shop JWT. */
+  const exchange = useCallback(async (): Promise<string> => {
+    await waitForAppBridge();
+    const sessionToken = await fetchIdToken();
+    if (!sessionToken) return '';
+    try {
+      const res = await apiFetch<{ accessToken: string; shop?: { shopDomain?: string } }>(
+        '/shopify/auth/app-bridge',
+        { method: 'POST', body: JSON.stringify({ sessionToken }) },
+      );
+      const resolvedShop = res.shop?.shopDomain || '';
+      if (res.accessToken) {
+        persist(resolvedShop, res.accessToken);
+        return res.accessToken;
+      }
+    } catch {
+      // fall through — caller renders the unauthenticated state
+    }
+    return '';
+  }, [persist]);
+
   useEffect(() => {
-    const fromUrl = params.get('shop') || '';
-    const impersonationToken = params.get('impersonation_token') || '';
+    let cancelled = false;
 
-    if (impersonationToken && fromUrl) {
-      localStorage.setItem(SHOP_KEY, fromUrl);
-      localStorage.setItem(TOKEN_KEY, impersonationToken);
-      setShop(fromUrl);
-      setToken(impersonationToken);
-      const payload = decodeJwtPayload(impersonationToken);
-      setIsImpersonating(payload?.impersonation === true);
-      setReady(true);
+    async function boot() {
+      const fromUrl = params.get('shop') || '';
+      const impersonationToken = params.get('impersonation_token') || '';
 
-      if (typeof window !== 'undefined') {
+      if (impersonationToken && fromUrl) {
+        persist(fromUrl, impersonationToken);
+        setReady(true);
         const url = new URL(window.location.href);
         url.searchParams.delete('impersonation_token');
         history.replaceState(null, '', url.pathname + url.search);
+        return;
       }
-      return;
+
+      const storedShop = typeof window !== 'undefined' ? localStorage.getItem(SHOP_KEY) || '' : '';
+      const storedToken = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) || '' : '';
+
+      // A stored token is only reusable for the same shop the Admin is showing.
+      if (storedToken && (!fromUrl || fromUrl === storedShop)) {
+        if (cancelled) return;
+        persist(storedShop || fromUrl, storedToken);
+        setReady(true);
+        return;
+      }
+
+      setShop(fromUrl);
+      await exchange();
+      if (!cancelled) setReady(true);
     }
 
-    const storedShop = typeof window !== 'undefined' ? localStorage.getItem(SHOP_KEY) : '';
-    const storedToken = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : '';
-    const nextShop = fromUrl || storedShop || '';
-    setShop(nextShop);
-    if (storedToken) {
-      setToken(storedToken);
-      const payload = decodeJwtPayload(storedToken);
-      setIsImpersonating(payload?.impersonation === true);
-    } else {
-      setIsImpersonating(false);
-    }
-    setReady(true);
-  }, [params]);
+    void boot();
+    return () => {
+      cancelled = true;
+    };
+  }, [params, persist, exchange]);
 
-  const login = useCallback(async (shopDomain?: string) => {
-    const target = shopDomain || shop;
-    if (!target) return;
-    const res = await apiFetch<{ accessToken: string }>('/shopify/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ shop: target }),
-    });
-    localStorage.setItem(SHOP_KEY, target);
-    localStorage.setItem(TOKEN_KEY, res.accessToken);
-    setShop(target);
-    setToken(res.accessToken);
-    return res.accessToken;
-  }, [shop]);
-
-  useEffect(() => {
-    if (!ready || !shop || token) return;
-    void login(shop).catch(() => undefined);
-  }, [ready, shop, token, login]);
-
-  return { shop, token, login, ready, setShop, isImpersonating };
+  return { shop, token, login: exchange, ready, setShop, isImpersonating };
 }
