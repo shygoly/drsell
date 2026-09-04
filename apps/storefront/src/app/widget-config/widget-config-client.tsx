@@ -46,6 +46,8 @@ const QUICK_REPLY_DEFAULTS = [
 
 function WidgetConfigInner() {
   const { shop, token, ready, startOAuth, setShop } = useShopSession();
+  // 预览里的店名：用真实店铺 handle，而不是设计稿留下的虚构品牌 LUMINA。
+  const storeLabel = (shop.replace(/\.myshopify\.com$/i, "") || "YOUR STORE").toUpperCase();
   const [shopInput, setShopInput] = useState("");
   const [widgetName, setWidgetName] = useState("Ava");
   const [welcomeMsg, setWelcomeMsg] = useState(
@@ -551,7 +553,7 @@ function WidgetConfigInner() {
                   <span className="h-2.5 w-2.5 rounded-full bg-success/60" />
                   {previewDevice === "desktop" ? (
                     <span className="text-muted-foreground mx-auto rounded bg-background px-3 text-[9px]">
-                      your-store.myshopify.com
+                      {shop || "your-store.myshopify.com"}
                     </span>
                   ) : null}
                 </div>
@@ -562,7 +564,7 @@ function WidgetConfigInner() {
                     <div className="flex h-full flex-col">
                       <div className="flex items-center justify-between border-b px-5 py-2">
                         <span className="text-accent-deep text-sm font-bold tracking-widest">
-                          LUMINA
+                          {storeLabel}
                         </span>
                         <div className="hidden gap-4 text-[9px] font-medium text-muted-foreground sm:flex">
                           <span>SHOP</span>
@@ -589,7 +591,7 @@ function WidgetConfigInner() {
                     <div className="flex h-full flex-col">
                       <div className="flex items-center justify-between px-4 py-2">
                         <span className="text-accent-deep text-xs font-bold tracking-widest">
-                          LUMINA
+                          {storeLabel}
                         </span>
                         <ShoppingBag className="text-muted-foreground h-3.5 w-3.5" aria-hidden="true" />
                       </div>

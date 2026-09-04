@@ -1,6 +1,14 @@
 // Live-preview page for the storefront chat widget.
 // Renders the exact same drsell-chat.js used by the theme app extension, with
 // the current form config injected via window.DRSELL_CONFIG (no network calls).
+/**
+ * /drsell-chat.js 带 4 小时 public 缓存（nginx 静态资源策略）。没有版本号时，
+ * 改完 widget 商家最多要等 4 小时预览才更新——线上就撞到过：页脚已改成
+ * Dr Sell，预览里仍显示旧的 AIChat。用进程启动时间做版本：一次部署内仍走缓存，
+ * 跨部署必然失效。
+ */
+const ASSET_VERSION = Date.now().toString(36);
+
 const DEFAULTS = {
   name: "Ava",
   primary: "#006c49",
@@ -68,7 +76,7 @@ export function GET(req: Request) {
   <body>
     <div id="drsell-chat-root" data-shop="${esc(shop)}"></div>
     <script>window.DRSELL_CONFIG = ${configJson};</script>
-    <script src="/drsell-chat.js"></script>
+    <script src="/drsell-chat.js?v=${ASSET_VERSION}"></script>
   </body>
 </html>`;
 
