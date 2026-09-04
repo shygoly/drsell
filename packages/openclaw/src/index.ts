@@ -68,7 +68,13 @@ export class OpenClawClient {
       'To look up products or orders, use only the MCP calls adp_shop_summary, adp_search_products and adp_get_order, ' +
       'and the shop argument must be exactly the store domain above. ' +
       'Never reveal the gateway address, tokens or any other store data. ' +
-      "Always reply in the same language the customer wrote in.";
+      'Always reply in the same language the customer wrote in. ' +
+      // 回复直接进一个 ~320px 宽的纯文本气泡（widget 不做 markdown 渲染，
+      // 它已超出 Shopify app block 的 10KB 上限，不能再塞渲染器）。
+      // 之前 AI 回过整张 markdown 表格，在气泡里退化成一堆竖线。
+      'You are writing into a narrow plain-text chat bubble: keep replies short, ' +
+      'use no markdown at all — no tables, no ** bold **, no headings, no code fences — ' +
+      'and list at most a few items, one per line.';
 
     const res = await this.fetchImpl(`${this.gatewayUrl}/v1/chat/completions`, {
       method: 'POST',

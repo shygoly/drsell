@@ -119,8 +119,14 @@
     document.body.appendChild(launcher);
   }
 
+  /** 兜底：提示词已要求纯文本，万一漏网也别把 **标记** 摆给顾客看。 */
+  function plain(t) {
+    return String(t).replace(/\*\*(.*?)\*\*/g, '$1').replace(/\\"/g, '"');
+  }
+
   function append(role, text) {
     if (!state.log) return;
+    text = plain(text);
     var bubble = document.createElement('div');
     var mine = role === 'me';
     cssText(bubble, {
@@ -316,7 +322,7 @@
 
     var footer = document.createElement('div');
     footer.id = 'drsell-chat-footer';
-    footer.textContent = 'Powered by AIChat';
+    footer.textContent = 'Powered by Dr Sell';
     cssText(footer, {
       textAlign: 'center',
       padding: '7px 10px',
@@ -415,7 +421,7 @@
           append('bot', botText);
           streamingBubble = state.log.lastChild;
         } else {
-          streamingBubble.textContent = botText;
+          streamingBubble.textContent = plain(botText);
         }
       }
       if (!botText) append('bot', '(empty)');
