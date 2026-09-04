@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { Conversation } from "@/lib/types";
+import { stripMarkdown } from "@/lib/markdown";
 
 const CHANNEL_ICON = {
   web: Globe,
@@ -101,7 +102,7 @@ export function LiveConversations({
                       className="h-3.5 w-3.5 shrink-0"
                       aria-label={c.channel}
                     />
-                    <span className="truncate">{c.preview}</span>
+                    <span className="truncate">{stripMarkdown(c.preview)}</span>
                   </div>
                 </div>
                 <span

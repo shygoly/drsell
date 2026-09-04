@@ -28,6 +28,16 @@ export function ConversationChart({ data }: ConversationChartProps) {
         </div>
       </div>
       <CardContent className="px-0">
+        {data.length === 0 ? (
+          // 没有数据时不要渲染一个空的坐标框——那看起来像图表坏了，
+          // 而不是「还没有会话」。
+          <div className="text-muted-foreground mt-2 flex h-64 flex-col items-center justify-center gap-1 text-center">
+            <p className="text-sm font-medium">No conversations yet</p>
+            <p className="text-[13px]">
+              Volume appears here once customers start chatting on your storefront.
+            </p>
+          </div>
+        ) : (
         <div
           role="img"
           aria-label="Stacked bar chart of conversation volume over the last 30 days"
@@ -57,6 +67,7 @@ export function ConversationChart({ data }: ConversationChartProps) {
             </div>
           ))}
         </div>
+        )}
       </CardContent>
     </Card>
   );
