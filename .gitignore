@@ -64,7 +64,9 @@ _tmp_*
 .stitch/project-11226504772808429506/work/reports/*/boxes.json
 .stitch/project-11226504772808429506/work/rebuild/
 /opencode.json
-.cursor/
+.cursor/*
+# Cloud Agent 环境配置是唯一需要入库的 .cursor 文件（供 Cloud Agent 复现开发环境）
+!.cursor/environment.json
 .gstack/
 
 # .stitch 设计基线整体不入库（2026-09-02 决定）：11.1MB 的截图/spec/基准只在本地保留。
