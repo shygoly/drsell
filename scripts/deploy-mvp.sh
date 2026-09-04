@@ -176,7 +176,7 @@ pm2 status
 
 curl -sf http://127.0.0.1:5011/api/health && echo
 curl -sf -o /dev/null -w "storefront:%{http_code}\n" http://127.0.0.1:5010/ || true
-curl -sf -o /dev/null -w "shopify-web:%{http_code}\n" http://127.0.0.1:5012/app || true
+curl -sf -o /dev/null -w "shopify-web:%{http_code}\n" http://127.0.0.1:5012/privacy || true
 curl -sf -o /dev/null -w "ops:%{http_code}\n" http://127.0.0.1:5013/login || true
 EOF
 

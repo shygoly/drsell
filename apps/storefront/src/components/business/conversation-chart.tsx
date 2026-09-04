@@ -41,7 +41,7 @@ export function ConversationChart({ data }: ConversationChartProps) {
         <div
           role="img"
           aria-label="Stacked bar chart of conversation volume over the last 30 days"
-          className="relative mt-2 flex h-64 items-end justify-between border-b border-l border-border/40 px-2 pt-8 pb-2"
+          className="relative mt-2 mb-6 flex h-64 items-end justify-between gap-[2px] border-b border-l border-border/40 px-2 pt-8 pb-2"
         >
           <div
             className="pointer-events-none absolute inset-0 flex flex-col justify-between opacity-10"
@@ -51,19 +51,25 @@ export function ConversationChart({ data }: ConversationChartProps) {
               <div key={i} className="h-0 w-full border-b" />
             ))}
           </div>
-          {data.map((point) => (
+          {data.map((point, i) => (
             <div
               key={point.label}
-              className="group relative z-10 flex h-full w-1/12 flex-col items-center justify-end gap-1"
+              title={point.label}
+              className="group relative z-10 flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1"
             >
               <div
-                className="bg-chart-2 w-4/5 rounded-t-sm transition-all group-hover:opacity-80"
+                className="bg-chart-2 w-3/5 rounded-t-sm transition-all group-hover:opacity-80"
                 style={{ height: `${point.ai}%` }}
               />
               <div
-                className="bg-muted w-4/5 rounded-t-sm transition-all group-hover:opacity-80"
+                className="bg-muted w-3/5 rounded-t-sm transition-all group-hover:opacity-80"
                 style={{ height: `${point.human}%` }}
               />
+              {/* 横轴刻度：30 根柱子全标日期会糊成一片，每 5 天标一个。
+                  原实现完全没渲染 label，图表因此读起来像个空框。 */}
+              <span className="text-muted-foreground absolute -bottom-5 text-[11px] tabular-nums">
+                {i % 5 === 0 || i === data.length - 1 ? point.label : ""}
+              </span>
             </div>
           ))}
         </div>

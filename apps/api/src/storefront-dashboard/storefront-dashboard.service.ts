@@ -102,22 +102,38 @@ export class StorefrontDashboardService {
       humanMap.set(key, (humanMap.get(key) ?? 0) + 1);
     }
 
-    if (dailyStats.length === 0) {
+    // 只回有记录的那几天，会让「30 天」图表在新店铺上退化成两三根孤零零的柱子，
+    // 看起来像坏了。这里补齐 30 个刻度；整段全为 0 时回空数组，由前端出空态。
+    const statByLabel = new Map(
+      dailyStats.map((d) => [
+        `${d.day.getUTCMonth() + 1}/${d.day.getUTCDate()}`,
+        d,
+      ]),
+    );
+
+    const days: { label: string; ai: number; human: number }[] = [];
+    let maxTotal = 0;
+    for (let i = 0; i < 30; i += 1) {
+      const day = new Date(since);
+      day.setUTCDate(day.getUTCDate() + i);
+      const label = `${day.getUTCMonth() + 1}/${day.getUTCDate()}`;
+      const stat = statByLabel.get(label);
+      const human = humanMap.get(label) ?? 0;
+      const total = stat?.count ?? 0;
+      const ai = stat?.aiResolvedCount ?? Math.max(total - human, 0);
+      maxTotal = Math.max(maxTotal, total, ai + human);
+      days.push({ label, ai, human });
+    }
+
+    if (maxTotal === 0) {
       return [];
     }
 
-    const maxTotal = Math.max(...dailyStats.map((d) => d.count), 1);
-    return dailyStats.map((d) => {
-      const label = `${d.day.getUTCMonth() + 1}/${d.day.getUTCDate()}`;
-      const human = humanMap.get(label) ?? 0;
-      const total = d.count;
-      const ai = d.aiResolvedCount ?? Math.max(total - human, 0);
-      return {
-        label,
-        ai: Math.round((ai / maxTotal) * 100),
-        human: Math.round((human / maxTotal) * 100),
-      };
-    });
+    return days.map((d) => ({
+      label: d.label,
+      ai: Math.round((d.ai / maxTotal) * 100),
+      human: Math.round((d.human / maxTotal) * 100),
+    }));
   }
 
   async getConversations(shopDomain: string) {
