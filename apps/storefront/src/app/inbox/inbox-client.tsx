@@ -4,18 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Bot,
   CheckCircle2,
-  ChevronRight,
-  Gift,
+  Clock,
+  Globe,
   Hand,
-  Mail,
-  MapPin,
   Paperclip,
   Search,
   Send,
-  ShoppingBag,
   Smile,
-  Truck,
-  Undo2,
   Zap,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -33,6 +28,13 @@ const FILTERS: { value: "open" | "mine" | "resolved"; label: string }[] = [
   { value: "mine", label: "Mine" },
   { value: "resolved", label: "Resolved" },
 ];
+
+const CHANNEL_LABEL: Record<Conversation["channel"], string> = {
+  web: "Web Store",
+  instagram: "Instagram",
+  email: "Email",
+  whatsapp: "WhatsApp",
+};
 
 const STATUS_BADGE = {
   ai: { label: "AI handling", variant: "success" as const },
@@ -466,113 +468,48 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
                 <h3 className="text-accent-deep mt-3 text-lg font-bold">
                   {selected.customer}
                 </h3>
-                <p className="text-muted-foreground text-sm">Customer since 2022</p>
+                <p className="text-muted-foreground text-sm">Storefront visitor</p>
               </div>
 
               <div className="space-y-3 border-b px-4 py-4 text-sm">
                 <div className="flex items-center justify-between border-b pb-2">
                   <span className="text-muted-foreground flex items-center gap-2">
-                    <Mail className="h-4 w-4" aria-hidden="true" />
-                    Email
+                    <Globe className="h-4 w-4" aria-hidden="true" />
+                    Channel
                   </span>
-                  <span className="w-32 truncate text-right font-medium">
-                    {slugify(selected.customer)}@example.com
-                  </span>
+                  <span className="font-medium">{CHANNEL_LABEL[selected.channel]}</span>
                 </div>
                 <div className="flex items-center justify-between border-b pb-2">
                   <span className="text-muted-foreground flex items-center gap-2">
-                    <MapPin className="h-4 w-4" aria-hidden="true" />
-                    Location
+                    <Bot className="h-4 w-4" aria-hidden="true" />
+                    Status
                   </span>
-                  <span className="font-medium">Portland, OR</span>
+                  <span className="font-medium">{STATUS_BADGE[selected.status].label}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground flex items-center gap-2">
-                    <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-                    Lifetime Value
+                    <Clock className="h-4 w-4" aria-hidden="true" />
+                    Last active
                   </span>
-                  <span className="text-primary font-medium">$450.00</span>
+                  <span className="font-medium">{selected.time}</span>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 border-b px-4 py-4">
-                {["VIP", "Returning"].map((tag) => (
-                  <span key={tag} className="bg-muted rounded px-2 py-1 text-xs font-medium">
-                    {tag}
-                  </span>
-                ))}
-                <span className="bg-accent text-accent-foreground rounded px-2 py-1 text-xs font-medium">
-                  + Add tag
-                </span>
-              </div>
-
-              <div className="border-b bg-muted/20 px-4 py-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <h4 className="text-accent-deep text-sm font-semibold">Recent Orders</h4>
-                  <a href="#" className="text-primary text-xs hover:underline">
-                    View all
-                  </a>
-                </div>
-                <div className="bg-card rounded-lg border p-3">
-                  <div className="mb-2 flex items-start justify-between">
-                    <div>
-                      <p className="text-sm font-bold">#GT-8992</p>
-                      <p className="text-muted-foreground text-xs">Oct 12, 2023</p>
-                    </div>
-                    <Badge variant="success">In Transit</Badge>
-                  </div>
-                  <div className="flex items-center gap-3 border-t pt-3">
-                    <div className="bg-muted flex h-10 w-10 items-center justify-center rounded border">
-                      <Truck className="text-primary h-5 w-5" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Smart Planter Pro</p>
-                      <p className="text-muted-foreground text-xs">Qty: 1 • $129.00</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-b px-4 py-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <h4 className="text-accent-deep text-sm font-semibold">Active Cart</h4>
-                  <span className="bg-muted rounded px-2 py-0.5 text-xs">$45.00</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="bg-muted flex h-12 w-12 items-center justify-center rounded border">
-                    <ShoppingBag className="text-muted-foreground h-5 w-5" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Organic Plant Food</p>
-                    <p className="text-muted-foreground text-xs">Added 10m ago</p>
-                  </div>
-                </div>
-              </div>
-
+              {/*
+                这里原本渲染的是设计稿留下的假客户档案（邮箱、Portland OR、
+                Lifetime Value $450、订单 #GT-8992 Smart Planter Pro、购物车），
+                以及三个没有 onClick 的 Quick Actions。那是编造的客户身份与交易
+                记录，会被 Shopify 审核判为 misrepresentation。在真正接入
+                Shopify 客户与订单之前，这里只说实话。
+              */}
               <div className="px-4 py-4">
-                <h4 className="text-accent-deep mb-3 text-sm font-semibold">Quick Actions</h4>
-                <div className="space-y-2">
-                  {[
-                    { icon: Gift, label: "Send discount", className: "text-primary" },
-                    { icon: Truck, label: "Track order", className: "text-primary" },
-                    { icon: Undo2, label: "Refund order", className: "text-destructive" },
-                  ].map((action) => {
-                    const Icon = action.icon;
-                    return (
-                      <button
-                        key={action.label}
-                        type="button"
-                        className="border-input bg-card hover:border-primary/50 hover:bg-muted/40 flex w-full items-center justify-between rounded-lg border p-2 text-sm transition-colors"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Icon className={cn("h-4 w-4", action.className)} aria-hidden="true" />
-                          {action.label}
-                        </span>
-                        <ChevronRight className="text-muted-foreground h-4 w-4" aria-hidden="true" />
-                      </button>
-                    );
-                  })}
-                </div>
+                <h4 className="text-accent-deep mb-2 text-sm font-semibold">
+                  Customer profile
+                </h4>
+                <p className="text-muted-foreground text-sm">
+                  This conversation is not linked to a Shopify customer, so there is no
+                  contact or order history to show here.
+                </p>
               </div>
             </>
           ) : (

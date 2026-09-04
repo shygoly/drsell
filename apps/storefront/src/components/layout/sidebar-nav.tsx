@@ -18,24 +18,22 @@ import { cn } from "@/lib/utils";
 import { useShopSession } from "@/hooks/useShopSession";
 
 /**
- * 侧边栏 — 对齐 Stitch home_dashboard/code.html 的 SideNavBar。
- * 稿中结构：品牌块 → New Automation CTA → 主导航 7 项 → border-t 分隔的底部 2 项。
+ * 侧边栏 — 源自 Stitch home_dashboard/code.html 的 SideNavBar。
  * 图标映射（Material Symbols → lucide）见 docs/stitch-to-shadcn-plan.md 组件映射表。
+ *
+ * 只列真正能用的页面。/customers、/analytics、/support、/documentation、/history
+ * 目前都是 ComingSoon 占位页——把一半导航指向空页，商家点进去只会觉得应用没做完，
+ * 上架审核也会记一笔。路由保留（书签不会 404），但不再从导航暴露。
  */
 const MAIN_ITEMS = [
   { href: "/", label: "Home", icon: Home }, // home
   { href: "/inbox", label: "Inbox", icon: MessageSquare }, // chat_bubble
   { href: "/ai-assistant", label: "AI Assistant", icon: Bot }, // smart_toy
   { href: "/widget-config", label: "Widget Config", icon: Puzzle }, // settings_input_component
-  { href: "/customers", label: "Customers", icon: Users }, // group
-  { href: "/analytics", label: "Analytics", icon: BarChart3 }, // bar_chart
   { href: "/settings", label: "Settings", icon: Settings }, // settings
 ];
 
-const FOOTER_ITEMS = [
-  { href: "/support", label: "Support", icon: HelpCircle }, // help
-  { href: "/documentation", label: "Documentation", icon: FileText }, // description
-];
+const FOOTER_ITEMS: { href: string; label: string; icon: typeof Home }[] = [];
 
 export function SidebarNav() {
   const { shop } = useShopSession();

@@ -23,7 +23,7 @@ type BillingRow = {
 };
 
 export default function SettingsPage() {
-  const { shop, userToken, bridge, switchShop } = useShopSession();
+  const { shop, userToken, bridge, embedded, switchShop } = useShopSession();
   const [rows, setRows] = useState<BillingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -33,7 +33,12 @@ export default function SettingsPage() {
     process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
 
   const refresh = useCallback(async () => {
-    if (!userToken) return;
+    if (!userToken) {
+      // 嵌入态由 Shopify 认证，不存在平台用户会话。这里必须解除 loading，
+      // 否则「My stores」永远转圈（嵌入端实测如此）。
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -114,9 +119,19 @@ export default function SettingsPage() {
             Loading…
           </div>
         ) : rows.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            No stores connected yet.
-          </p>
+          embedded && shop ? (
+            // 嵌入态只管当前这家店；多店切换在独立面板里做。
+            <div className="flex items-center gap-2 py-1 text-sm">
+              <span className="font-medium">{shop}</span>
+              <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-[10px] uppercase">
+                current
+              </span>
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-sm">
+              No stores connected yet.
+            </p>
+          )
         ) : (
           <ul className="divide-y">
             {rows.map((row) => {

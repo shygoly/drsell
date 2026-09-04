@@ -20,7 +20,6 @@ import { StoreSwitcher } from "@/components/business/store-switcher";
  */
 const TOP_TABS = [
   { href: "/", label: "Dashboard" },
-  { href: "/history", label: "History" },
   { href: "/settings", label: "Settings" },
 ];
 
