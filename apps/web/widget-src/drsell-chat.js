@@ -36,7 +36,9 @@
     widgetWindowSize: 'medium',
     widgetLauncherStyle: 'chat',
     widgetVisible: true,
-    widgetQuickReplies: ['Where is my order?', 'What is your return policy?', 'Do you ship internationally?'],
+    // 默认只放 AI 真能回答的问题。曾默认问「退货政策」「是否国际配送」，
+    // 但它只经 MCP 查商品与订单、拿不到政策页，点了必然得到「抱歉，我没有…」。
+    widgetQuickReplies: ['Where is my order?', 'What products do you sell?', 'Is this in stock?'],
     welcomeMessage: lang === 'zh' ? '你好，有什么可以帮您？' : "Hi! I'm Ava. How can I help you today?",
     widgetPreviewOpen: false,
   };

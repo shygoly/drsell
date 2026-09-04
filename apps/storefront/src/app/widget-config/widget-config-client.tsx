@@ -39,9 +39,10 @@ import { cn } from "@/lib/utils";
 const PRIMARY_COLORS = ["#006c49", "#0a3d2e", "#181c1f", "#1a60bf", "#8a5d0a"];
 const HEADER_COLORS = ["#006c49", "#0a3d2e", "#181c1f"];
 const QUICK_REPLY_DEFAULTS = [
+  // 只放 AI 真能回答的：它经 MCP 查商品与订单，拿不到政策页。
   "Where is my order?",
-  "What is your return policy?",
-  "Do you ship internationally?",
+  "What products do you sell?",
+  "Is this in stock?",
 ];
 
 function WidgetConfigInner() {

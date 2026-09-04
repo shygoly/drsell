@@ -42,110 +42,16 @@ const STATUS_BADGE = {
   human: { label: "Human", variant: "info" as const },
 } as const;
 
-const FALLBACK_THREAD_MESSAGES: Record<string, ChatMessage[]> = {
-  c1: [
-    {
-      id: "m1",
-      role: "user",
-      content: "Where is my order #10294? The tracking hasn't updated.",
-      createdAt: "2026-08-30T10:42:00.000Z",
-    },
-    {
-      id: "m2",
-      role: "assistant",
-      content:
-        "Hi John! I've checked order #10294 — it's currently in transit and expected to arrive tomorrow by 8 PM. Is there anything else I can help you with?",
-      createdAt: "2026-08-30T10:42:05.000Z",
-    },
-  ],
-  c2: [
-    {
-      id: "m1",
-      role: "user",
-      content: "Do you ship to Canada?",
-      createdAt: "2026-08-30T10:40:00.000Z",
-    },
-    {
-      id: "m2",
-      role: "assistant",
-      content:
-        "Yes, we ship to Canada! Standard delivery takes 3–5 business days and is free on orders over $50.",
-      createdAt: "2026-08-30T10:40:04.000Z",
-    },
-  ],
-  c3: [
-    {
-      id: "m1",
-      role: "user",
-      content: "Can I exchange for a larger size?",
-      createdAt: "2026-08-30T10:37:00.000Z",
-    },
-    {
-      id: "m2",
-      role: "assistant",
-      content:
-        "Of course! You can start an exchange from your order page within 30 days. I can help you set that up — what's your order number?",
-      createdAt: "2026-08-30T10:37:08.000Z",
-    },
-  ],
-  c4: [
-    {
-      id: "m1",
-      role: "user",
-      content: "Thanks for the quick reply!",
-      createdAt: "2026-08-30T10:30:00.000Z",
-    },
-    {
-      id: "m2",
-      role: "assistant",
-      content: "You're very welcome, Sarah! Let me know if you need anything else. 😊",
-      createdAt: "2026-08-30T10:30:02.000Z",
-    },
-  ],
-  c5: [
-    {
-      id: "m1",
-      role: "user",
-      content: "Agent takeover requested",
-      createdAt: "2026-08-30T10:27:00.000Z",
-    },
-    {
-      id: "m2",
-      role: "assistant",
-      content:
-        "A human agent has been notified about this conversation. They'll join shortly.",
-      createdAt: "2026-08-30T10:27:03.000Z",
-    },
-  ],
-};
+/*
+ * 这里原本有 FALLBACK_THREAD_MESSAGES 与 buildFallbackMessages：真实消息为空或
+ * 请求失败时，用编造的对话顶上（含虚构订单号 #10294、"expected to arrive
+ * tomorrow by 8 PM"、"free on orders over $50" 之类的配送承诺）。那等于把商家
+ * 从未做过的承诺伪装成 AI 的历史回复，已整段删除——拿不到消息就显示空态。
+ */
 
-function buildFallbackMessages(conversation: Conversation): ChatMessage[] {
-  if (FALLBACK_THREAD_MESSAGES[conversation.id]) {
-    return FALLBACK_THREAD_MESSAGES[conversation.id];
-  }
-  return [
-    {
-      id: "m1",
-      role: "user",
-      content: conversation.preview || `Hi, I need help with ${conversation.topic.toLowerCase()}.`,
-      createdAt: "2026-08-30T10:42:00.000Z",
-    },
-    {
-      id: "m2",
-      role: "assistant",
-      content: `Thanks for reaching out! I'm looking into your ${conversation.topic.toLowerCase()} and will help you shortly.`,
-      createdAt: "2026-08-30T10:42:05.000Z",
-    },
-  ];
-}
-
-function slugify(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.+|\.+$/g, "");
-}
-
-type InboxClientProps = {
+interface InboxClientProps {
   initialConversations: Conversation[];
-};
+}
 
 export function InboxClient({ initialConversations }: InboxClientProps) {
   const { token } = useShopSession();
@@ -154,11 +60,8 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("open");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState(initialConversations[0]?.id ?? "");
-  const [messages, setMessages] = useState<ChatMessage[]>(
-    initialConversations[0]
-      ? buildFallbackMessages(initialConversations[0])
-      : [],
-  );
+  // 初始为空：真实消息由下面的 effect 拉取，拿不到就保持空态。
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [draft, setDraft] = useState("");
 
@@ -195,10 +98,7 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
       .catch(() => null)
       .then((data) => {
         if (cancelled) return;
-        const found = conversations.find((c) => c.id === selectedId);
-        setMessages(
-          data && data.length > 0 ? data : found ? buildFallbackMessages(found) : [],
-        );
+        setMessages(data && data.length > 0 ? data : []);
         setLoadingMessages(false);
       });
     return () => {
