@@ -29,11 +29,15 @@ apps/api          NestJS 11 + Prisma 6 + PostgreSQL     生产 :5011（dev :3001
 apps/web          Next 15 + Polaris 13 + App Bridge 4   生产 :5012（dev :3000）
                   Shopify embedded app：/app、OAuth 回调、webhooks
                   theme app extension 在 apps/web/extensions/chatbot
+                  widget 可读源码在 apps/web/widget-src/，产物在扩展 assets/
+                  （扩展目录只允许 assets/blocks/locales/snippets，且 JS 有 10KB
+                   上限；产物必须提交，
+                   因为 shopify app deploy 从工作区打包、不跑本仓构建）
 apps/ops          Next 15                               生产 :5013
                   运营控制台 ops.szchada.top，superadmin + 审计
 apps/storefront   Next 15 + App Bridge                  生产 :5010（dev :3100）
 packages/         shared · shopify · adp · openclaw
-spec/             治理校验器（8 个 check-*.mjs），pnpm spec
+spec/             治理校验器（9 个 check-*.mjs），pnpm spec
 infra/            nginx vhost · cloudflare · docker · openclaw profile
 scripts/          deploy-mvp.sh 等
 ```
@@ -48,7 +52,7 @@ scripts/          deploy-mvp.sh 等
 ```bash
 pnpm dev            # turbo run dev（全部）
 pnpm build          # turbo run build
-pnpm spec           # 治理校验（8 个检查器）
+pnpm spec           # 治理校验（9 个检查器）
 pnpm test           # pnpm spec + turbo run test —— 提交前必须绿
 pnpm lint
 pnpm db:generate    # prisma generate
