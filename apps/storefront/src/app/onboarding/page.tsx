@@ -368,7 +368,7 @@ export default function OnboardingPage() {
                 <Bot className="text-primary h-9 w-9" aria-hidden="true" />
               </div>
               <CardTitle className="text-accent-deep text-2xl font-bold tracking-tight sm:text-[28px]">
-                Welcome to DrSell
+                Welcome to Dr Sell
               </CardTitle>
               <CardDescription className="text-muted-foreground text-sm">
                 4 quick steps to put your AI support agent live on your storefront.
@@ -514,7 +514,7 @@ export default function OnboardingPage() {
                 Configure and enable your widget
               </CardTitle>
               <CardDescription className="text-muted-foreground text-sm">
-                Pick a look, then turn on the storefront widget to activate DrSell.
+                Pick a look, then turn on the storefront widget to activate Dr Sell.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6">
@@ -604,7 +604,7 @@ export default function OnboardingPage() {
                 <p className="text-muted-foreground text-xs leading-relaxed">
                   {embedLive
                     ? "Your theme app embed is active. You can finish setup."
-                    : "Open the theme editor and turn on the DrSell Chat app embed, then save."}
+                    : "Open the theme editor and turn on the Dr Sell Chat app embed, then save."}
                 </p>
                 {!embedLive ? (
                   <div className="flex flex-wrap gap-2">
@@ -674,7 +674,7 @@ export default function OnboardingPage() {
                 Your AI support agent is live
               </CardTitle>
               <CardDescription className="text-muted-foreground text-sm">
-                The DrSell widget is now active on your storefront.
+                The Dr Sell widget is now active on your storefront.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6 px-6 pb-8 sm:px-10">
