@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { BillingService } from './billing.service';
+import { BillingService, planCodeFromShopifyName } from './billing.service';
 
 jest.mock('@drsell/shopify', () => ({
   shopifyGraphql: jest.fn(),
@@ -17,8 +17,14 @@ function mockDeps(overrides: Record<string, unknown> = {}) {
   };
   const findMany = jest.fn();
   const findFirst = jest.fn();
-  const create = jest.fn();
-  const update = jest.fn();
+  const create = jest.fn(async (args: { data: Record<string, unknown> }) => ({
+    id: 'sub_new',
+    ...args.data,
+  }));
+  const update = jest.fn(async (args: { where: { id: string }; data: Record<string, unknown> }) => ({
+    id: args.where.id,
+    ...args.data,
+  }));
   const updateMany = jest.fn();
   const knowledgeJobCreate = jest.fn();
 
@@ -114,5 +120,92 @@ describe('BillingService', () => {
     );
     expect(creates).toHaveLength(1);
     expect(creates[0][0].shop).toBe('b.myshopify.com');
+  });
+
+  describe('syncFromShopify — 托管计费的唯一知情渠道', () => {
+    /**
+     * 这组用例守的是「收了钱不给货」：商家在 Shopify 界面选了 Pro，
+     * 我们没同步就会按 basic 的 1500 次掐掉他。
+     */
+    function mockActive(sub: Record<string, unknown> | null) {
+      mockedGraphql.mockReset();
+      mockedGraphql.mockResolvedValue({
+        data: { currentAppInstallation: { activeSubscriptions: sub ? [sub] : [] } },
+      });
+    }
+
+    it('Pro 订阅写回 planCode=pro 与 Shopify 给的周期结束时间', async () => {
+      const { svc, findFirst, create } = mockDeps();
+      mockActive({
+        id: 'gid://shopify/AppSubscription/9',
+        name: 'Pro',
+        status: 'ACTIVE',
+        currentPeriodEnd: '2026-10-05T00:00:00Z',
+      });
+      findFirst.mockResolvedValue(null);
+
+      await svc.syncFromShopify('a.myshopify.com');
+
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            planCode: 'pro',
+            status: 'ACTIVE',
+            shopifyChargeId: 'gid://shopify/AppSubscription/9',
+            currentPeriodEnd: new Date('2026-10-05T00:00:00Z'),
+          }),
+        }),
+      );
+    });
+
+    it('套餐名对不上时不动 planCode —— 绝不把付费商家悄悄降级', async () => {
+      const { svc, findFirst, update } = mockDeps();
+      mockActive({ id: 'gid://x', name: 'Enterprise Custom', status: 'ACTIVE' });
+      findFirst.mockResolvedValue({ id: 'sub1', planCode: 'pro', status: 'ACTIVE' });
+
+      await svc.syncFromShopify('a.myshopify.com');
+
+      const data = update.mock.calls[0][0].data;
+      expect(data).not.toHaveProperty('planCode');
+      expect(data.status).toBe('ACTIVE');
+    });
+
+    it('Shopify 说没有活跃订阅就置 CANCELLED，不留假的 ACTIVE', async () => {
+      const { svc, findFirst, update } = mockDeps();
+      mockActive(null);
+      findFirst.mockResolvedValue({ id: 'sub1', planCode: 'pro', status: 'ACTIVE' });
+
+      const out = await svc.syncFromShopify('a.myshopify.com');
+
+      expect(out).toBeNull();
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'sub1' },
+          data: { status: 'CANCELLED', isBillingShop: false },
+        }),
+      );
+    });
+
+    it('已经是 CANCELLED 就不重复写', async () => {
+      const { svc, findFirst, update } = mockDeps();
+      mockActive(null);
+      findFirst.mockResolvedValue({ id: 'sub1', planCode: 'basic', status: 'CANCELLED' });
+      await svc.syncFromShopify('a.myshopify.com');
+      expect(update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('planCodeFromShopifyName', () => {
+    it('按 PLANS 的名字与 code 双向匹配（大小写无关）', () => {
+      expect(planCodeFromShopifyName('Basic')).toBe('basic');
+      expect(planCodeFromShopifyName('  PRO ')).toBe('pro');
+      expect(planCodeFromShopifyName('pro')).toBe('pro');
+    });
+
+    it('未知名字返回 null，而不是回落到 basic', () => {
+      expect(planCodeFromShopifyName('Plus')).toBeNull();
+      expect(planCodeFromShopifyName('')).toBeNull();
+      expect(planCodeFromShopifyName(null)).toBeNull();
+    });
   });
 });

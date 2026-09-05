@@ -1,6 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { shopifyGraphql } from '@drsell/shopify';
-import { DEFAULT_PLAN, PlanCode, planOf } from '@drsell/shared';
+import { DEFAULT_PLAN, PLANS, PlanCode, planOf } from '@drsell/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantService } from '../tenant/tenant.service';
 
@@ -14,6 +14,23 @@ import { TenantService } from '../tenant/tenant.service';
 const BILLING_TEST = process.env.BILLING_TEST === '1';
 const APP_URL = process.env.SHOPIFY_APP_URL || 'https://drsell.szchada.top';
 
+/**
+ * Shopify 套餐名 → 我们的 PlanCode。
+ *
+ * Partner 后台的 App Pricing 方案里，plan name 与 internal handle 是**刻意**
+ * 按 PLANS 对齐的（name "Basic"/"Pro"，handle "basic"/"pro"），所以两边都能匹配上。
+ * 对不上时返回 null，**绝不回落到 basic**——那会把一个付 $30 的商家
+ * 悄悄降级成 1500 次额度，而且没有任何人会发现。
+ */
+export function planCodeFromShopifyName(
+  name: string | null | undefined,
+): PlanCode | null {
+  const n = (name ?? '').trim().toLowerCase();
+  if (!n) return null;
+  const codes = Object.keys(PLANS) as PlanCode[];
+  return codes.find((c) => c === n || PLANS[c].name.toLowerCase() === n) ?? null;
+}
+
 type ChargeResult = {
   appSubscription?: { id: string; status?: string } | null;
   confirmationUrl?: string | null;
@@ -22,6 +39,8 @@ type ChargeResult = {
 
 @Injectable()
 export class BillingService {
+  private readonly logger = new Logger(BillingService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly tenants: TenantService,
@@ -264,5 +283,94 @@ export class BillingService {
       ).catch(() => undefined);
       throw e;
     }
+  }
+
+  /**
+   * 从 Shopify 拉取当前订阅并写回本地（app_subscriptions/update webhook 的落点）。
+   *
+   * 为什么必须有这条路径：本 app 开了 Shopify 托管计费（App Pricing），商家是在
+   * **Shopify 自己的界面**选套餐的，根本不经过上面的 createCharge。不接这个 webhook，
+   * 本地 Subscription 就没有 planCode，QuotaService 会把付 $30 的 Pro 商家
+   * 当成 basic 只给 1500 次额度——收了钱不给货，而且没有任何报错。
+   *
+   * webhook 载荷里没有 currentPeriodEnd，而配额周期要靠它，所以这里不信载荷、
+   * 回查 Shopify 拿权威值。
+   */
+  async syncFromShopify(shopDomain: string) {
+    const { shop, token } = await this.shopWithToken(shopDomain);
+    const res = await shopifyGraphql<{
+      data: {
+        currentAppInstallation?: {
+          activeSubscriptions?: Array<{
+            id: string;
+            name?: string | null;
+            status?: string | null;
+            currentPeriodEnd?: string | null;
+          }> | null;
+        } | null;
+      };
+    }>({
+      shop: shopDomain,
+      accessToken: token,
+      query: `
+        {
+          currentAppInstallation {
+            activeSubscriptions { id name status currentPeriodEnd }
+          }
+        }
+      `,
+    });
+
+    const active = res.data?.currentAppInstallation?.activeSubscriptions?.[0] ?? null;
+    const existing = await this.prisma.subscription.findFirst({
+      where: { shopId: shop.id },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    // Shopify 说没有活跃订阅 —— 以 Shopify 为准置为 CANCELLED，别留一条假的 ACTIVE。
+    if (!active) {
+      if (existing && existing.status !== 'CANCELLED') {
+        await this.prisma.subscription.update({
+          where: { id: existing.id },
+          data: { status: 'CANCELLED', isBillingShop: false },
+        });
+        await this.log(shop.tenantId, 'sync', `${shopDomain}: no active subscription -> CANCELLED`);
+      }
+      return null;
+    }
+
+    const mapped = planCodeFromShopifyName(active.name);
+    if (!mapped) {
+      // 对不上就不动 planCode：宁可保持原样，也不要把付费商家悄悄降级。
+      this.logger.error(
+        `unmapped Shopify plan name ${JSON.stringify(active.name)} for ${shopDomain} — ` +
+          'planCode left unchanged; align the App Pricing plan name with @drsell/shared PLANS',
+      );
+      await this.log(shop.tenantId, 'sync-unmapped-plan', `${shopDomain}: ${active.name}`);
+    }
+
+    const data = {
+      status: (active.status || 'ACTIVE').toUpperCase(),
+      shopifyChargeId: active.id,
+      currentPeriodEnd: active.currentPeriodEnd ? new Date(active.currentPeriodEnd) : null,
+      isBillingShop: true,
+      ...(mapped ? { planCode: mapped } : {}),
+    };
+
+    const sub = existing
+      ? await this.prisma.subscription.update({ where: { id: existing.id }, data })
+      : await this.prisma.subscription.create({
+          data: { shopId: shop.id, planCode: mapped ?? DEFAULT_PLAN, ...data },
+        });
+
+    // 日志用已知的入参拼，不解引用写入返回值——写已经成功了，
+    // 记日志不该有能力让整个 webhook 处理抛错。
+    await this.log(
+      shop.tenantId,
+      'sync',
+      `${shopDomain}: ${mapped ?? existing?.planCode ?? DEFAULT_PLAN} ${data.status} ` +
+        `until ${data.currentPeriodEnd?.toISOString() ?? '-'}`,
+    );
+    return sub;
   }
 }

@@ -131,7 +131,16 @@ pro $30/5000 次。计费与配额都从这里读，listing 文案必须与之�
 $9.90，而 listing 打算写两档——**在 Shopify 上宣传做不到的计费方式是驳回项**。
 把价格与额度收进一个常量，是让「表单写的」和「实际收的」不可能分叉的唯一办法。
 计数单位是一次**成功的** AI 回答；闸门在调模型之前，超额不产生上游成本。
-**守护**：`packages/shared/src/index.ts` + `spec/check-pricing.mjs`。
+
+两档在 Partner 后台以 Shopify **托管计费（App Pricing）** 方案存在，
+plan name 与 internal handle 刻意对齐 `PLANS`（`Basic`/`basic`、`Pro`/`pro`）。
+托管计费下商家是在 **Shopify 自己的界面**选套餐的，不经过 `createCharge`——
+所以 `app_subscriptions/update` webhook 是我们唯一能知道他选了哪一档的途径。
+不接这个 webhook，付 $30 的 Pro 商家会被 `QuotaService` 当成 basic 只给 1500 次额度：
+收了钱不给货，且全程无报错。套餐名对不上时**不动 `planCode`**，宁可保持原样，
+也不把付费商家悄悄降级。
+**守护**：`packages/shared/src/index.ts` + `spec/check-pricing.mjs`
++ `apps/api/src/subscription/billing.service.spec.ts`。
 
 ### `ADR-15`
 

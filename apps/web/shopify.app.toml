@@ -26,7 +26,10 @@ api_version = "2025-04"
   "products/create",
   "orders/updated",
   "app/uninstalled",
-  "app/scopes_update"
+  "app/scopes_update",
+  # 托管计费：商家在 Shopify 界面换套餐后，这是我们唯一的知情渠道。
+  # 不订阅的话，付 $30 的 Pro 商家会被按 basic 的额度掐掉（见 ADR-14）。
+  "app_subscriptions/update"
 ]
 
   # Shopify 强制合规 webhook 单独走 /webhook（apps/web 代理 → apps/api 同一入口）

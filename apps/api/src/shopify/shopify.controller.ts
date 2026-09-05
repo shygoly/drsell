@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Headers,
+  Logger,
   Param,
   Patch,
   Post,
@@ -18,6 +19,7 @@ import type { JwtPayload } from '../auth/auth.service';
 import { Auth, CurrentUser } from '../common/auth.decorators';
 import { ShopScopeService } from '../common/shop-scope.service';
 import { ShopifyService } from './shopify.service';
+import { BillingService } from '../subscription/billing.service';
 import { PatchOnboardingDto } from './dto/onboarding.dto';
 
 class ShopLoginDto {
@@ -55,9 +57,12 @@ class BotSettingDto {
 
 @Controller('shopify')
 export class ShopifyController {
+  private readonly logger = new Logger(ShopifyController.name);
+
   constructor(
     private readonly shopify: ShopifyService,
     private readonly scope: ShopScopeService,
+    private readonly billing: BillingService,
   ) {}
 
   /**
@@ -213,6 +218,17 @@ export class ShopifyController {
     }
     if (topic === 'app/uninstalled' && shop) {
       return this.shopify.handleUninstall(shop);
+    }
+    // 托管计费（App Pricing）下商家在 Shopify 界面选套餐，不经过本服务的 createCharge。
+    // 这是我们唯一能知道「他选了哪一档」的途径——不接就会把付 $30 的 Pro 商家
+    // 按 basic 的 1500 次额度掐掉。webhook 必须 2xx，失败只记日志不抛错。
+    if (topic === 'app_subscriptions/update' && shop) {
+      try {
+        await this.billing.syncFromShopify(shop);
+      } catch (e) {
+        this.logger.error(`app_subscriptions/update sync failed for ${shop}: ${String(e)}`);
+      }
+      return { ok: true, topic };
     }
     // Shopify 强制合规 webhook：HMAC 已通过，处理必须幂等且永不抛错（合规端点须 2xx）。
     if (
