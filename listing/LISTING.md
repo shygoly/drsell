@@ -6,7 +6,8 @@
 > 文案全部在限额内、中文残留 0、三张截图已上传、5 条 search terms 已加、
 > 审核说明 1520/2800 已写入（密码位置留占位符）。校验错误 0。
 >
-> **唯一仍阻塞的是定价**——见下方「定价：与代码实现不符」。
+> 定价曾是阻塞项（代码只有一档、listing 要写两档）。**已解决**：两档已实现
+> 并有配额守护，见下方 Pricing 一节。
 
 | | |
 |---|---|
@@ -181,39 +182,36 @@ Storefront password: <<< ENTER STOREFRONT PASSWORD HERE >>>
 0. **开启 Chrome 的「Allow access to file URLs」**，否则截图传不上去（见 Media）。
 2. **店铺密码是否写入 App testing information**：审核员必须能进前台，
    但这是凭据，由你决定填写方式。
-3. **定价：与代码实现不符（阻塞项，见下节）。**
+3. ~~定价与代码实现不符~~ —— 已解决（两档已实现，见 Pricing 一节）。
+   仍需人工在 Partner 后台把遗留的三档删成两档。
 
 ---
 
-## 定价：与代码实现不符
+## Pricing
 
-**这一项会卡住提交，且不是填表能解决的。**
+**这张表由 `spec/check-pricing.mjs` 与 `@drsell/shared` 的 `PLANS` 逐行对账**（`ADR-14`）。
+改价格先改 `PLANS`，再抄到这里和表单——反过来会红。
 
-要求是两档 `Basic $15` / `Pro $30`。但 `apps/api/src/subscription/billing.service.ts`
-里只有**一档**：
+| Display name | Price (USD/月) | AI answers / 30 天 |
+|---|---|---|
+| Basic | 15 | 1500 |
+| Pro | 30 | 5000 |
 
-```js
-const PLAN_CODE  = process.env.BILLING_PLAN_CODE  || 'pro';
-const PLAN_PRICE = Number(process.env.BILLING_PLAN_PRICE || 9.9);
-```
+两档的差别**只有额度**，没有功能门禁：同样的实时商品/订单问答、同样的 Inbox、
+同样的 widget 定制。这是刻意的——按功能切分需要在代码里到处加门禁，
+而额度切分只有一个闸门，审核员也一眼能验证。
 
-单一 plan code、单一价格，**没有套餐选择，也没有任何按档位的功能门禁**。
-生产两个变量都未设置，实际按回落值收 **$9.90/30 天**（后台看到的 $14.00 是历史订阅）。
+超额行为（`apps/api/src/quota/quota.service.ts`）：
 
-listing 写两档 = 宣传应用做不到的计费方式。商家点 Basic 也只会被收同一个价，
-Shopify 对计费审得很细，这是驳回项。
+- 计数单位是**一次成功的 AI 回答**。请求失败、被闸门拦下、商家人工回复都不计。
+- 闸门在调模型**之前**，超额不产生任何上游成本。
+- 顾客看到：`I'm not able to answer right now. Please leave your question here and
+  the store team will follow up.` 会话转 `pending` 并计未读，商家在 Inbox 里能接手。
+  提示里不含套餐与用量——那是商家的商业信息，不该给顾客看。
+- 周期跟随订阅 `currentPeriodEnd` 倒推 30 天，配额随扣费重置。
 
-三条路：
-
-| 方案 | 代价 |
-|---|---|
-| 实现两档计费 | 要定义两档各含什么、加套餐选择 UI、加按档功能门禁、改 Shopify 订阅创建逻辑。**「Basic 和 Pro 差在哪」是产品决策，只能你定** |
-| listing 只写一档 | 把表单里的 Display name 收敛成一档，价格与 `BILLING_PLAN_PRICE` 对齐。最快，能立刻提交 |
-| 先写两档、后补实现 | **不可行**，属于计费不实 |
-
-表单里目前仍是遗留的三档 `Pro` / `Basic` / `Plus`，我没有动——改它之前得先定上面选哪条。
-
----
+> **表单待办**：Partner 后台的 Pricing 里仍是遗留三档 `Pro` / `Basic` / `Plus`，
+> 需删到只剩上表两档。
 
 ## 演示视频
 

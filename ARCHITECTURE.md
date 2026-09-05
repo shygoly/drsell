@@ -123,6 +123,30 @@ ADP 智能体经 `adp_reader` 直连 PG，仅可执行 `adp_*` 函数。
 **为什么**：自造状态词（如 `PAID`）会与 Shopify webhook 事实漂移，账单对不上。
 **守护**：`apps/api/prisma/schema.prisma` + `spec/check-ops-status.mjs`。
 
+### `ADR-14`
+
+套餐只有两档，定义在 `@drsell/shared` 的 `PLANS`：basic $15/1500 次 AI 回答、
+pro $30/5000 次。计费与配额都从这里读，listing 文案必须与之一致。
+**为什么**：此前价格散在 `BILLING_PLAN_PRICE` 等环境变量里，生产按回落值实收
+$9.90，而 listing 打算写两档——**在 Shopify 上宣传做不到的计费方式是驳回项**。
+把价格与额度收进一个常量，是让「表单写的」和「实际收的」不可能分叉的唯一办法。
+计数单位是一次**成功的** AI 回答；闸门在调模型之前，超额不产生上游成本。
+**守护**：`packages/shared/src/index.ts` + `spec/check-pricing.mjs`。
+
+### `ADR-15`
+
+模型走「主 + 备」：primary `deepseek-v4/deepseek-v4-pro`，
+fallbacks `zhipu/glm-4.5-flash`。OpenClaw 把 402/余额不足归为 `billing` 失败并
+自动切到备用模型。
+**为什么**：单一 provider 的 key 一旦欠费，**全部商家的客服对话同时失败**，
+而这属于我们向商家收了钱的核心功能。备用链路让欠费从「立即全线中断」降级为
+「变慢、变笨，但仍在回答」。选 `glm-4.5-flash` 是因为已验证它支持本链路依赖的
+tool calling（`adp_search_products` 等），换别的模型前必须重新验证这一点——
+不支持 tool calling 的模型会一本正经地编造商品，比报错更糟。
+primary **不要改**：它正在服务生产对话（见 `AGENTS.md` 陷阱 1）。
+**守护**：`infra/openclaw/drsell/openclaw.json.example` + `setup-wjclaw.sh`
+（服务器重建即复现该配置）。
+
 ## 3. B — 边界规矩论证
 
 ### `B-1`

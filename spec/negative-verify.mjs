@@ -138,6 +138,24 @@ const CASES = [
     expect: 1,
     expectMatch: /缺论证锚点：DS-3/,
   },
+  {
+    name: 'check-pricing 抓 listing 价格与 PLANS 漂移',
+    checker: 'check-pricing.mjs',
+    inject: () => patchFile('listing/LISTING.md', '| Basic | 15 | 1500 |', '| Basic | 12 | 1500 |'),
+    expect: 1,
+    expectMatch: /"Basic" 档不一致/,
+  },
+  {
+    name: 'check-pricing 抓 listing 多出代码里没有的套餐',
+    checker: 'check-pricing.mjs',
+    inject: () => patchFile(
+      'listing/LISTING.md',
+      '| Pro | 30 | 5000 |',
+      '| Pro | 30 | 5000 |\n| Plus | 99 | 99999 |',
+    ),
+    expect: 1,
+    expectMatch: /多出一档 "Plus"/,
+  },
 ];
 
 const gitStatus = () =>

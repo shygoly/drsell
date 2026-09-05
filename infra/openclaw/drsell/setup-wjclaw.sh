@@ -7,6 +7,9 @@ STATE_DIR="${OPENCLAW_STATE_DIR:-/root/.openclaw-drsell}"
 WORKSPACE="/root/.openclaw/workspace-drsell"
 
 : "${DEEPSEEK_API_KEY:?需要 DEEPSEEK_API_KEY（复用 wjclaw 现有 DeepSeek）}"
+# 备用模型：主 key 余额不足时 OpenClaw 自动切过去（见 ADR-15）。
+# 不给就只配主模型——但那样余额一断，客服对话全线失败。
+: "${GLM_API_KEY:?需要 GLM_API_KEY（备用模型 zhipu/glm-4.5-flash，见 ADR-15）}"
 
 if [[ -z "${OPENCLAW_GATEWAY_TOKEN:-}" ]]; then
   OPENCLAW_GATEWAY_TOKEN="$(openssl rand -hex 24)"
@@ -29,6 +32,7 @@ cp "$ROOT/infra/openclaw/drsell/workspace/IDENTITY.md" "$WORKSPACE/"
 cp "$ROOT/infra/openclaw/drsell/workspace/skills/drsell-pg/SKILL.md" "$WORKSPACE/skills/drsell-pg/"
 
 sed -e "s/REPLACE_WITH_DEEPSEEK_API_KEY/${DEEPSEEK_API_KEY}/" \
+    -e "s/REPLACE_WITH_GLM_API_KEY/${GLM_API_KEY}/" \
     -e "s/REPLACE_WITH_GATEWAY_TOKEN/${OPENCLAW_GATEWAY_TOKEN}/" \
     -e "s/REPLACE_ADP_READER_PASSWORD/${ADP_READER_PASSWORD}/" \
     "$ROOT/infra/openclaw/drsell/openclaw.json.example" > "$STATE_DIR/openclaw.json"

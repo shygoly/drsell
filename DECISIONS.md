@@ -52,6 +52,8 @@
 | `ADR-11` | 运营台是独立应用 `apps/ops`，独立 `server_name` `ops.szchada.top`；商家端不得存在 `/admin` 或 `/ops` 路由 | `infra/nginx/ops.szchada.top.conf` + `spec/check-ops-entry.mjs` | 已守护 |
 | `ADR-12` | 运营台第三套设计令牌（`apps/ops/app/tokens.css` → `globals.css` shadcn 映射），经 `stitch-to-shadcn-pro` + Tailwind v4 + shadcn/ui 落地；禁止 Polaris | `apps/ops/app/globals.css` + `.stitch/` + `spec/check-design.mjs` | 已守护 |
 | `ADR-13` | 本地订阅状态只镜像 Shopify `AppSubscriptionStatus` 的六个取值，不自造状态词 | `apps/api/prisma/schema.prisma` + `spec/check-ops-status.mjs` | 已守护 |
+| `ADR-14` | 套餐只有两档，价格与 AI 回答额度定义在 `@drsell/shared` 的 `PLANS`（basic $15/1500、pro $30/5000）；listing 文案必须与之一致 | `packages/shared/src/index.ts` + `spec/check-pricing.mjs` | 已守护 |
+| `ADR-15` | 模型主备：primary `deepseek-v4/deepseek-v4-pro`，fallbacks `zhipu/glm-4.5-flash`；余额不足（`billing`）自动切换。备用模型必须支持 tool calling | `infra/openclaw/drsell/openclaw.json.example` + `setup-wjclaw.sh` | 已守护 |
 
 ---
 
