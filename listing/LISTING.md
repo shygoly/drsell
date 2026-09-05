@@ -16,12 +16,33 @@
 | client_id | `0b36b70772220b71b2fe296b3deba914` |
 | handle | `drseller-alpha` |
 | 提交表单 | https://apps.shopify.com/services/partner-app-submissions/0b36b70772220b71b2fe296b3deba914/en |
-| 当前状态 | Delisted（需重新过审） |
+| 当前状态 | **Delisted — 由 Shopify 下架，原因在邮件里**（见下方「真正的阻塞点」） |
 | 测试店铺 | `chatbotdomaintest.myshopify.com` |
-| 最后核对 | 2026-09-04，对应扩展版本 `drseller-alpha-30` |
+| 最后核对 | 2026-09-05，对应扩展版本 `drseller-alpha-31` |
 | 演示店 widget 配色 | `#008A57` / `#0A3D2E`（原为商家设的 `#8a5d0a`，为素材统一改绿） |
 
 ---
+
+## 真正的阻塞点：应用处于 Delisted，Publish 被锁
+
+2026-09-05 查到的实况。Partner 后台
+`https://partners.shopify.com/3746733/apps/264501002241/distribution/app-store` 上写着：
+
+> **Critical — Delisted。Check your email for details.**
+> Your listing has been removed from the App Store in all languages.
+> **You can't publish languages in a delisted status.**
+
+`Publish` 按钮带 `aria-disabled="true"`，整个提交表单里也**没有** "Submit for review"
+——只有 Save 和 Preview listing。
+
+**结论：把表单填完不等于能提交。** 表单内容已经全部就绪（校验错误 0），但在
+Delisted 解除之前，无论内容多完整都发不出去。下一步不是继续改文案，而是：
+
+1. 找到 Shopify 发来的下架通知邮件，确认它列出的具体原因；
+2. 按邮件指引整改并回复/申诉；
+3. 状态恢复后，Publish 才会解锁。
+
+本目录里的素材与文案在那之前保持可用，不需要重做。
 
 ## Basic app information
 
@@ -78,19 +99,29 @@ Replies come from DeepSeek via our gateway.
 Feature image / video 一个槽位，desktop screenshots 三个起（可加）。
 图片文件在 `listing/screenshots/`，全部 1600×900，已裁掉 Shopify 后台导航与浏览器边框。
 
-**上传状态：三张 desktop screenshot 已上传**（1600×900，Shopify 侧已接收）。
-Feature image 槽位仍是旧素材，等你定用哪张。
+**上传状态：首图 + 三张 desktop screenshot 全部就位**（1600×900，重载回读验证过）。
+
+首图原是一张纯文字营销图（深色底 + 机器人图标 + "Shopping guide-style intelligent
+customer service, more actively encourages customers to place orders"）。换掉它有三个
+理由，不是审美偏好：alt 文本写的是 storefront 上回答商品问题，图里没有，**自相矛盾**；
+文案里的「主动促单」是本应用做不到的能力，属**超范围声明**；Shopify 本页 DON'T 明写
+「不要用大量文字的图」。现已换成 `09-storefront-chat.jpg`——真实前台 + widget 正在
+用真实商品和价格回答 "Do you have any snowboards under $700?"。
+
+> 换图的操作坑：填满的槽位 Polaris DropZone 会带 `--isDisabled`，直接塞 file input
+> 或派发 drop 事件都没反应（页面零网络请求）。删除按钮 `_DeleteAction_*` 只在 hover
+> 时可见，得先删掉旧图腾空槽位，DropZone 才恢复可用。旧图已下载留底再动手。
 
 > 教训：桥接的 `find` 按文案找 "Add" 会命中页面上多个同名按钮。我误点过两次，
 > 给 Screenshots 区凭空加了两个空槽，导致 Save 被校验拦下（"1 issues to fix:
 > Screenshots"）。已删除。**点 Add/Delete 这类按钮要按 DOM 邻近定位，不要按文案找。**
 
-| 槽位 | file input id | 文件 | Alt text | 长度 |
-|---|---|---|---|---|
-| Feature image | `:r4o:` | 建议 `screenshots/09-storefront-chat.jpg`（待你确认） | `AI chat widget answering a product question on a storefront` | 59/64 |
-| Screenshot 1 | `:r4q:` | `screenshots/01-dashboard.jpg` | `Dashboard with conversation volume and AI resolution rate` | 57/64 |
-| Screenshot 2 | `:r4s:` | `screenshots/02-inbox.jpg` | `Inbox showing a customer conversation and visitor details` | 57/64 |
-| Screenshot 3 | `:r4u:` | `screenshots/03-widget-config.jpg` | `Widget configuration with a live preview of the chat window` | 59/64 |
+| 槽位 | 文件 | Alt text | 长度 |
+|---|---|---|---|
+| Feature image | `screenshots/09-storefront-chat.jpg` ✅ 2026-09-05 已换 | `AI chat widget answering a product question on a storefront` | 59/64 |
+| Screenshot 1 | `screenshots/01-dashboard.jpg` | `Dashboard with conversation volume and AI resolution rate` | 57/64 |
+| Screenshot 2 | `screenshots/02-inbox.jpg` | `Inbox showing a customer conversation and visitor details` | 57/64 |
+| Screenshot 3 | `screenshots/03-widget-config.jpg` | `Widget configuration with a live preview of the chat window` | 59/64 |
 
 > file input 的 id 是 React 生成的，页面重载后会变。上传前重新读一遍，别照抄。
 
@@ -176,14 +207,11 @@ Storefront password: <<< ENTER STOREFRONT PASSWORD HERE >>>
 
 ## 未决（需要人决定，勿擅自填）
 
-1. **Feature image 用哪张**：alt 文本已设为 `AI chat widget answering a product
-   question on a storefront`，与 `09-storefront-chat.jpg` 正好对应，但首图是门面，
-   由你拍板。
-0. **开启 Chrome 的「Allow access to file URLs」**，否则截图传不上去（见 Media）。
+1. ~~Feature image 用哪张~~ —— 已换成 `09-storefront-chat.jpg`（见 Media 一节的三条理由）。
 2. **店铺密码是否写入 App testing information**：审核员必须能进前台，
    但这是凭据，由你决定填写方式。
-3. ~~定价与代码实现不符~~ —— 已解决（两档已实现，见 Pricing 一节）。
-   仍需人工在 Partner 后台把遗留的三档删成两档。
+3. ~~定价与代码实现不符~~ —— **已全部解决**：两档已实现、已在 Partner 后台建好、
+   遗留三档已删、表单 Display name 与 top features 已填并重载验证。
 
 ---
 
@@ -210,8 +238,26 @@ Storefront password: <<< ENTER STOREFRONT PASSWORD HERE >>>
   提示里不含套餐与用量——那是商家的商业信息，不该给顾客看。
 - 周期跟随订阅 `currentPeriodEnd` 倒推 30 天，配额随扣费重置。
 
-> **表单待办**：Partner 后台的 Pricing 里仍是遗留三档 `Pro` / `Basic` / `Plus`，
-> 需删到只剩上表两档。
+两档都带 **7 天免费试用**（沿用本 app 原有三档的一致做法，未改变）。
+
+### 计费实况（不是文案，是线上事实）
+
+Partner 后台开着 **Shopify 托管计费（App Pricing）**——「新订阅走已发布的
+App Pricing 方案」。也就是说商家是在 **Shopify 自己的界面**选套餐，
+不经过 `billing.service.ts` 的 `createCharge`。
+
+| 方案 handle | Plan name | 价格 | 状态 |
+|---|---|---|---|
+| `basic` | Basic | $15/月，7 天试用 | 2026-09-05 新建 |
+| `pro` | Pro | $30/月，7 天试用 | 2026-09-05 新建 |
+
+handle **刻意等于**代码里的 `PlanCode`，`app_subscriptions/update` webhook
+回查 Shopify 后按 plan name 映射写回 `Subscription.planCode`，配额据此发放。
+
+遗留的三档 `drseller-usd126`($126) / `drseller-usd14`($14) / `drseller-usd42`($42)
+已于 2026-09-05 删除。它们是 **public** 方案，留着商家就能选到与 listing 不符的价格
+——正是驳回项。删除前确认零活跃订阅；Shopify 确认框也写明已订阅商家不受影响
+（dev store 上那条历史 $14 订阅仍在，属正常）。
 
 ## 演示视频
 
