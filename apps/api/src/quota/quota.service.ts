@@ -40,8 +40,16 @@ export class QuotaService {
         select: { currentPeriodEnd: true },
       });
       if (sub?.currentPeriodEnd) {
-        const start = new Date(sub.currentPeriodEnd);
-        start.setUTCDate(start.getUTCDate() - PERIOD_DAYS);
+        // currentPeriodEnd 可能已经过期：Shopify 续期了而本地镜像滞后，或是一条
+        // 陈旧的历史订阅（生产上就有一条 currentPeriodEnd 停在一年前的）。
+        // 直接倒推会把配额永远钉死在那个陈旧周期里——用量再也不重置，
+        // 商家用满一次就永久被拦。按整周期推进到包含「现在」的那一期，
+        // 既修掉这点，又保住「按扣费日重置」的对齐。
+        const periodMs = PERIOD_DAYS * 24 * 60 * 60 * 1000;
+        const anchor = new Date(sub.currentPeriodEnd).getTime();
+        const now = Date.now();
+        const skipped = anchor > now ? 0 : Math.floor((now - anchor) / periodMs) + 1;
+        const start = new Date(anchor + skipped * periodMs - periodMs);
         start.setUTCHours(0, 0, 0, 0);
         return start;
       }

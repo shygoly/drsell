@@ -62,6 +62,34 @@ describe('QuotaService', () => {
     expect(start.toISOString()).toBe('2026-08-21T00:00:00.000Z');
   });
 
+  it('周期锚点已过期时按整周期推进到当期，而不是钉死在陈旧周期', async () => {
+    // 生产上真有这种数据：一条历史订阅的 currentPeriodEnd 停在一年前。
+    // 若直接倒推，配额窗口永远落在过去，用满一次就永久被拦。
+    const stale = new Date('2025-08-25T00:00:00.000Z');
+    const { client } = makePrisma({ sub: { planCode: 'basic', currentPeriodEnd: stale } });
+    const svc = new QuotaService(client as never);
+    const start = await svc.periodStart('shop_1');
+
+    const now = Date.now();
+    const periodMs = 30 * 24 * 60 * 60 * 1000;
+    expect(start.getTime()).toBeLessThanOrEqual(now);
+    expect(start.getTime() + periodMs).toBeGreaterThan(now);
+    // 仍与扣费日对齐：与原锚点的间隔是整周期数
+    const deltaDays = Math.round((start.getTime() - stale.getTime()) / 86400000);
+    expect(deltaDays % 30).toBe(0);
+  });
+
+  it('周期锚点在未来时保持不变（正常续费中的订阅）', async () => {
+    const future = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+    const { client } = makePrisma({ sub: { planCode: 'pro', currentPeriodEnd: future } });
+    const svc = new QuotaService(client as never);
+    const start = await svc.periodStart('shop_1');
+    const expected = new Date(future);
+    expected.setUTCDate(expected.getUTCDate() - 30);
+    expected.setUTCHours(0, 0, 0, 0);
+    expect(start.toISOString()).toBe(expected.toISOString());
+  });
+
   it('pro 档额度为 5000，basic 为 1500', () => {
     expect(PLANS.pro.answersPerPeriod).toBe(5000);
     expect(PLANS.basic.answersPerPeriod).toBe(1500);
