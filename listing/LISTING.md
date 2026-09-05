@@ -2,9 +2,11 @@
 
 提交表单的**唯一事实来源**。改文案先改这里，再抄进表单，避免每次重新想一遍。
 
-> **表单文本字段已于 2026-09-04 通过浏览器桥接填入并保存**，整页重载回读验证通过：
-> Introduction 96、App details 499、Feature 2、Subtitle、Title tag、Meta description、
-> 四条 alt 全为英文，中文残留 0。**截图尚未上传**（见下方 Media）。
+> **表单已于 2026-09-04 通过浏览器桥接填入并保存**，整页重载回读验证通过：
+> 文案全部在限额内、中文残留 0、三张截图已上传、5 条 search terms 已加、
+> 审核说明 1520/2800 已写入（密码位置留占位符）。校验错误 0。
+>
+> **唯一仍阻塞的是定价**——见下方「定价：与代码实现不符」。
 
 | | |
 |---|---|
@@ -75,10 +77,12 @@ Replies come from DeepSeek via our gateway.
 Feature image / video 一个槽位，desktop screenshots 三个起（可加）。
 图片文件在 `listing/screenshots/`，全部 1600×900，已裁掉 Shopify 后台导航与浏览器边框。
 
-**上传状态：四个图片槽位仍是旧素材。** 浏览器桥接的 upload 被 Chrome 拦下：
-扩展需要「Allow access to file URLs」权限，而扩展无法自行开启。
-开启方式：`chrome://extensions` → 找到 Kimi → Details → 打开该开关，然后重试上传。
-alt 文本已按下表填好并保存，图片换上去即可对应。
+**上传状态：三张 desktop screenshot 已上传**（1600×900，Shopify 侧已接收）。
+Feature image 槽位仍是旧素材，等你定用哪张。
+
+> 教训：桥接的 `find` 按文案找 "Add" 会命中页面上多个同名按钮。我误点过两次，
+> 给 Screenshots 区凭空加了两个空槽，导致 Save 被校验拦下（"1 issues to fix:
+> Screenshots"）。已删除。**点 Add/Delete 这类按钮要按 DOM 邻近定位，不要按文案找。**
 
 | 槽位 | file input id | 文件 | Alt text | 长度 |
 |---|---|---|---|---|
@@ -124,7 +128,7 @@ alt 文本已按下表填好并保存，图片换上去即可对应。
 | Subtitle | `AI chat answering product and order questions in any language` | 60/62 |
 | Title tag | `Dr Sell \| AI Chat Widget for Product and Order Questions` | 56/60 |
 | Meta description | `Add an AI chat widget to your storefront that answers product and order questions. Track chats and AI-resolved conversations from one dashboard.` | 143/160 |
-| Search terms | 留空（未定） |
+| Search terms | `Smart Customer Service` · `Shopping Guidance` · `Intelligent Chatbot` · `AI customer support` · `live chat`（上限 5 条，已满） |
 
 ---
 
@@ -133,9 +137,12 @@ alt 文本已按下表填好并保存，图片换上去即可对应。
 审核员需要的完整信息。**店铺前台有密码保护**（开发店无法关闭），这条必须写进去，
 否则审核员打不开前台、看不到 widget。
 
+**已写入表单（1520/2800）**，其中密码位置是占位符 `<<< ENTER STOREFRONT PASSWORD
+HERE >>>`，需人工替换——把密码填进输入框不是我能做的操作。
+
 ```
 Test store: chatbotdomaintest.myshopify.com
-Storefront password: <见下方「未决」——需确认是否写入>
+Storefront password: <<< ENTER STOREFRONT PASSWORD HERE >>>
 
 1. Install Dr Sell and approve the standard authorization for your store.
 2. The app opens in your Shopify admin. Complete the guided setup.
@@ -174,10 +181,37 @@ Storefront password: <见下方「未决」——需确认是否写入>
 0. **开启 Chrome 的「Allow access to file URLs」**，否则截图传不上去（见 Media）。
 2. **店铺密码是否写入 App testing information**：审核员必须能进前台，
    但这是凭据，由你决定填写方式。
-3. **Pricing 三档 `Basic` / `Pro` / `Plus`**：表单里已有，未与实际计费核对。
-   Shopify 后台显示当前订阅为 `$14.00 USD every 30 days` 且挂着 `Will be removed`，
-   上架前需查清这个订阅状态。
-4. **Search terms** 留空。
+3. **定价：与代码实现不符（阻塞项，见下节）。**
+
+---
+
+## 定价：与代码实现不符
+
+**这一项会卡住提交，且不是填表能解决的。**
+
+要求是两档 `Basic $15` / `Pro $30`。但 `apps/api/src/subscription/billing.service.ts`
+里只有**一档**：
+
+```js
+const PLAN_CODE  = process.env.BILLING_PLAN_CODE  || 'pro';
+const PLAN_PRICE = Number(process.env.BILLING_PLAN_PRICE || 9.9);
+```
+
+单一 plan code、单一价格，**没有套餐选择，也没有任何按档位的功能门禁**。
+生产两个变量都未设置，实际按回落值收 **$9.90/30 天**（后台看到的 $14.00 是历史订阅）。
+
+listing 写两档 = 宣传应用做不到的计费方式。商家点 Basic 也只会被收同一个价，
+Shopify 对计费审得很细，这是驳回项。
+
+三条路：
+
+| 方案 | 代价 |
+|---|---|
+| 实现两档计费 | 要定义两档各含什么、加套餐选择 UI、加按档功能门禁、改 Shopify 订阅创建逻辑。**「Basic 和 Pro 差在哪」是产品决策，只能你定** |
+| listing 只写一档 | 把表单里的 Display name 收敛成一档，价格与 `BILLING_PLAN_PRICE` 对齐。最快，能立刻提交 |
+| 先写两档、后补实现 | **不可行**，属于计费不实 |
+
+表单里目前仍是遗留的三档 `Pro` / `Basic` / `Plus`，我没有动——改它之前得先定上面选哪条。
 
 ---
 
