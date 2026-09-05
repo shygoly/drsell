@@ -3,6 +3,7 @@ import type { JwtPayload } from '../auth/auth.service';
 import { Auth, CurrentUser } from '../common/auth.decorators';
 import { ShopScopeService } from '../common/shop-scope.service';
 import { StorefrontDashboardService } from './storefront-dashboard.service';
+import { QuotaService } from '../quota/quota.service';
 
 /**
  * 商家仪表盘只读接口。
@@ -16,7 +17,18 @@ export class StorefrontDashboardController {
   constructor(
     private readonly dashboard: StorefrontDashboardService,
     private readonly scope: ShopScopeService,
+    private readonly quota: QuotaService,
   ) {}
+
+  /**
+   * 本周期 AI 回答用量。商家要能在用尽之前看到进度——用尽当下才发现，
+   * 顾客那边已经收到「暂时无法回答」了。
+   */
+  @Auth()
+  @Get('quota')
+  async quotaUsage(@CurrentUser() user: JwtPayload, @Query('shop') shop?: string) {
+    return this.quota.usage(await this.scope.resolveShopDomain(user, shop));
+  }
 
   @Auth()
   @Get('stats')

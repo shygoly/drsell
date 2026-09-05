@@ -1,12 +1,23 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { createOpenClawClient } from '@drsell/openclaw';
 import { PrismaService } from '../prisma/prisma.service';
+import { QuotaExceededError, QuotaService } from '../quota/quota.service';
+
+/**
+ * 额度用尽时给顾客看的话。要点：说明白当前答不了、不怪顾客、给一条出路，
+ * 且不暴露商家的套餐或用量——那是商家的商业信息，不该出现在顾客侧。
+ */
+const QUOTA_EXHAUSTED_REPLY =
+  "I'm not able to answer right now. Please leave your question here and the store team will follow up.";
 
 @Injectable()
 export class AdpService {
   private readonly openclaw = createOpenClawClient();
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly quota: QuotaService,
+  ) {}
 
   async syncKnowledge(params: {
     shopDomain: string;
@@ -62,6 +73,33 @@ export class AdpService {
       },
     });
 
+    // 配额闸门：必须在调模型之前。超额就不发上游请求——商家不该为拦下的对话付费。
+    try {
+      await this.quota.assertWithinQuota(params.shopDomain);
+    } catch (e) {
+      if (!(e instanceof QuotaExceededError)) throw e;
+      params.onChunk(QUOTA_EXHAUSTED_REPLY);
+      await this.prisma.$transaction([
+        this.prisma.chatMessage.create({
+          data: { threadId: thread.id, role: 'user', content: params.text },
+        }),
+        this.prisma.chatMessage.create({
+          data: { threadId: thread.id, role: 'assistant', content: QUOTA_EXHAUSTED_REPLY },
+        }),
+        // 转成待人工接管：额度用尽的会话必须让商家看得见，否则顾客石沉大海。
+        this.prisma.chatThread.update({
+          where: { id: thread.id },
+          data: {
+            status: 'pending',
+            lastMessage: QUOTA_EXHAUSTED_REPLY,
+            unread: { increment: 1 },
+            updatedAt: new Date(),
+          },
+        }),
+      ]);
+      return;
+    }
+
     let assistantText = '';
     await this.openclaw.chatStream({
       shopDomain: params.shopDomain,
@@ -95,6 +133,11 @@ export class AdpService {
         },
       }),
     ]);
+
+    // 只有真的产出了内容才算一次 AI 回答——空回复不该扣额度。
+    if (assistantText.trim()) {
+      await this.quota.recordAnswer(params.shopDomain);
+    }
 
     await this.bumpChatStat(params.shopDomain);
     if (thread.status === 'ai') {

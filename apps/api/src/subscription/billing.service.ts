@@ -1,10 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { shopifyGraphql } from '@drsell/shopify';
+import { DEFAULT_PLAN, PlanCode, planOf } from '@drsell/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantService } from '../tenant/tenant.service';
 
-const PLAN_CODE = process.env.BILLING_PLAN_CODE || 'pro';
-const PLAN_PRICE = Number(process.env.BILLING_PLAN_PRICE || 9.9);
+/**
+ * 套餐来自 @drsell/shared 的 PLANS —— 价格与配额的唯一事实来源，
+ * 也是 App Store listing 上必须写的那份。此前这里是单一 env 价格
+ * （BILLING_PLAN_PRICE，回落 9.9），与「两档」的对外说法不符。
+ *
+ * BILLING_TEST=1 时创建 test charge，供开发店验证而不真实扣费。
+ */
+const BILLING_TEST = process.env.BILLING_TEST === '1';
 const APP_URL = process.env.SHOPIFY_APP_URL || 'https://drsell.szchada.top';
 
 type ChargeResult = {
@@ -29,7 +36,8 @@ export class BillingService {
     return { shop, token };
   }
 
-  private async createCharge(shopDomain: string, amount: number) {
+  private async createCharge(shopDomain: string, planCode: PlanCode) {
+    const plan = planOf(planCode);
     const { token } = await this.shopWithToken(shopDomain);
     const returnUrl = `${APP_URL}/settings?shop=${encodeURIComponent(shopDomain)}`;
     const res = await shopifyGraphql<{
@@ -59,10 +67,10 @@ export class BillingService {
         }
       `,
       variables: {
-        name: PLAN_CODE,
+        name: plan.name,
         returnUrl,
-        test: false,
-        price: String(amount),
+        test: BILLING_TEST,
+        price: String(plan.price),
       },
     });
     const result = res.data?.appSubscriptionCreate;
@@ -124,7 +132,11 @@ export class BillingService {
   }
 
   /** 组内指定一家店收全额，其余店建 $0 charge；转移失败留痕，不静默吞掉 */
-  async setBillingShop(shopDomain: string) {
+  /**
+   * 指定收费店并创建订阅。planCode 决定价格与 AI 回答额度（见 @drsell/shared 的 PLANS）；
+   * 不传时沿用该店已有套餐，仍没有就落到 DEFAULT_PLAN。
+   */
+  async setBillingShop(shopDomain: string, planCode?: PlanCode) {
     const { shop } = await this.shopWithToken(shopDomain);
     const group = await this.prisma.shop.findMany({
       where: { tenantId: shop.tenantId },
@@ -148,7 +160,13 @@ export class BillingService {
           data: { isBillingShop: false },
         });
       }
-      const created = await this.createCharge(shop.shopDomain, PLAN_PRICE);
+      const existingSub = await this.prisma.subscription.findFirst({
+        where: { shopId: shop.id },
+        select: { planCode: true },
+      });
+      const chosen: PlanCode =
+        planCode ?? planOf(existingSub?.planCode ?? DEFAULT_PLAN).code;
+      const created = await this.createCharge(shop.shopDomain, chosen);
       const existing = await this.prisma.subscription.findFirst({
         where: { shopId: shop.id },
       });
@@ -159,13 +177,13 @@ export class BillingService {
               isBillingShop: true,
               shopifyChargeId: created.appSubscription?.id ?? null,
               status: 'ACTIVE',
-              planCode: PLAN_CODE,
+              planCode: chosen,
             },
           })
         : await this.prisma.subscription.create({
             data: {
               shopId: shop.id,
-              planCode: PLAN_CODE,
+              planCode: chosen,
               status: 'ACTIVE',
               isBillingShop: true,
               shopifyChargeId: created.appSubscription?.id ?? null,
@@ -205,7 +223,9 @@ export class BillingService {
       return null;
     }
     try {
-      const created = await this.createCharge(next.shopDomain, PLAN_PRICE);
+      // next 是 Shop，套餐在它的 subscriptions 上；沿用原套餐，缺失时落 DEFAULT_PLAN。
+      const nextPlan = planOf(next.subscriptions[0]?.planCode ?? DEFAULT_PLAN).code;
+      const created = await this.createCharge(next.shopDomain, nextPlan);
       const existing = await this.prisma.subscription.findFirst({
         where: { shopId: next.id },
       });
@@ -216,14 +236,14 @@ export class BillingService {
             isBillingShop: true,
             shopifyChargeId: created.appSubscription?.id ?? null,
             status: 'ACTIVE',
-            planCode: PLAN_CODE,
+            planCode: nextPlan,
           },
         });
       } else {
         await this.prisma.subscription.create({
           data: {
             shopId: next.id,
-            planCode: PLAN_CODE,
+            planCode: nextPlan,
             status: 'ACTIVE',
             isBillingShop: true,
             shopifyChargeId: created.appSubscription?.id ?? null,

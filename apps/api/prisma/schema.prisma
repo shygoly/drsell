@@ -38,6 +38,8 @@ model Shop {
   customers   Customer[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  aiUsage       AiUsage[]
+
 }
 
 model Session {
@@ -189,6 +191,31 @@ model ChatStatDaily {
   updatedAt        DateTime @updatedAt
 
   @@unique([shopDomain, day])
+}
+
+/// AI 回答用量计数 —— 按店铺 + 计费周期累计。
+///
+/// 为什么单独建表而不是从 ChatMessage 现算：配额要在每次对话前判断，
+/// 现算需要 ChatMessage join ChatThread 再按店铺过滤，随会话量线性变慢；
+/// 这里一次 upsert 递增、一次主键读，代价恒定。
+///
+/// periodStart 取订阅当期起点（currentPeriodEnd - 30d），无订阅时回落自然月，
+/// 这样配额随扣费重置，而不是随日历月。
+///
+/// 用 shopId 外键而非 shopDomain 字符串：本仓的 soft_tenant_models 棘轮正在
+/// 偿还「按字符串圈租户」的欠账，新表不该再添一笔。
+model AiUsage {
+  id          String   @id @default(cuid())
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  periodStart DateTime
+  /// 本周期已产出的 AI 回答次数（仅成功产出才计）
+  answers     Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([shopId, periodStart])
+  @@index([shopId, periodStart])
 }
 
 /// 访客会话线程 — storefront inbox / dashboard
