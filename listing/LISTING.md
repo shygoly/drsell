@@ -12,6 +12,7 @@
 | 当前状态 | Delisted（需重新过审） |
 | 测试店铺 | `chatbotdomaintest.myshopify.com` |
 | 最后核对 | 2026-09-04，对应扩展版本 `drseller-alpha-30` |
+| 演示店 widget 配色 | `#008A57` / `#0A3D2E`（原为商家设的 `#8a5d0a`，为素材统一改绿） |
 
 ---
 
@@ -76,6 +77,7 @@ Feature image / video 一个槽位，desktop screenshots 三个起（可加）�
 | Screenshot 1 | `screenshots/01-dashboard.jpg` | `Dashboard with conversation volume and AI resolution rate` | 57/64 |
 | Screenshot 2 | `screenshots/02-inbox.jpg` | `Inbox showing a customer conversation and visitor details` | 57/64 |
 | Screenshot 3 | `screenshots/03-widget-config.jpg` | `Widget configuration with a live preview of the chat window` | 59/64 |
+| Screenshot 4 | `screenshots/09-storefront-chat.jpg` | `Storefront chat answering a question about snowboard prices` | 59/64 |
 
 备用（可加为 Screenshot 4-7）：
 
@@ -85,6 +87,7 @@ Feature image / video 一个槽位，desktop screenshots 三个起（可加）�
 | `screenshots/05-setup-widget.jpg` | `Setup step for widget appearance and store data sync` |
 | `screenshots/06-setup-done.jpg` | `Setup complete with the AI agent live on the storefront` |
 | `screenshots/07-settings.jpg` | `App settings showing the connected Shopify store` |
+| `screenshots/08-storefront-widget.jpg` | `Chat button in the corner of a live Shopify storefront` |
 
 > Shopify 明确要求：截图不得含浏览器 UI 或桌面背景，不得出现任何可识别个人信息。
 > 现有截图已满足——访客只显示 `41.` / `05.` 这类编号，客户面板如实说明未关联 Shopify 客户。
@@ -163,4 +166,14 @@ Storefront password: <见下方「未决」——需确认是否写入>
    Shopify 后台显示当前订阅为 `$14.00 USD every 30 days` 且挂着 `Will be removed`，
    上架前需查清这个订阅状态。
 4. **Search terms** 留空。
-5. **演示视频**未录制，见 `listing/video/`。
+
+---
+
+## 演示视频
+
+`listing/video/dr-sell-demo.mp4` —— 72s / 1920x1080 / 30fps / 1.9MB。
+由 `listing/video/build.sh` 从 `screenshots/` 合成，可随时重跑。
+
+**它是静态图合成，不是录屏。** 画面本身是真实应用实拍，但没有光标移动、
+打字过程与流式回复。若审核反馈要求真实操作录像，需要另行录屏——
+本机终端没有屏幕录制权限，届时要人工授权后重录。
