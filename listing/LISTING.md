@@ -2,6 +2,10 @@
 
 提交表单的**唯一事实来源**。改文案先改这里，再抄进表单，避免每次重新想一遍。
 
+> **表单文本字段已于 2026-09-04 通过浏览器桥接填入并保存**，整页重载回读验证通过：
+> Introduction 96、App details 499、Feature 2、Subtitle、Title tag、Meta description、
+> 四条 alt 全为英文，中文残留 0。**截图尚未上传**（见下方 Media）。
+
 | | |
 |---|---|
 | App | Dr Sell |
@@ -71,13 +75,19 @@ Replies come from DeepSeek via our gateway.
 Feature image / video 一个槽位，desktop screenshots 三个起（可加）。
 图片文件在 `listing/screenshots/`，全部 1600×900，已裁掉 Shopify 后台导航与浏览器边框。
 
-| 槽位 | 文件 | Alt text | 长度 |
-|---|---|---|---|
-| Feature image | 待定（见下方「未决」） | `AI chat widget answering a product question on a storefront` | 59/64 |
-| Screenshot 1 | `screenshots/01-dashboard.jpg` | `Dashboard with conversation volume and AI resolution rate` | 57/64 |
-| Screenshot 2 | `screenshots/02-inbox.jpg` | `Inbox showing a customer conversation and visitor details` | 57/64 |
-| Screenshot 3 | `screenshots/03-widget-config.jpg` | `Widget configuration with a live preview of the chat window` | 59/64 |
-| Screenshot 4 | `screenshots/09-storefront-chat.jpg` | `Storefront chat answering a question about snowboard prices` | 59/64 |
+**上传状态：四个图片槽位仍是旧素材。** 浏览器桥接的 upload 被 Chrome 拦下：
+扩展需要「Allow access to file URLs」权限，而扩展无法自行开启。
+开启方式：`chrome://extensions` → 找到 Kimi → Details → 打开该开关，然后重试上传。
+alt 文本已按下表填好并保存，图片换上去即可对应。
+
+| 槽位 | file input id | 文件 | Alt text | 长度 |
+|---|---|---|---|---|
+| Feature image | `:r4o:` | 建议 `screenshots/09-storefront-chat.jpg`（待你确认） | `AI chat widget answering a product question on a storefront` | 59/64 |
+| Screenshot 1 | `:r4q:` | `screenshots/01-dashboard.jpg` | `Dashboard with conversation volume and AI resolution rate` | 57/64 |
+| Screenshot 2 | `:r4s:` | `screenshots/02-inbox.jpg` | `Inbox showing a customer conversation and visitor details` | 57/64 |
+| Screenshot 3 | `:r4u:` | `screenshots/03-widget-config.jpg` | `Widget configuration with a live preview of the chat window` | 59/64 |
+
+> file input 的 id 是 React 生成的，页面重载后会变。上传前重新读一遍，别照抄。
 
 备用（可加为 Screenshot 4-7）：
 
@@ -158,8 +168,10 @@ Storefront password: <见下方「未决」——需确认是否写入>
 
 ## 未决（需要人决定，勿擅自填）
 
-1. **Feature image**：Media 首图尚未确定用哪张。现有 alt text 为
-   `Smart Shopping Customer Service`，图片本身是旧素材。
+1. **Feature image 用哪张**：alt 文本已设为 `AI chat widget answering a product
+   question on a storefront`，与 `09-storefront-chat.jpg` 正好对应，但首图是门面，
+   由你拍板。
+0. **开启 Chrome 的「Allow access to file URLs」**，否则截图传不上去（见 Media）。
 2. **店铺密码是否写入 App testing information**：审核员必须能进前台，
    但这是凭据，由你决定填写方式。
 3. **Pricing 三档 `Basic` / `Pro` / `Plus`**：表单里已有，未与实际计费核对。
