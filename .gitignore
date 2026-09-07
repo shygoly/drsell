@@ -64,7 +64,9 @@ _tmp_*
 .stitch/project-11226504772808429506/work/reports/*/boxes.json
 .stitch/project-11226504772808429506/work/rebuild/
 /opencode.json
-.cursor/
+.cursor/*
+# 仅入库共享的 Cursor 项目配置（MCP 服务器列表），其余 .cursor/ 本地保留
+!.cursor/mcp.json
 .gstack/
 
 # .stitch 设计基线整体不入库（2026-09-02 决定）：11.1MB 的截图/spec/基准只在本地保留。
