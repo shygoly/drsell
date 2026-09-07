@@ -54,8 +54,8 @@ importers:
         specifier: ^6.9.0
         version: 6.19.3(prisma@6.19.3)(typescript@5.9.3)
       '@shopify/shopify-api':
-        specifier: ^11.14.1
-        version: 11.14.1
+        specifier: ^14.0.1
+        version: 14.0.1
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.3
@@ -246,8 +246,8 @@ importers:
         specifier: ^13.9.2
         version: 13.9.5(react-dom@19.2.8)(react@19.2.8)
       '@shopify/shopify-api':
-        specifier: ^11.12.0
-        version: 11.14.1
+        specifier: ^14.0.1
+        version: 14.0.1
       next:
         specifier: ^15.3.3
         version: 15.5.24(@babel/core@7.29.7)(@types/node@22.20.1)(react-dom@19.2.8)(react@19.2.8)
@@ -2586,10 +2586,10 @@ packages:
       react: 19.2.8
     dev: false
 
-  /@shopify/admin-api-client@1.1.2:
-    resolution: {integrity: sha512-sV5gS8x4kj0KLULlOJkoBzm+tu6tn+1PCK9a6inySv5qtzmf/JxDWtLgaW9vRXeXHo/Sl/p3mBWhY3//fKA8iw==}
+  /@shopify/admin-api-client@2.0.0:
+    resolution: {integrity: sha512-ivvOKq08S4xdETu3R7ZxIGTX2Q//dKef7jLY7Ne9HSlg+UJzk7PqdY+h61pqQzvZ3AeNN8AJG2eV20ycuJowfg==}
     dependencies:
-      '@shopify/graphql-client': 1.4.2
+      '@shopify/graphql-client': 2.0.0
     dev: false
 
   /@shopify/app-bridge-react@4.2.13(react-dom@19.2.8)(react@19.2.8):
@@ -2620,14 +2620,8 @@ packages:
       global-agent: 3.0.0
     dev: true
 
-  /@shopify/graphql-client@1.4.2:
-    resolution: {integrity: sha512-C/fEyx6BZmTGeJv0HSsduhfn5ZbkXk0nePkyo0+xXxorP1I+uvx9pobdFxTfiPnOrh+P6QiKzBgIviksnSo4YA==}
-    dev: false
-
-  /@shopify/network@3.3.0:
-    resolution: {integrity: sha512-Lln7vglzLK9KiYhl9ucQFVM7ArlpUM21xkDriBX8kVrqsoBsi+4vFIjf1wjhNPT0J/zHMjky7jiTnxVfdm+xXw==}
-    engines: {node: '>=18.12.0'}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+  /@shopify/graphql-client@2.0.0:
+    resolution: {integrity: sha512-SfIZa6J9Px4ZSMIVdPLNupeSyqznovV6pDVxwC1rmbi0JTVj2q/CCsOf9hLQvsMdBiyJDHVnoVHGpBzlhpwO2Q==}
     dev: false
 
   /@shopify/polaris-icons@9.3.1(react@19.2.8):
@@ -2665,28 +2659,24 @@ packages:
       react-transition-group: 4.4.5(react-dom@19.2.8)(react@19.2.8)
     dev: false
 
-  /@shopify/shopify-api@11.14.1:
-    resolution: {integrity: sha512-5VyQZyNhMN2PJLosA6OytYL1ENmdpqslcTcr1jFjGn6sEuxhXtLav+I74ygdL2iTdjEud4aDBZycgDVxPIH+uw==}
+  /@shopify/shopify-api@14.0.1:
+    resolution: {integrity: sha512-wWSd6rSaNlUUmj0ECz2s2wQ+B6gTuzcPrbeOhwGlw1I35gHt2q88muCMZn5gS1Hq6pG/1ybOKiDf5bvhao+ypw==}
+    engines: {node: '>=22.0.0'}
     dependencies:
-      '@shopify/admin-api-client': 1.1.2
-      '@shopify/graphql-client': 1.4.2
-      '@shopify/network': 3.3.0
-      '@shopify/storefront-api-client': 1.0.10
+      '@shopify/admin-api-client': 2.0.0
+      '@shopify/graphql-client': 2.0.0
+      '@shopify/storefront-api-client': 2.0.0
       compare-versions: 6.1.1
       isbot: 5.2.1
       jose: 5.10.0
-      jsonwebtoken: 9.0.3
-      node-fetch: 2.7.0
+      lossless-json: 4.3.1
       tslib: 2.8.1
-      uuid: 11.1.1
-    transitivePeerDependencies:
-      - encoding
     dev: false
 
-  /@shopify/storefront-api-client@1.0.10:
-    resolution: {integrity: sha512-A0ItFW58L5+y/jnnJDEsmt2YcQSt2BG+pNoQOYRpPBJaOLpTj7A13q1QVrE5XYVGZCA6ZQ6FqAtgosHHrkut0Q==}
+  /@shopify/storefront-api-client@2.0.0:
+    resolution: {integrity: sha512-rWmPqZ+ZqsxdePpH/4sPdd+jUWHiSUeEWolJNQpqb+1KLlx79khdfJO1M9z9HfG2H0aHkmS+fnx2jr46q7NCGQ==}
     dependencies:
-      '@shopify/graphql-client': 1.4.2
+      '@shopify/graphql-client': 2.0.0
     dev: false
 
   /@sinclair/typebox@0.27.12:
@@ -5599,6 +5589,10 @@ packages:
       js-tokens: 4.0.0
     dev: false
 
+  /lossless-json@4.3.1:
+    resolution: {integrity: sha512-SqD/Bg3ZfltBJ2Z14hJ/BihnvtV553WO4g9/ePtlp4lrnl9jF3AdIJt53A/Wkg/0Li+LMfxaBqgx1MiFZdQlpQ==}
+    dev: false
+
   /lru-cache@11.5.2:
     resolution: {integrity: sha512-4pfM1Ff0x50o0tQwb5ucw/RzNyD0/YJME6IVcStalZuMWxdt3sR3huStTtxz4PUmvZfRguvDejasvQ2kifR11g==}
     engines: {node: 20 || >=22}
@@ -5836,18 +5830,6 @@ packages:
 
   /node-fetch-native@1.6.7:
     resolution: {integrity: sha512-g9yhqoedzIUm0nTnTqAQvueMPVOuIY16bqgAJJC8XOOubYFNwz6IER9qs0Gq2Xd0+CecCKFjtdDTMA4u4xG06Q==}
-
-  /node-fetch@2.7.0:
-    resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
-    engines: {node: 4.x || >=6.0.0}
-    peerDependencies:
-      encoding: ^0.1.0
-    peerDependenciesMeta:
-      encoding:
-        optional: true
-    dependencies:
-      whatwg-url: 5.0.0
-    dev: false
 
   /node-int64@0.4.0:
     resolution: {integrity: sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw==}
@@ -6831,10 +6813,6 @@ packages:
       ieee754: 1.2.1
     dev: false
 
-  /tr46@0.0.3:
-    resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
-    dev: false
-
   /ts-jest@29.4.12(@babel/core@7.29.7)(jest@29.7.0)(typescript@5.9.3):
     resolution: {integrity: sha512-Ov6ClY53Fflh6BGAnY2DlTq1hYDrTycz2PVTXBWFW2CU+9zrEqAp9fWdGXl42EXO5RLSFAcAZ2JFKbP+zBTFfw==}
     engines: {node: ^14.15.0 || ^16.10.0 || ^18.0.0 || >=20.0.0}
@@ -7099,10 +7077,6 @@ packages:
       defaults: 1.0.4
     dev: true
 
-  /webidl-conversions@3.0.1:
-    resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
-    dev: false
-
   /webpack-node-externals@3.0.0:
     resolution: {integrity: sha512-LnL6Z3GGDPht/AigwRh2dvL9PQPFQ8skEpVrWZXLWBYmqcaojHNN0onvHzie6rq7EWKrrBfPYqNEzTJgiwEQDQ==}
     engines: {node: '>=6'}
@@ -7161,13 +7135,6 @@ packages:
       - postcss
       - uglify-js
     dev: true
-
-  /whatwg-url@5.0.0:
-    resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
-    dependencies:
-      tr46: 0.0.3
-      webidl-conversions: 3.0.1
-    dev: false
 
   /which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}

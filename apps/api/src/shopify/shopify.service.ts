@@ -105,7 +105,7 @@ export class ShopifyService {
       apiSecretKey: this.secret(),
       scopes: [],
       hostName: 'drsell.szchada.top',
-      apiVersion: ApiVersion.April25,
+      apiVersion: ApiVersion.July26,
       isEmbeddedApp: true,
     });
   }
