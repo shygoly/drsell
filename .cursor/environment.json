@@ -1,0 +1,34 @@
+{
+  "name": "Drsell (Next.js + NestJS + PostgreSQL)",
+  "user": "ubuntu",
+  "install": "bash scripts/cloud-agent-install.sh",
+  "start": "bash scripts/cloud-agent-start.sh",
+  "terminals": [
+    {
+      "name": "api",
+      "command": "pnpm --filter @drsell/api dev",
+      "description": "NestJS API (dev :3001) — Shopify, ADP proxy, storefront public API"
+    },
+    {
+      "name": "web",
+      "command": "pnpm --filter @drsell/web dev",
+      "description": "Shopify embedded app / merchant admin (Next dev :3000)"
+    },
+    {
+      "name": "ops",
+      "command": "pnpm --filter @drsell/ops dev",
+      "description": "Ops console (Next dev :5013)"
+    },
+    {
+      "name": "storefront",
+      "command": "pnpm --filter @drsell/storefront dev",
+      "description": "Storefront dashboard (Next dev :3100)"
+    }
+  ],
+  "ports": [
+    { "name": "web", "port": 3000 },
+    { "name": "api", "port": 3001 },
+    { "name": "storefront", "port": 3100 },
+    { "name": "ops", "port": 5013 }
+  ]
+}
