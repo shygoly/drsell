@@ -120,8 +120,16 @@ customer service, more actively encourages customers to place orders"）。换�
 |---|---|---|---|
 | Feature image | `screenshots/09-storefront-chat.jpg` ✅ 2026-09-05 已换 | `AI chat widget answering a product question on a storefront` | 59/64 |
 | Screenshot 1 | `screenshots/01-dashboard.jpg` | `Dashboard with conversation volume and AI resolution rate` | 57/64 |
-| Screenshot 2 | `screenshots/02-inbox.jpg` | `Inbox showing a customer conversation and visitor details` | 57/64 |
-| Screenshot 3 | `screenshots/03-widget-config.jpg` | `Widget configuration with a live preview of the chat window` | 59/64 |
+| Screenshot 2 | `screenshots/02-inbox.jpg` ✅ 2026-09-07 已重拍 | `Inbox showing a customer conversation and visitor details` | 57/64 |
+| Screenshot 3 | `screenshots/03-widget-config.jpg` ✅ 2026-09-07 已重拍 | `Widget configuration with a live preview of the chat window` | 59/64 |
+
+> **2026-09-07 重拍（Screenshot 2/3）**：旧图是 9 月初旧界面的摆拍数据，与当前绿色 UI
+> 实物不符（用户在提交页发现）。新图拍摄方式：无头浏览器 superadmin 登录商家端后，
+> 注入 ops 代登录 token（`drsell_shop_token`，POST `/api/ops/shops/<domain>/impersonate`
+> 签发）获得 chatbotdomaintest 店铺上下文，截到的即真实数据——Inbox 是店里真实的
+> snowboard 商品问答会话，Widget Config 显示 Theme app embed 真实 Active 状态。
+> 侧栏账号邮箱在截屏前清洗为 `merchant@drsell.app`。1600×900 JPG 已就位，
+> **提交表单里的旧图还需替换上传**（桥接断开期间需手动传，或桥接恢复后由 agent 代传）。
 
 > file input 的 id 是 React 生成的，页面重载后会变。上传前重新读一遍，别照抄。
 
