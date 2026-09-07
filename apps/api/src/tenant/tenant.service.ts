@@ -4,24 +4,40 @@ import {
   encryptShopAccessToken,
 } from '../crypto/shop-token-cipher';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  PersistedTokenBundle,
+  ShopAccessTokenService,
+} from './shop-access-token.service';
 
 @Injectable()
 export class TenantService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly shopTokens: ShopAccessTokenService,
+  ) {}
 
   /**
    * 确保店铺 + 租户存在。
    * 传入 tenantId（来自发起安装的账号已有租户）时复用，不再为每家店无脑建租户。
+   * 若带上 token bundle（含 refresh / expiry），一并落库。
    */
   async ensureShopTenant(
     shopDomain: string,
     accessToken?: string,
     scopes?: string,
     tenantId?: string,
+    tokenMeta?: Omit<PersistedTokenBundle, 'accessToken' | 'scopes'>,
   ) {
     const domain = shopDomain.replace(/^https?:\/\//, '').replace(/\/$/, '');
     let shop = await this.prisma.shop.findUnique({ where: { shopDomain: domain } });
     const storedToken = accessToken ? encryptShopAccessToken(accessToken) : undefined;
+    const storedRefresh =
+      tokenMeta?.refreshToken !== undefined
+        ? tokenMeta.refreshToken
+          ? encryptShopAccessToken(tokenMeta.refreshToken)
+          : null
+        : undefined;
+
     if (!shop) {
       const tenant =
         (tenantId
@@ -36,6 +52,9 @@ export class TenantService {
             shopDomain: domain,
             tenantId: tenant.id,
             accessToken: storedToken,
+            refreshToken: storedRefresh,
+            accessTokenExpiresAt: tokenMeta?.accessTokenExpiresAt ?? undefined,
+            refreshTokenExpiresAt: tokenMeta?.refreshTokenExpiresAt ?? undefined,
             scopes,
           },
         });
@@ -52,10 +71,23 @@ export class TenantService {
       if (!shop) {
         throw new Error(`Failed to resolve shop tenant for ${domain}`);
       }
-    } else if (storedToken) {
-      shop = await this.prisma.shop.update({
-        where: { id: shop.id },
-        data: { accessToken: storedToken, scopes, uninstalledAt: null },
+      if (accessToken && shop.accessToken !== storedToken) {
+        // Race: another request created the row without our token — persist ours.
+        shop = await this.shopTokens.persistTokenBundle(shop.id, {
+          accessToken,
+          refreshToken: tokenMeta?.refreshToken,
+          accessTokenExpiresAt: tokenMeta?.accessTokenExpiresAt,
+          refreshTokenExpiresAt: tokenMeta?.refreshTokenExpiresAt,
+          scopes,
+        });
+      }
+    } else if (accessToken) {
+      shop = await this.shopTokens.persistTokenBundle(shop.id, {
+        accessToken,
+        refreshToken: tokenMeta?.refreshToken,
+        accessTokenExpiresAt: tokenMeta?.accessTokenExpiresAt,
+        refreshTokenExpiresAt: tokenMeta?.refreshTokenExpiresAt,
+        scopes,
       });
     }
     return shop;
@@ -76,8 +108,15 @@ export class TenantService {
     });
   }
 
-  /** 解密 Shopify Admin API 用的 access token */
+  /** 解密 Shopify Admin API 用的 access token（不做 refresh；后台调用请用 getValidAccessToken） */
   getShopAccessToken(shop: { accessToken: string | null }): string | null {
     return decryptShopAccessToken(shop.accessToken);
+  }
+
+  /** 可用的 Admin API token：必要时 migrate / refresh */
+  getValidAccessToken(
+    shop: Parameters<ShopAccessTokenService['getValidAccessToken']>[0],
+  ) {
+    return this.shopTokens.getValidAccessToken(shop);
   }
 }

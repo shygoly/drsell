@@ -27,13 +27,14 @@ export async function GET(req: NextRequest) {
       end() {},
     };
     const callback = await shopify.auth.callback({
+      expiring: true,
       rawRequest,
       rawResponse: mockRes,
     });
     const session = callback.session;
     const api = process.env.API_INTERNAL_URL || 'http://127.0.0.1:3001';
     // OAuth 成功即是店铺归属证明。这一调用负责落 Shop/Tenant 记录并写入
-    // Shopify access token；返回的 shop JWT 不再外带（嵌入端自行走 App Bridge 换发）。
+    // Shopify access + refresh token（expiring offline）。
     const res = await fetch(`${api}/api/shopify/auth/login`, {
       method: 'POST',
       headers: {
@@ -44,6 +45,13 @@ export async function GET(req: NextRequest) {
         shop: session.shop,
         accessToken: session.accessToken,
         scopes: session.scope,
+        refreshToken: session.refreshToken ?? null,
+        accessTokenExpiresAt: session.expires
+          ? new Date(session.expires).toISOString()
+          : null,
+        refreshTokenExpiresAt: session.refreshTokenExpires
+          ? new Date(session.refreshTokenExpires).toISOString()
+          : null,
       }),
     });
     if (!res.ok) {

@@ -110,12 +110,29 @@ export class ShopifyService {
     });
   }
 
-  async login(params: { shop: string; accessToken?: string; scopes?: string }) {
+  async login(params: {
+    shop: string;
+    accessToken?: string;
+    scopes?: string;
+    refreshToken?: string;
+    accessTokenExpiresAt?: string | Date | null;
+    refreshTokenExpiresAt?: string | Date | null;
+  }) {
     if (!params.shop) throw new BadRequestException('shop required');
+    const toDate = (v?: string | Date | null) =>
+      v == null || v === '' ? null : v instanceof Date ? v : new Date(v);
     const shop = await this.tenants.ensureShopTenant(
       params.shop,
       params.accessToken,
       params.scopes,
+      undefined,
+      params.accessToken
+        ? {
+            refreshToken: params.refreshToken ?? null,
+            accessTokenExpiresAt: toDate(params.accessTokenExpiresAt),
+            refreshTokenExpiresAt: toDate(params.refreshTokenExpiresAt),
+          }
+        : undefined,
     );
     const token = this.auth.signShopSession({
       shop: shop.shopDomain,
@@ -272,7 +289,7 @@ export class ShopifyService {
   async startBatchSync(shopDomain: string) {
     const setting = await this.getOrCreateBotSetting(shopDomain);
     const shop = await this.tenants.getByShopDomain(shopDomain);
-    const accessToken = shop ? this.tenants.getShopAccessToken(shop) : null;
+    const accessToken = shop ? await this.tenants.getValidAccessToken(shop) : null;
     if (!shop || !accessToken) {
       throw new BadRequestException(
         'shop missing access token: complete Shopify authorization first',
@@ -369,7 +386,13 @@ export class ShopifyService {
     });
     await this.prisma.shop.update({
       where: { id: shop.id },
-      data: { accessToken: null, uninstalledAt: new Date() },
+      data: {
+        accessToken: null,
+        refreshToken: null,
+        accessTokenExpiresAt: null,
+        refreshTokenExpiresAt: null,
+        uninstalledAt: new Date(),
+      },
     });
     await this.prisma.session.deleteMany({ where: { shopId: shop.id } });
     if (billingSub) {
@@ -450,7 +473,7 @@ export class ShopifyService {
 
   async syncCatalog(shopDomain: string, kind: 'products' | 'orders' | 'customers') {
     const shop = await this.tenants.getByShopDomain(shopDomain);
-    const accessToken = shop ? this.tenants.getShopAccessToken(shop) : null;
+    const accessToken = shop ? await this.tenants.getValidAccessToken(shop) : null;
     if (!shop || !accessToken) {
       throw new BadRequestException('shop missing access token');
     }

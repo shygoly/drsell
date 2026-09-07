@@ -48,7 +48,7 @@ export class BillingService {
 
   private async shopWithToken(shopDomain: string) {
     const shop = await this.tenants.getByShopDomain(shopDomain);
-    const token = shop ? this.tenants.getShopAccessToken(shop) : null;
+    const token = shop ? await this.tenants.getValidAccessToken(shop) : null;
     if (!shop || !token) {
       throw new BadRequestException('shop missing access token');
     }

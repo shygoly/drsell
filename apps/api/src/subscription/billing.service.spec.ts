@@ -36,6 +36,7 @@ function mockDeps(overrides: Record<string, unknown> = {}) {
   const tenants = {
     getByShopDomain: jest.fn(async () => shop),
     getShopAccessToken: jest.fn(() => 'tok'),
+    getValidAccessToken: jest.fn(async () => 'tok'),
     ...(overrides.tenants ?? {}),
   } as never;
   return {
@@ -68,6 +69,7 @@ describe('BillingService', () => {
       tenants: {
         getByShopDomain: jest.fn(async () => null),
         getShopAccessToken: jest.fn(() => null),
+        getValidAccessToken: jest.fn(async () => null),
       },
     });
     deps.findMany.mockResolvedValue([]);

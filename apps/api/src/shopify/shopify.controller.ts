@@ -33,6 +33,18 @@ class ShopLoginDto {
   @IsOptional()
   @IsString()
   scopes?: string;
+
+  @IsOptional()
+  @IsString()
+  refreshToken?: string;
+
+  @IsOptional()
+  @IsString()
+  accessTokenExpiresAt?: string;
+
+  @IsOptional()
+  @IsString()
+  refreshTokenExpiresAt?: string;
 }
 
 class AppBridgeLoginDto {

@@ -20,25 +20,31 @@ model Tenant {
 }
 
 model Shop {
-  id          String   @id @default(cuid())
-  shopDomain  String   @unique
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
-  accessToken String?
-  scopes      String?
-  installedAt DateTime @default(now())
-  uninstalledAt DateTime?
-  botSetting  BotSetting?
-  inboxUsers  InboxUser[]
-  sessions    Session[]
-  subscriptions Subscription[]
-  memberships   Membership[]
-  products    Product[]
-  orders      Order[]
-  customers   Customer[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  aiUsage       AiUsage[]
+  id                    String    @id @default(cuid())
+  shopDomain            String    @unique
+  tenantId              String
+  tenant                Tenant    @relation(fields: [tenantId], references: [id])
+  accessToken           String?
+  /// Shopify offline refresh token（AES 加密，与 accessToken 同钥）
+  refreshToken          String?
+  /// access token 过期时间；null 表示历史「不过期」offline token，待 migrate
+  accessTokenExpiresAt  DateTime?
+  /// refresh token 过期时间
+  refreshTokenExpiresAt DateTime?
+  scopes                String?
+  installedAt           DateTime  @default(now())
+  uninstalledAt         DateTime?
+  botSetting            BotSetting?
+  inboxUsers            InboxUser[]
+  sessions              Session[]
+  subscriptions         Subscription[]
+  memberships           Membership[]
+  products              Product[]
+  orders                Order[]
+  customers             Customer[]
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  aiUsage               AiUsage[]
 
 }
 
