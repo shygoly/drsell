@@ -23,7 +23,7 @@ export function verifyShopifyWebhookHmac(
   return timingSafeEqual(a, b);
 }
 
-export function buildAdminGraphqlUrl(shop: string, apiVersion = '2025-04'): string {
+export function buildAdminGraphqlUrl(shop: string, apiVersion = '2026-07'): string {
   const host = shop.replace(/^https?:\/\//, '').replace(/\/$/, '');
   return `https://${host}/admin/api/${apiVersion}/graphql.json`;
 }

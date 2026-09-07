@@ -14,7 +14,7 @@ handle = "drseller-alpha"
 automatically_update_urls_on_dev = false
 
 [webhooks]
-api_version = "2025-04"
+api_version = "2026-07"
 
   [[webhooks.subscriptions]]
   uri = "/api/webhooks"

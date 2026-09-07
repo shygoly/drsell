@@ -18,7 +18,7 @@ export function getShopify() {
       'read_customers,read_orders,read_products,write_orders,write_products'
     ).split(','),
     hostName,
-    apiVersion: ApiVersion.April25,
+    apiVersion: ApiVersion.July26,
     isEmbeddedApp: true,
   });
   return _shopify;

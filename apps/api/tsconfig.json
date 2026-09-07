@@ -13,7 +13,10 @@
     "paths": {
       "@drsell/shared": ["../../packages/shared/dist/index.d.ts"],
       "@drsell/shopify": ["../../packages/shopify/dist/index.d.ts"],
-      "@drsell/adp": ["../../packages/adp/dist/index.d.ts"]
+      "@drsell/adp": ["../../packages/adp/dist/index.d.ts"],
+      "@shopify/shopify-api/adapters/node": [
+        "./node_modules/@shopify/shopify-api/dist/ts/adapters/node/index.d.ts"
+      ]
     },
     "incremental": true,
     "skipLibCheck": true,
