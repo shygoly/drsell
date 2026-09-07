@@ -1,0 +1,24 @@
+{
+  "name": "Drsell monorepo",
+  "user": "ubuntu",
+  "install": "bash .cursor/install.sh",
+  "start": "bash .cursor/start.sh",
+  "terminals": [
+    {
+      "name": "api (:3001)",
+      "command": "pnpm --filter @drsell/api dev"
+    },
+    {
+      "name": "web (:3000)",
+      "command": "pnpm --filter @drsell/web dev"
+    },
+    {
+      "name": "storefront (:3100)",
+      "command": "pnpm --filter @drsell/storefront dev"
+    },
+    {
+      "name": "ops (:5013)",
+      "command": "pnpm --filter @drsell/ops dev"
+    }
+  ]
+}

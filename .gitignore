@@ -65,6 +65,12 @@ _tmp_*
 .stitch/project-11226504772808429506/work/rebuild/
 /opencode.json
 .cursor/
+# Keep the Cloud Agent dev-environment config in version control.
+!.cursor/
+.cursor/*
+!.cursor/environment.json
+!.cursor/install.sh
+!.cursor/start.sh
 .gstack/
 
 # .stitch 设计基线整体不入库（2026-09-02 决定）：11.1MB 的截图/spec/基准只在本地保留。
