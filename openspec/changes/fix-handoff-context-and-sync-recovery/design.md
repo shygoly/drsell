@@ -78,18 +78,26 @@ widget 在打开状态下按固定间隔拉取 `GET public/chat/messages?after=<
 
 **待决**：轮询是否要在无活动 N 分钟后退避停止，避免挂着页面的访客长期打点。
 
-### D4：移除对 `x-openclaw-session-key` 的记忆依赖，但保留该 header
+### D4：会话键改为**每请求唯一**（实测后修订）
 
-`chatStream` 改为接受 `messages: Message[]` + `systemPrompt: string`，
-调用方每次发送完整上下文。session key header 保留，仅用于网关侧的日志关联与限流，
-不再承担记忆职责。
+`chatStream` 改为接受 `messages: Message[]` + `systemPrompt`，调用方每次发送完整上下文；
+`x-openclaw-session-key` 保留，但**每次请求生成一个新值**
+（`drsell:<shop>:<conv>:<uuid>`），只用于网关日志按前缀归并。
 
-**理由**：`INV`/`ADR` 层面这让推理后端真正可替换（`ADR-9` 说的是走 OpenClaw，
-没说记忆必须存在 OpenClaw）。同时 `ADR-15` 规定余额不足会自动切到
-`zhipu/glm-4.5-flash`——换模型时如果记忆在网关侧，切换的语义是不明确的。
+**实测依据**（wjclaw 生产网关，2026-09-08）：
+网关的会话记忆是真的，且**独立于**这个改造存在——
 
-**待决**：OpenClaw 侧是否会因为收到完整历史而与自己的 session 记忆叠加，
-造成上下文重复。需要在隔离网关上实测确认，必要时关掉网关侧记忆。
+| 探针 | 会话键 | 第二轮 `messages` 是否含第一轮 | 结果 |
+|---|---|---|---|
+| 稳定键 | 同一个 | 否 | 答出口令 → 网关自己记着 |
+| 唯一键 | 每次不同 | 否 | `UNKNOWN` → 记忆被切断 |
+| 唯一键 | 每次不同 | 是（新实现的形态） | 答出口令 → 我们的上下文生效 |
+
+所以：**沿用稳定键 + 发完整历史 = 把历史发两遍**。
+唯一键是让「本地库拥有上下文」这条决策真正成立的必要条件，不是可选优化。
+
+**代价**：网关侧不再有可按键续接的会话视图，日志只能按前缀聚合。
+这正是本变更想要的——上下文的唯一真相在 `ChatMessage`。
 
 ### D5：商家写操作暂不纳入 `INV-3` 审计
 
@@ -162,6 +170,21 @@ widget 在打开状态下按固定间隔拉取 `GET public/chat/messages?after=<
 `spec/check-ops-audit.mjs` 当前输出为「扫描 1 个 controller」，
 即只覆盖 ops 控制器，不会误扫 storefront 的新写路由。
 若该检查器将来扩大扫描范围，D5 的结论需要重新讨论。
+
+**R8 — OpenClaw 工作区记忆是一条跨租户通道（新发现，未关闭）**
+除会话记忆外，网关还有一层**落盘的 agent 记忆**：工作区
+`/root/.openclaw/workspace-drsell/memory/YYYY-MM-DD.md`，由 OpenClaw 通用
+`AGENTS.md` 模板指示 agent「Capture what matters」自行写入，并在每次请求的启动
+上下文里回灌。实测：探针请求「记住 4271」后该文件被创建，随后**换一个会话键、
+甚至完全不带会话键**的请求仍能读出 4271，模型自述"found this recorded in my
+daily memory file"。探针写入的文件已删除（此前该目录不存在，即历史上未累积过）。
+
+这层记忆**没有任何店铺维度**：一个工作区服务所有商家的所有顾客。
+它绕过了 `INV-2`——`adp_reader` 的零表权限管得住 SQL，管不住一个 Markdown 文件。
+本变更在 `infra/openclaw/drsell/workspace/SOUL.md` 加了硬性规则 5 禁止写记忆文件，
+**但那是提示词级的约束，不是守护方式**：按本仓规矩，它现在是一条说不出守护方式的
+规则。真正的解法在 OpenClaw 侧（按 agent/会话隔离工作区，或关掉记忆能力），
+超出本变更范围，应单独立项。
 
 **R7 — 引入 `openspec/` 与单一事实来源的张力（已关闭）**
 本仓 `AGENTS.md` 是 agent 指引唯一事实来源，且明确记录过「两份事实来源漂移」的教训。

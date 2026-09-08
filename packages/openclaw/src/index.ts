@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 export type OpenClawClientOptions = {
   gatewayUrl?: string;
   gatewayToken?: string;
@@ -30,9 +32,19 @@ export type OpenClawChatParams = {
   signal?: AbortSignal;
 };
 
+/**
+ * 每次请求一个**唯一**的会话键。
+ *
+ * 网关的会话记忆是真的：在隔离探针上实测过——同一 key 下，第二次请求即使
+ * `messages` 里不含第一轮，模型照样答得出第一轮的口令；换成每请求唯一的 key，
+ * 同样的第二次请求回 UNKNOWN。既然上下文已经由本地库全量组装（`ADR-17`），
+ * 再复用稳定 key 就等于把历史发两遍。
+ *
+ * 前缀保留 shop 与会话 id，网关日志仍可按它归并同一条对话。
+ */
 function sessionKey(shopDomain: string, visitorId: string, conversationId?: string) {
   const conv = conversationId || visitorId;
-  return `drsell:${shopDomain}:${conv}`;
+  return `drsell:${shopDomain}:${conv}:${randomUUID()}`;
 }
 
 /** Parse OpenAI-compatible SSE from OpenClaw /v1/chat/completions */
@@ -88,7 +100,8 @@ export class OpenClawClient {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${this.gatewayToken}`,
         'x-openclaw-agent-id': this.agentId,
-        // 保留仅供网关侧日志关联与限流；记忆已由调用方的 messages 承担。
+        // 每请求唯一：网关会按这个键累积自己的会话记忆，复用就会与我们
+        // 自己组装的 messages 叠加成双份上下文。
         'x-openclaw-session-key': key,
       },
       body: JSON.stringify({

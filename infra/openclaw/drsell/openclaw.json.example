@@ -11,6 +11,16 @@
         "api": "openai-completions",
         "models": [
           {
+            "id": "deepseek-v4-flash",
+            "name": "DeepSeek V4 Flash",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "contextWindow": 131072,
+            "maxTokens": 8192
+          },
+          {
             "id": "deepseek-v4-pro",
             "name": "DeepSeek V4 Pro",
             "reasoning": true,
@@ -43,7 +53,7 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "deepseek-v4/deepseek-v4-pro",
+        "primary": "deepseek-v4/deepseek-v4-flash",
         "fallbacks": [
           "zhipu/glm-4.5-flash"
         ]

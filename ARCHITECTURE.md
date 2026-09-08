@@ -144,15 +144,23 @@ plan name 与 internal handle 刻意对齐 `PLANS`（`Basic`/`basic`、`Pro`/`pr
 
 ### `ADR-15`
 
-模型走「主 + 备」：primary `deepseek-v4/deepseek-v4-pro`，
+模型走「主 + 备」：primary `deepseek-v4/deepseek-v4-flash`，
 fallbacks `zhipu/glm-4.5-flash`。OpenClaw 把 402/余额不足归为 `billing` 失败并
 自动切到备用模型。
 **为什么**：单一 provider 的 key 一旦欠费，**全部商家的客服对话同时失败**，
 而这属于我们向商家收了钱的核心功能。备用链路让欠费从「立即全线中断」降级为
-「变慢、变笨，但仍在回答」。选 `glm-4.5-flash` 是因为已验证它支持本链路依赖的
-tool calling（`adp_search_products` 等），换别的模型前必须重新验证这一点——
-不支持 tool calling 的模型会一本正经地编造商品，比报错更糟。
-primary **不要改**：它正在服务生产对话（见 `AGENTS.md` 陷阱 1）。
+「变慢、变笨，但仍在回答」。
+**换模型的前置条件**：必须先验证它支持本链路依赖的 tool calling
+（`adp_search_products` 等）——不支持 tool calling 的模型会一本正经地编造商品，
+比报错更糟。`glm-4.5-flash` 与 `deepseek-v4-flash` 均已实测通过：
+直连 `api.deepseek.com/chat/completions` 带 `tools` 时正确发出 `tool_calls`，
+且切换后经网关端到端复验能真的查出该店商品数。
+**注意主备同 key**：`deepseek-v4-flash` 与 `deepseek-v4-pro` 共用同一个
+provider key，所以在 primary 上换 DeepSeek 型号**解决不了欠费**——
+billing 失败时唯一有效的备用是另一个 provider（`zhipu`）。
+**已实测发生过**：2026-09-08 生产日志出现
+`decision=fallback_model reason=billing from=deepseek-v4/deepseek-v4-pro`
+→ `candidate_succeeded ... zhipu/glm-4.5-flash`，本条备用链路在生产上真的兜住过。
 **守护**：`infra/openclaw/drsell/openclaw.json.example` + `setup-wjclaw.sh`
 （服务器重建即复现该配置）。
 

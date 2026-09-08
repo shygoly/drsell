@@ -3,12 +3,20 @@
 
 ## 1. 前置核实（不写代码，先证伪假设）
 
-- [ ] ⛔ 1.1 在生产库跑 `SELECT DISTINCT status FROM "ChatThread"`（无生产库访问）。
-      **已缓解**：迁移不依赖这个假设——先 `UPDATE ... WHERE status NOT IN (...)` 归一，
-      再做类型转换，脏数据不会炸掉部署。`ChatMessage.role` 同样处理。
+- [x] 1.1 生产库已核实（wjclaw / `drsell` @ 5433）：`ChatThread.status` 只有 `ai`（6 行），
+      `ChatMessage.role` 只有 `user`(19) / `assistant`(19)，两列均仍是 `text`。
+      **无词表外取值，枚举迁移安全**。迁移仍保留防御性归一，不依赖这个观察。
+      顺带：`KnowledgeSyncJob` 无 `running` 行（5 skipped / 4 done）——F3 的死锁尚未
+      发生，修的是隐患；`ChatStatDaily` 两行 `count` 与 `aiResolvedCount` 完全相等，
+      印证「两个都在数消息、且从没有人工」。
 - [x] 1.2 ~~确认 `spec/check-ops-audit.mjs` 扫描范围~~ — 只扫 1 个 controller（ops），不影响 storefront 新写路由（R6 已排除）
-- [ ] ⛔ 1.3 在隔离 OpenClaw 网关上实测多条 `messages` 时网关侧 session 记忆是否叠加（无网关访问）。
-      **风险仍在**：若叠加，上下文会重复。上线前必须实测；D4 保留了 session key 仅作日志关联。
+- [x] 1.3 已在 wjclaw 网关实测，**结论是「会叠加」，D4 因此改写、代码已修**：
+      稳定 key 下第二轮不带历史仍答得出第一轮口令（网关自己记着）；换成每请求唯一 key
+      则回 `UNKNOWN`；唯一 key + 历史放进 `messages` 正常作答。
+      故 `sessionKey()` 改为每请求附加 uuid。
+      **另发现**：网关还有一层落盘的跨租户 agent 记忆（`workspace-drsell/memory/*.md`），
+      见 design.md 的 R8——探针写入的文件已清除，`SOUL.md` 加了禁止写记忆的硬性规则，
+      但那只是提示词级约束，不是守护方式。
 - [x] 1.4 widget 余量实测：改造后 9783 B / 阈值 10000 B，**余量 217 字节**（98%）。放得下，但很贴边。
 
 ## 2. 数据模型与迁移
@@ -49,8 +57,9 @@
 - [x] 6.1 `handleTakeOver`/`handleResolve`/`handleSend` 改调真实 API
 - [x] 6.2 失败渲染可见错误条（"nothing was sent"）+ 按钮 busy 禁用，不静默吞掉
 - [x] 6.3 `ConversationStatus` 增加 `closed`；`ChatMessage.role` 增加 `agent`；`resolvedIds` 本地态删除，改由服务端 `closed` 决定
-- [ ] ⛔ 6.4 手工验证「接管后刷新页面状态仍在」（需已部署实例 + 数据库）。
-      单测已覆盖服务端写入，未覆盖端到端往返。
+- [ ] ⛔ 6.4 手工验证「接管后刷新页面状态仍在」——**本分支尚未部署**，已在公网确认
+      `POST /api/storefront/inbox/:id/reply` 与 `GET /api/public/chat/messages` 均返回 404，
+      即生产跑的仍是旧代码。部署后必须补做。
 
 ## 7. 上下文所有权（F2）
 
@@ -87,4 +96,7 @@
 - [x] 10.3 新增 `ADR-16`（会话状态词表由 DB 枚举守住）与 `ADR-17`（上下文所有权在本地库），
       论证入 `ARCHITECTURE.md`，登记入 `DECISIONS.md`，`check-links`/`check-ids` 绿
 - [x] 10.4 `openspec/` 与治理文档的分工已写入 `AGENTS.md` 事实来源表
-- [ ] ⛔ 10.5 生产验证走公网域名并断言内容特征（尚未部署）
+- [ ] ⛔ 10.5 本分支的生产验证——尚未部署。
+      已做的公网基线（改模型后）：`drsell.szchada.top/` 200 且 `<title>Dr Sell — AI customer
+      support`；`/api/health` 返回 `{"ok":true,"service":"drsell-api"}`；`ops.szchada.top`
+      307 → `/login`。

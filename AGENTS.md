@@ -46,7 +46,7 @@ apps/ops          Next 15                               生产 :5013
                   运营控制台 ops.szchada.top，superadmin + 审计
 apps/storefront   Next 15 + App Bridge                  生产 :5010（dev :3100）
 packages/         shared · shopify · adp · openclaw
-spec/             治理校验器（10 个 check-*.mjs），pnpm spec
+spec/             治理校验器（11 个 check-*.mjs），pnpm spec
 infra/            nginx vhost · cloudflare · docker · openclaw profile
 scripts/          deploy-mvp.sh 等
 ```
@@ -61,7 +61,7 @@ scripts/          deploy-mvp.sh 等
 ```bash
 pnpm dev            # turbo run dev（全部）
 pnpm build          # turbo run build
-pnpm spec           # 治理校验（10 个检查器）
+pnpm spec           # 治理校验（11 个检查器）
 pnpm test           # pnpm spec + turbo run test —— 提交前必须绿
 pnpm lint
 pnpm db:generate    # prisma generate
@@ -74,12 +74,16 @@ bash scripts/deploy-mvp.sh   # 构建 + rsync 到 wjclaw + pm2 重启四进程 +
 1. **AI 回复链路走 OpenClaw，不是 Coze。** `apps/api` → `packages/openclaw` →
    wjclaw 上的 OpenClaw gateway（`127.0.0.1:18790`，OpenAI 兼容 `/v1/chat/completions`，
    provider DeepSeek-V4，pm2 进程 `openclaw-drsell`）。仓库配置模板在
-   `infra/openclaw/drsell/`。该 gateway **正在服务生产对话**，不要改
-   `agents.defaults.model.primary`。全仓 `coze` 零命中。
+   `infra/openclaw/drsell/`。该 gateway **正在服务生产对话**：改
+   `agents.defaults.model.primary` 前先备份、先验 tool calling，改完走公网复验，
+   并同步 `ADR-15` 与配置模板。全仓 `coze` 零命中。
 
    主 key 欠费时会自动切到 `fallbacks` 里的 `zhipu/glm-4.5-flash`（`ADR-15`）——
-   OpenClaw 把 402/余额不足归为 `billing` 失败并换模型，已在隔离网关上实测过
-   （`decision=fallback_model reason=billing`）。**换备用模型前必须先验证它支持
+   **`deepseek-v4-flash` 与 `deepseek-v4-pro` 共用同一个 key**，换 DeepSeek 型号
+   兜不住欠费，只有换 provider 才行。
+   OpenClaw 把 402/余额不足归为 `billing` 失败并换模型，**生产上真的兜住过**
+   （2026-09-08 日志：`decision=fallback_model reason=billing
+   from=deepseek-v4/... → candidate_succeeded zhipu/glm-4.5-flash`）。**换备用模型前必须先验证它支持
    tool calling**：本链路靠 `adp_search_products`/`adp_get_order` 查真实数据，
    不支持工具调用的模型会一本正经地编造商品，比直接报错更糟。
 
