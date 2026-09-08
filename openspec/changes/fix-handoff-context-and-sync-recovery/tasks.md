@@ -78,5 +78,5 @@
 - [ ] 10.1 `pnpm test`（含 `pnpm spec`）全绿
 - [ ] 10.2 `openspec validate fix-handoff-context-and-sync-recovery --strict` 通过
 - [ ] 10.3 按 D6 在 `DECISIONS.md` 决定是否需要新 ADR（`status` 词表、上下文所有权两项属不可逆选择）
-- [ ] 10.4 按 R7 决定 `openspec/` 与 `ARCHITECTURE.md` 的分工，必要时在 `AGENTS.md` 事实来源表加一行
+- [x] 10.4 ~~决定 `openspec/` 与治理文档的分工~~ — 已写入 `AGENTS.md` 事实来源表：openspec 管行为需求，`INV`/`ADR`/`B` 独占不可逆决策，两者不交叉（R7 已关闭）
 - [ ] 10.5 生产验证走公网域名并断言内容特征，不用 `curl 127.0.0.1` 直连上游

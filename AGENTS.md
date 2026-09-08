@@ -16,9 +16,18 @@
 | 架构全景与不可逆决策论证 | `ARCHITECTURE.md`（`INV-n`/`ADR-n`/`B-n` 的出处） |
 | 决策登记册（ID 唯一权威） | `DECISIONS.md`（一条一行，论证留在出处） |
 | UI 反模式与设计规范 | `DESIGN.md` |
+| 进行中变更的行为需求 | `openspec/changes/<id>/`（`openspec list` 看有哪些） |
 | 最近一次发布的实况 | `docs/RELEASE-2026-09-02.md` |
 
 代码或文档里出现的 `INV-n`/`ADR-n`/`B-n` **必须在 `DECISIONS.md` 里**，否则 `pnpm spec` 红。
+
+**openspec 与治理文档的分工**：openspec 只描述**行为需求**（什么条件下系统该做什么），
+`INV`/`ADR`/`B` 独占**不可逆决策**（为什么只能这么建）。两者不交叉——
+一条需求若牵出不可逆选择，结论入 `DECISIONS.md`，openspec 里只留指向该 ID 的引用。
+`openspec/specs/` 是 change 归档后才产生的，归档前是空的；**别拿它当架构描述读**，
+架构永远看 `ARCHITECTURE.md`。
+重新 init 时必须带 `--tools none`：默认会往 `CLAUDE.md` 注入托管块，
+而 openspec 用法是工具中立的共享内容，按本文开头的规矩只能留在 `AGENTS.md`。
 
 ## 仓库结构
 

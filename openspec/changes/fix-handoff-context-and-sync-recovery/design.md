@@ -163,10 +163,13 @@ widget 在打开状态下按固定间隔拉取 `GET public/chat/messages?after=<
 即只覆盖 ops 控制器，不会误扫 storefront 的新写路由。
 若该检查器将来扩大扫描范围，D5 的结论需要重新讨论。
 
-**R7 — 引入 `openspec/` 与单一事实来源的张力（低）**
+**R7 — 引入 `openspec/` 与单一事实来源的张力（已关闭）**
 本仓 `AGENTS.md` 是 agent 指引唯一事实来源，且明确记录过「两份事实来源漂移」的教训。
 `openspec init` 已用 `--tools none` 执行，未注入托管块。
-但 `openspec/specs/` 归档后会成为第二份行为描述，与 `ARCHITECTURE.md`/`DECISIONS.md`
-的关系需要在本变更 review 时明确：建议 openspec 只描述**行为需求**，
-`INV`/`ADR`/`B` 继续独占**不可逆决策**，两者不交叉，并在 `AGENTS.md` 的
-「事实来源」表里加一行说明分工。
+分工已写入 `AGENTS.md` 的「事实来源」表：openspec 只描述**行为需求**，
+`INV`/`ADR`/`B` 独占**不可逆决策**，两者不交叉；需求牵出不可逆选择时，
+结论入 `DECISIONS.md`，openspec 里只留指向该 ID 的引用。
+
+**残留**：这条分工目前**没有守护方式**——没有检查器能防止 openspec spec 里
+写进架构断言。按本仓「每条规矩要有守护方式」的规矩，它现在是一条靠自觉的约定。
+`openspec/specs/` 归档后若开始变厚，应补一个检查器。
