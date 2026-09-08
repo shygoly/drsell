@@ -39,6 +39,12 @@ export function useShopSession() {
   const [bridgeAuth, setBridgeAuth] = useState<"idle" | "pending" | "done" | "failed">(
     "idle",
   );
+  /**
+   * Shopify 每次嵌入加载都会把一枚 session token 放在 URL 的 id_token 里。
+   * 它和 App Bridge 的 idToken() 是同一种东西，后端换发端点照单全收——
+   * 于是初次鉴权根本不需要等 App Bridge。
+   */
+  const [urlIdToken, setUrlIdToken] = useState("");
 
   useEffect(() => {
     const fromUrl =
@@ -71,9 +77,18 @@ export function useShopSession() {
       }
     }
     const storedToken = fragmentToken || safeStorageGet(TOKEN_KEY);
-    if (fragmentToken && nextShop) {
-      safeStorageSet(SHOP_KEY, nextShop);
-      safeStorageSet(TOKEN_KEY, fragmentToken);
+    if (fragmentToken) safeStorageSet(TOKEN_KEY, fragmentToken);
+    // shop 一律落盘：客户端路由跳转会丢掉查询串，之前只在拿到 fragment token 时才存，
+    // 于是进到 /inbox 之后 shop 变空，换发条件永远不成立。
+    if (nextShop) safeStorageSet(SHOP_KEY, nextShop);
+
+    // id_token 是凭据，用完立刻从地址栏抹掉（有效期约 60 秒）。
+    const idTok = search.get("id_token") || "";
+    if (idTok) {
+      setUrlIdToken(idTok);
+      search.delete("id_token");
+      const qs = search.toString();
+      history.replaceState(null, "", window.location.pathname + (qs ? `?${qs}` : ""));
     }
 
     setShop(nextShop);
@@ -151,9 +166,9 @@ export function useShopSession() {
     setToken("");
   }, []);
 
-  const loginWithAppBridge = useCallback(async () => {
-    if (!bridge || !shop) return;
-    const sessionToken = await bridge.idToken();
+  /** 用一枚 Shopify session token 换本站 JWT。来源可以是 URL 的 id_token，也可以是 App Bridge。 */
+  const exchangeSessionToken = useCallback(async (sessionToken: string) => {
+    if (!sessionToken || !shop) return;
     const api =
       process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
     const res = await fetch(`${api}/shopify/auth/app-bridge`, {
@@ -162,17 +177,38 @@ export function useShopSession() {
       body: JSON.stringify({ sessionToken }),
     });
     if (!res.ok) {
-      throw new Error(`App Bridge login failed (${res.status})`);
+      throw new Error(`Session token exchange failed (${res.status})`);
     }
     const data = (await res.json()) as { accessToken: string };
     safeStorageSet(SHOP_KEY, shop);
     safeStorageSet(TOKEN_KEY, data.accessToken);
     setToken(data.accessToken);
     return data.accessToken;
-  }, [bridge, shop]);
+  }, [shop]);
+
+  const loginWithAppBridge = useCallback(async () => {
+    if (!bridge || !shop) return;
+    return exchangeSessionToken(await bridge.idToken());
+  }, [bridge, shop, exchangeSessionToken]);
+
+  /**
+   * 首选路径：URL 里的 id_token 直接换发，不依赖 App Bridge。
+   *
+   * 实测 App Bridge 在本站根本起不来——它要求自己是 head 里第一个 <script> 且不带
+   * async，而 Next 会把自己的 chunk 排在前面，App Bridge 随即
+   * "Aborting"，window.shopify 永远不存在。此前所有商家 API 调用都带着空 token
+   * 打出去，整页 401。这条路径把初次鉴权与 App Bridge 解耦。
+   */
+  useEffect(() => {
+    if (!ready || !shop || !urlIdToken) return;
+    setBridgeAuth("pending");
+    void exchangeSessionToken(urlIdToken)
+      .then((t) => setBridgeAuth(t ? "done" : "failed"))
+      .catch(() => setBridgeAuth("failed"));
+  }, [ready, shop, urlIdToken, exchangeSessionToken]);
 
   useEffect(() => {
-    // Admin embedded：每次进入都用 App Bridge session token 换发 JWT。
+    // App Bridge 可用时也换一次（token 刷新用）。目前它起不来，见上面的注释。
     // 非嵌入场景没有店铺归属证明，只能用 OAuth 回调下发并已落盘的 token，
     // 不再允许「给个 shop 域名就换 token」。
     if (!ready || !shop || !bridge) return;
