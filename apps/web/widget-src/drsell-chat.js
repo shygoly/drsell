@@ -16,6 +16,7 @@
     text: '#181c1f',
     textMuted: '#6b7280',
     bubbleOther: '#ebedf3',
+    bubbleAgent: '#dff0e6',
     border: '#e5e7eb',
     inputBorder: '#d1d5db',
   };
@@ -117,6 +118,7 @@
       state.open = !state.open;
       var panel = document.getElementById('drsell-chat-panel');
       if (panel) panel.style.display = state.open ? 'flex' : 'none';
+      syncPoll();
     });
     document.body.appendChild(launcher);
   }
@@ -140,7 +142,7 @@
       fontSize: '13px',
       lineHeight: '1.45',
       alignSelf: mine ? 'flex-end' : 'flex-start',
-      background: mine ? primaryColor() : FALLBACK.bubbleOther,
+      background: mine ? primaryColor() : role === 'agent' ? FALLBACK.bubbleAgent : FALLBACK.bubbleOther,
       color: mine ? FALLBACK.onPrimary : FALLBACK.text,
       borderBottomRightRadius: mine ? '4px' : '12px',
       borderBottomLeftRadius: mine ? '12px' : '4px',
@@ -241,6 +243,7 @@
     close.addEventListener('click', function () {
       state.open = false;
       panel.style.display = 'none';
+      syncPoll();
     });
     header.appendChild(headLeft);
     header.appendChild(close);
@@ -429,6 +432,44 @@
       if (!botText) append('bot', '(empty)');
     } catch (e) {
       append('bot', String(e));
+    }
+  }
+
+  /**
+   * 商家人工回复的接收端。
+   *
+   * AI 的回复走 SSE 当场渲染，这里只补 role='agent' 的商家消息——
+   * 在此之前商家的回复没有任何送达顾客的路径。
+   * 首轮只认游标不渲染：那一批是历史，重放会把旧对话又刷一遍。
+   */
+  var pollAt = '';
+  var pollTimer = null;
+  var pollSeeded = false;
+
+  function pullMessages() {
+    fetch(apiBase + '/public/chat/messages?shop=' + encodeURIComponent(shop) +
+      '&visitorId=' + encodeURIComponent(visitorId) + '&after=' + pollAt)
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var list = (d && d.messages) || [];
+        for (var i = 0; i < list.length; i++) {
+          var m = list[i];
+          if (pollSeeded && m.role === 'agent') append('agent', m.content);
+          pollAt = m.id;
+        }
+        pollSeeded = true;
+      })
+      .catch(function () {});
+  }
+
+  /** 只在面板打开时轮询——关着的时候顾客本来就看不到，长连接是纯浪费。 */
+  function syncPoll() {
+    if (state.open && !pollTimer) {
+      pullMessages();
+      pollTimer = setInterval(pullMessages, 5000);
+    } else if (!state.open && pollTimer) {
+      clearInterval(pollTimer);
+      pollTimer = null;
     }
   }
 

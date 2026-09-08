@@ -3,6 +3,7 @@ import {
   BadRequestException,
   UnauthorizedException,
   Logger,
+  OnModuleInit,
 } from '@nestjs/common';
 import '@shopify/shopify-api/adapters/node';
 import { ApiVersion, shopifyApi } from '@shopify/shopify-api';
@@ -83,9 +84,52 @@ function dec(v: unknown): Decimal | undefined {
   return new Decimal(String(v));
 }
 
+/**
+ * 同步任务的心跳间隔与超时阈值。
+ *
+ * 超时判定必须基于心跳而不是创建时间：上万商品的店铺同步本来就慢，
+ * 按 createdAt 判会把健康的长任务误杀。
+ */
+const SYNC_HEARTBEAT_MS = 30_000;
+const SYNC_STALE_MS = 5 * 60_000;
+
 @Injectable()
-export class ShopifyService {
+export class ShopifyService implements OnModuleInit {
   private readonly logger = new Logger(ShopifyService.name);
+
+  /**
+   * 启动清理：把心跳停摆的 running 任务推向终态。
+   *
+   * runSyncJob 是 void 出去的进程内异步——进程在同步中途被重启，job 就永远停在
+   * 'running'，而 startBatchSync 的并发守卫（if (running) continue）会让该店该类目
+   * 再也不启动同步。商品目录静默陈旧，agent 继续拿旧数据回答顾客，无任何告警。
+   *
+   * 幂等：多实例同时启动只会把同一批行重复写成同样的终态。
+   */
+  async onModuleInit() {
+    const staleBefore = new Date(Date.now() - SYNC_STALE_MS);
+    try {
+      const { count } = await this.prisma.knowledgeSyncJob.updateMany({
+        where: {
+          status: 'running',
+          OR: [
+            { heartbeatAt: null },
+            { heartbeatAt: { lt: staleBefore } },
+          ],
+        },
+        data: {
+          status: 'failed',
+          payload: '进程中断：心跳停摆，由启动清理判定为孤儿任务（非 Shopify 错误）',
+        },
+      });
+      if (count > 0) {
+        this.logger.warn(`released ${count} orphaned sync job(s) left running by a previous process`);
+      }
+    } catch (err) {
+      // 清理失败不该拦住 API 启动，但必须留痕——否则同步会静默地一直堵着。
+      this.logger.error(`orphaned sync job cleanup failed: ${String(err)}`);
+    }
+  }
 
   constructor(
     private readonly prisma: PrismaService,
@@ -312,6 +356,7 @@ export class ShopifyService {
           kind,
           externalId: `${shopDomain}:${kind}:${Date.now()}`,
           status: 'running',
+          heartbeatAt: new Date(),
         },
       });
       started.push(kind);
@@ -325,6 +370,14 @@ export class ShopifyService {
     kind: 'products' | 'orders' | 'customers',
     jobId: string,
   ) {
+    // 心跳让「还活着的长任务」和「进程死掉留下的尸体」区分得开。
+    const beat = setInterval(() => {
+      this.prisma.knowledgeSyncJob
+        .update({ where: { id: jobId }, data: { heartbeatAt: new Date() } })
+        .catch(() => undefined);
+    }, SYNC_HEARTBEAT_MS);
+    beat.unref?.();
+
     try {
       const result = await this.syncCatalog(shopDomain, kind);
       await this.prisma.knowledgeSyncJob.update({
@@ -342,6 +395,8 @@ export class ShopifyService {
           payload: String(err),
         },
       });
+    } finally {
+      clearInterval(beat);
     }
   }
 
@@ -350,15 +405,30 @@ export class ShopifyService {
     const tenantId = shop?.tenantId;
 
     const kinds = ['products', 'orders', 'customers'] as const;
-    const out: Record<string, { status: string; count?: number }> = {};
+    const out: Record<
+      string,
+      {
+        status: string;
+        count?: number;
+        lastSuccessAt: string | null;
+        failureReason: string | null;
+      }
+    > = {};
 
     for (const kind of kinds) {
-      const latest = await this.prisma.knowledgeSyncJob.findFirst({
-        // pushKnowledge 每次同步后都会追加一条 skipped 记录，过滤掉它，
-        // 让状态反映真实的同步结果（done / failed / idle）。
-        where: { shopDomain, kind, status: { not: 'skipped' } },
-        orderBy: { createdAt: 'desc' },
-      });
+      // pushKnowledge 每次同步后都会追加一条 skipped 记录，过滤掉它，
+      // 让状态反映真实的同步结果（done / failed / idle）。
+      const [latest, lastSuccess] = await Promise.all([
+        this.prisma.knowledgeSyncJob.findFirst({
+          where: { shopDomain, kind, status: { not: 'skipped' } },
+          orderBy: { createdAt: 'desc' },
+        }),
+        this.prisma.knowledgeSyncJob.findFirst({
+          where: { shopDomain, kind, status: 'done' },
+          orderBy: { updatedAt: 'desc' },
+          select: { updatedAt: true },
+        }),
+      ]);
       let count: number | undefined;
       if (tenantId) {
         if (kind === 'products') count = await this.prisma.product.count({ where: { tenantId } });
@@ -368,6 +438,10 @@ export class ShopifyService {
       out[kind] = {
         status: latest?.status ?? 'idle',
         count,
+        // 目录静默陈旧是本缺陷最实际的危害——agent 拿旧数据回答顾客，商家不知情。
+        // 「上次成功同步于何时」必须摆到商家眼前，光有 status 看不出陈旧了多久。
+        lastSuccessAt: lastSuccess?.updatedAt?.toISOString() ?? null,
+        failureReason: latest?.status === 'failed' ? (latest.payload ?? null) : null,
       };
     }
 

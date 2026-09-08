@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantService } from '../tenant/tenant.service';
 import { AdpService } from '../adp/adp.service';
+import { ConversationService } from '../conversation/conversation.service';
 
 @Injectable()
 export class PublicStorefrontService {
@@ -9,6 +10,7 @@ export class PublicStorefrontService {
     private readonly prisma: PrismaService,
     private readonly tenants: TenantService,
     private readonly adp: AdpService,
+    private readonly conversations: ConversationService,
   ) {}
 
   async botSettingsByShop(shopDomain: string) {
@@ -62,6 +64,34 @@ export class PublicStorefrontService {
       create: { shopId: shop.id, userEmail, displayName },
       update: { displayName },
     });
+  }
+
+  /**
+   * 顾客侧增量拉取。
+   *
+   * 商家的人工回复此前没有任何送达路径：顾客侧只有一条 SSE，而那条流在 AI
+   * 回完就结束了。widget 打开时按游标轮询这里，才让「接管」真的闭环。
+   *
+   * 鉴权沿用 POST public/chat 的模型：(shopDomain, visitorId) 定位会话，
+   * 不接受调用方指定 threadId——否则任何人都能翻别人的对话。
+   */
+  async messagesFor(shopDomain: string, visitorId: string, afterId?: string) {
+    const thread = await this.prisma.chatThread.findUnique({
+      where: { shopDomain_visitorId: { shopDomain, visitorId } },
+      select: { id: true, status: true },
+    });
+    // 还没说过话的访客不是错误，是空会话。
+    if (!thread) return { status: null, messages: [] };
+    const messages = await this.conversations.messagesAfter(thread.id, afterId);
+    return {
+      status: thread.status,
+      messages: messages.map((m) => ({
+        id: m.id,
+        role: m.role,
+        content: m.content,
+        createdAt: m.createdAt.toISOString(),
+      })),
+    };
   }
 
   chat(params: {

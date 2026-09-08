@@ -50,6 +50,19 @@ export class PublicStorefrontController {
     return this.storefront.upsertInboxUser(body.shopDomain, body.userEmail, body.displayName);
   }
 
+  /**
+   * 商家人工回复的送达通道。游标之后的增量，最多 50 条。
+   * widget 只在打开状态下轮询——关着的时候顾客本来就看不到。
+   */
+  @Get('public/chat/messages')
+  messages(
+    @Query('shop') shop: string,
+    @Query('visitorId') visitorId: string,
+    @Query('after') after?: string,
+  ) {
+    return this.storefront.messagesFor(shop, visitorId, after);
+  }
+
   @Post('public/chat')
   async chat(@Body() body: PublicChatDto, @Res() res: Response) {
     res.setHeader('Content-Type', 'text/event-stream');

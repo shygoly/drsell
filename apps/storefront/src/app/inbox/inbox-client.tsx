@@ -18,7 +18,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { fetchThreadMessages } from "@/lib/api";
+import {
+  closeThread,
+  fetchThreadMessages,
+  replyToThread,
+  takeOverThread,
+} from "@/lib/api";
 import { useShopSession } from "@/hooks/useShopSession";
 import type { ChatMessage, Conversation, ConversationStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -36,11 +41,15 @@ const CHANNEL_LABEL: Record<Conversation["channel"], string> = {
   whatsapp: "WhatsApp",
 };
 
-const STATUS_BADGE = {
-  ai: { label: "AI handling", variant: "success" as const },
-  pending: { label: "Pending", variant: "warning" as const },
-  human: { label: "Human", variant: "info" as const },
-} as const;
+const STATUS_BADGE: Record<
+  ConversationStatus,
+  { label: string; variant: "success" | "warning" | "info" | "secondary" }
+> = {
+  ai: { label: "AI handling", variant: "success" },
+  pending: { label: "Pending", variant: "warning" },
+  human: { label: "Human", variant: "info" },
+  closed: { label: "Closed", variant: "secondary" },
+};
 
 /*
  * 这里原本有 FALLBACK_THREAD_MESSAGES 与 buildFallbackMessages：真实消息为空或
@@ -56,7 +65,6 @@ interface InboxClientProps {
 export function InboxClient({ initialConversations }: InboxClientProps) {
   const { token } = useShopSession();
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
-  const [resolvedIds, setResolvedIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("open");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState(initialConversations[0]?.id ?? "");
@@ -64,13 +72,15 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return conversations.filter((c) => {
-      if (filter === "resolved" && !resolvedIds.includes(c.id)) return false;
+      if (filter === "resolved" && c.status !== "closed") return false;
       if (filter === "mine" && c.status !== "human") return false;
-      if (filter === "open" && resolvedIds.includes(c.id)) return false;
+      if (filter === "open" && c.status === "closed") return false;
       if (!q) return true;
       return (
         c.customer.toLowerCase().includes(q) ||
@@ -78,10 +88,10 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
         c.preview.toLowerCase().includes(q)
       );
     });
-  }, [conversations, filter, resolvedIds, search]);
+  }, [conversations, filter, search]);
 
   const selected = conversations.find((c) => c.id === selectedId) ?? null;
-  const isResolved = selected ? resolvedIds.includes(selected.id) : false;
+  const isResolved = selected?.status === "closed";
 
   useEffect(() => {
     if (!selectedId) {
@@ -107,45 +117,66 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, token]);
 
-  function handleTakeOver() {
-    if (!selected) return;
+  function patchStatus(id: string, status: ConversationStatus) {
     setConversations((prev) =>
-      prev.map((c) => (c.id === selected.id ? { ...c, status: "human" as ConversationStatus } : c)),
+      prev.map((c) => (c.id === id ? { ...c, status } : c)),
     );
   }
 
+  /**
+   * 接管 / 解决 / 发送以前全是纯本地 state：刷新页面接管就没了，
+   * 商家发的消息从未离开浏览器，而 status='human' 后端根本没人写。
+   * 现在三个动作都落到服务端，失败要说人话而不是静默吞掉。
+   */
+  async function run(action: () => Promise<void>) {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await action();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function handleTakeOver() {
+    if (!selected || !token) return;
+    const id = selected.id;
+    void run(async () => {
+      const r = await takeOverThread(id, token);
+      patchStatus(id, r.status);
+    });
+  }
+
   function handleResolve() {
-    if (!selected) return;
-    setResolvedIds((prev) => (prev.includes(selected.id) ? prev : [...prev, selected.id]));
-    setConversations((prev) =>
-      prev.map((c) => (c.id === selected.id ? { ...c, status: "human" as ConversationStatus } : c)),
-    );
+    if (!selected || !token) return;
+    const id = selected.id;
+    void run(async () => {
+      const r = await closeThread(id, token);
+      patchStatus(id, r.status);
+    });
   }
 
   function handleSend() {
     const text = draft.trim();
-    if (!text || !selected) return;
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `local-${Date.now()}`,
-        role: "user",
-        content: text,
-        createdAt: new Date().toISOString(),
-      },
-    ]);
-    setDraft("");
-    window.setTimeout(() => {
+    if (!text || !selected || !token) return;
+    const id = selected.id;
+    void run(async () => {
+      const sent = await replyToThread(id, token, text);
+      setDraft("");
       setMessages((prev) => [
         ...prev,
         {
-          id: `local-ai-${Date.now()}`,
-          role: "assistant",
-          content: "Got it — a human agent will follow up on this right away.",
-          createdAt: new Date().toISOString(),
+          id: sent.id,
+          role: sent.role,
+          content: sent.content,
+          createdAt: sent.createdAt,
         },
       ]);
-    }, 800);
+      patchStatus(id, sent.threadStatus);
+    });
   }
 
   return (
@@ -251,11 +282,16 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={handleTakeOver}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleTakeOver}
+                    disabled={busy}
+                  >
                     <Hand className="h-4 w-4" aria-hidden="true" />
                     Take over
                   </Button>
-                  <Button size="sm" onClick={handleResolve} disabled={isResolved}>
+                  <Button size="sm" onClick={handleResolve} disabled={isResolved || busy}>
                     <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                     {isResolved ? "Resolved" : "Resolve"}
                   </Button>
@@ -269,46 +305,64 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
                   <p className="text-muted-foreground text-sm">No messages in this thread.</p>
                 ) : (
                   <>
+                    {/* 时间取第一条消息，不再写死成 "Today, 10:42 AM" */}
                     <div className="flex justify-center">
                       <span className="bg-muted text-muted-foreground rounded-full px-3 py-1 text-[10px] tracking-wider uppercase">
-                        Today, 10:42 AM
+                        {new Date(messages[0].createdAt).toLocaleString()}
                       </span>
                     </div>
+                    {/*
+                      顾客在左，店家（AI + 人工）在右——这是商家的收件箱，
+                      右侧应当是「我们说的话」。人工回复另给一套配色，
+                      否则商家分不清哪句是自己说的、哪句是 AI 说的。
+                    */}
                     {messages.map((m) => (
                       <div
                         key={m.id}
                         className={cn(
                           "max-w-[75%]",
-                          m.role === "assistant" ? "self-start" : "self-end",
+                          m.role === "user" ? "self-start" : "self-end",
                         )}
                       >
                         <div
                           className={cn(
                             "rounded-2xl px-4 py-2.5 text-sm",
-                            m.role === "assistant"
-                              ? "bg-card text-card-foreground border shadow-xs"
-                              : "bg-primary text-primary-foreground",
+                            m.role === "user" &&
+                              "bg-card text-card-foreground border shadow-xs",
+                            m.role === "assistant" && "bg-primary text-primary-foreground",
+                            m.role === "agent" &&
+                              "bg-accent text-accent-foreground border-primary/40 border",
                           )}
                         >
                           {m.content}
                         </div>
+                        {m.role === "agent" ? (
+                          <div className="text-muted-foreground mt-1 text-right text-[10px]">
+                            You
+                          </div>
+                        ) : null}
                       </div>
                     ))}
-                    <div className="flex items-center gap-2 self-start">
-                      <Avatar className="bg-primary/10 text-primary h-7 w-7">
-                        <AvatarFallback className="text-xs">
-                          <Bot className="h-4 w-4" aria-hidden="true" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-muted-foreground text-xs italic">
-                        AI is typing...
-                      </span>
-                    </div>
                   </>
                 )}
               </div>
 
               <div className="border-t p-3">
+                {error ? (
+                  <div
+                    role="alert"
+                    className="border-destructive/40 bg-destructive/10 text-destructive mb-2 flex items-start justify-between gap-3 rounded-md border px-3 py-2 text-xs"
+                  >
+                    <span>Could not reach the server — nothing was sent. {error}</span>
+                    <button
+                      type="button"
+                      onClick={() => setError(null)}
+                      className="font-medium underline underline-offset-2"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                ) : null}
                 <div className="border-input bg-card rounded-lg border focus-within:border-ring focus-within:ring-ring/20 focus-within:ring-2">
                   <textarea
                     value={draft}
@@ -339,7 +393,13 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
                       <span className="text-muted-foreground hidden text-xs xl:inline">
                         Press Enter to send
                       </span>
-                      <Button size="icon" onClick={handleSend} className="h-8 w-8 rounded-md" aria-label="Send message">
+                      <Button
+                        size="icon"
+                        onClick={handleSend}
+                        disabled={busy}
+                        className="h-8 w-8 rounded-md"
+                        aria-label="Send message"
+                      >
                         <Send className="h-4 w-4" aria-hidden="true" />
                       </Button>
                     </div>

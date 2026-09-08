@@ -156,6 +156,28 @@ const CASES = [
     expect: 1,
     expectMatch: /多出一档 "Plus"/,
   },
+  {
+    name: 'check-dashboard-metrics 抓硬编码度量值',
+    checker: 'check-dashboard-metrics.mjs',
+    inject: () => patchFile(
+      'apps/api/src/storefront-dashboard/storefront-dashboard.service.ts',
+      '      avgFirstResponseSec,',
+      '      avgFirstResponseSec: 12,',
+    ),
+    expect: 1,
+    expectMatch: /被写成常量 12/,
+  },
+  {
+    name: 'check-dashboard-metrics 抓分流率丢失空态',
+    checker: 'check-dashboard-metrics.mjs',
+    inject: () => patchFile(
+      'apps/api/src/storefront-dashboard/storefront-dashboard.service.ts',
+      'total > 0 ? Math.round(((total - human) / total) * 100) : null;',
+      'total > 0 ? Math.round(((total - human) / total) * 100) : 0;',
+    ),
+    expect: 1,
+    expectMatch: /必须在窗内无会话时返回 null/,
+  },
 ];
 
 const gitStatus = () =>

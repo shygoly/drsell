@@ -45,17 +45,20 @@ export default function DashboardPage() {
           value={String(stats.conversationsToday)}
           delta={{ text: `${stats.conversationsTrendPct}%`, good: true }}
         />
+        {/* null = 窗口内没有数据。显示 — 而不是 0%——0% 会被读成「AI 一个都没解决」。 */}
         <StatCard
           icon={<Bot className="h-4 w-4" aria-hidden="true" />}
-          label="AI resolution"
-          value={`${stats.aiResolution}%`}
+          label={`AI resolution (${stats.windowDays}d)`}
+          value={stats.aiResolution === null ? "—" : `${stats.aiResolution}%`}
           delta={{ text: `Target: ${stats.aiResolutionTarget}%`, good: false }}
         />
         <StatCard
           icon={<Timer className="h-4 w-4" aria-hidden="true" />}
           label="Avg first response"
-          value={`${stats.avgFirstResponseSec}s`}
-          delta={{ text: `${stats.avgResponseTrendSec}s`, good: true }}
+          value={
+            stats.avgFirstResponseSec === null ? "—" : `${stats.avgFirstResponseSec}s`
+          }
+          delta={{ text: `Last ${stats.windowDays}d`, good: true }}
         />
         <StatCard
           icon={<Headset className="h-4 w-4" aria-hidden="true" />}

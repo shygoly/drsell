@@ -156,6 +156,34 @@ primary **不要改**：它正在服务生产对话（见 `AGENTS.md` 陷阱 1�
 **守护**：`infra/openclaw/drsell/openclaw.json.example` + `setup-wjclaw.sh`
 （服务器重建即复现该配置）。
 
+### `ADR-16`
+
+会话状态是数据库枚举 `ChatThreadStatus`（`ai` / `pending` / `human` / `closed`），
+所有迁移经 `ConversationService` 这一个写入口。
+**为什么**：裸 `String` 让 `'human'` 变成一个前端自说自话、后端从不写入的幽灵取值——
+商家点「接管」只改了 React state，刷新即失效；而仪表盘的分流率据此计算，于是恒为
+100%，30 天图表的人工序列恒为零。同期配额耗尽的会话已经对顾客承诺
+"the store team will follow up"，却没有任何兑现路径。词表放在应用层守不住：
+一次漏改就又长出第二个真相。放在数据库，写错即 5xx。
+**守护**：Prisma enum → PostgreSQL enum 类型约束；
+`apps/api/src/adp/adp.service.spec.ts` 断言四种状态各自的分支，
+其中 `human` 分支必须零上游调用、零配额消耗。
+
+### `ADR-17`
+
+会话上下文的所有权在本地库：每次推理由 `ChatMessage` 组装完整 `messages` 数组，
+system prompt 以独立 `system` 角色发出；网关侧会话键仅用于日志关联与限流。
+**为什么**：原实现每次只发单条消息，多轮记忆存在 OpenClaw 的 `x-openclaw-session-key`
+里，`ChatMessage` 只是事后写的日志。网关重启 / profile 变更 / token 轮换都会让记忆
+消失，而历史无法从本地库重建。这也是 `ADR-15` 的前提——备用模型是**自动**切换的，
+记忆若在网关侧，切换时的上下文语义是不明确的。同时 system prompt 原先拼在用户消息
+前缀里，顾客可以把它当普通文本对待；移到 system 角色后，店铺域由服务端注入，
+正文里伪造 `[shop=...]` 无效。
+**注意**：这条只降低 prompt injection 的难度，不消除它。真正的边界仍是
+`adp_reader` 的零表权限（`INV-2`）——即使模型被说服，它也只能调那三个只读函数。
+**守护**：`packages/openclaw` 的接口只收 `messages` + `systemPrompt`，
+不泄漏网关专有语义；`adp.service.spec.ts` 断言网关记忆缺失时仍能从本地库重建上下文。
+
 ## 3. B — 边界规矩论证
 
 ### `B-1`

@@ -208,10 +208,22 @@ export class OpsService {
     const periodStart = this.periodStart(sub);
     const statsWhere: { shopDomain: string; day?: { gte: Date } } = { shopDomain };
     if (periodStart) statsWhere.day = { gte: periodStart };
-    const stats = await this.prisma.chatStatDaily.aggregate({
-      where: statsWhere,
-      _sum: { count: true, aiResolvedCount: true },
-    });
+    // AI 用量读 AiUsage.answers——那是 QuotaService 维护、真正决定拦不拦对话的
+    // 权威计数器。这里以前读 ChatStatDaily.aiResolvedCount（AI 消息数），
+    // 与配额是两套数，且该列在会话口径改版后已停写。
+    const [stats, aiUsage] = await Promise.all([
+      this.prisma.chatStatDaily.aggregate({
+        where: statsWhere,
+        _sum: { count: true },
+      }),
+      this.prisma.aiUsage.aggregate({
+        where: {
+          shopId: shop.id,
+          ...(periodStart ? { periodStart: { gte: periodStart } } : {}),
+        },
+        _sum: { answers: true },
+      }),
+    ]);
     const agentSeatsUsed = await this.prisma.membership.count({ where: { shopId: shop.id } });
     const owner = shop.memberships[0]?.user;
     let accountShopCount: number | null = null;
@@ -221,7 +233,7 @@ export class OpsService {
       });
     }
     const chatUsed = stats._sum.count ?? 0;
-    const aiResolvedUsed = stats._sum.aiResolvedCount ?? 0;
+    const aiResolvedUsed = aiUsage._sum.answers ?? 0;
     const overAi = Math.max(0, aiResolvedUsed - plan.aiResolvedLimit);
     return {
       shopDomain: shop.shopDomain,

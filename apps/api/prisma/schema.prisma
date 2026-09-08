@@ -183,16 +183,29 @@ model KnowledgeSyncJob {
   externalId String
   status     String
   payload    String?
+  /// 运行中任务的心跳。超时判定必须基于它而不是 createdAt——按创建时间会误杀
+  /// 长时间但健康的大目录同步。心跳停摆的 running 任务由启动清理推向 failed，
+  /// 否则并发守卫会让该店该类目永久不再同步。
+  heartbeatAt DateTime?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  @@index([status, heartbeatAt])
 }
 
 model ChatStatDaily {
   id               String   @id @default(cuid())
   shopDomain       String
   day              DateTime
+  /// 消息数（旧口径）。ops 的 chatCount 仍在用，故保留。
   count            Int      @default(0)
+  /// 弃用：AI 消息数（旧口径）。曾被当作会话数塞进图表，与 human 序列单位不同。
+  /// 新写入已停止；ops 的 AI 用量改读 AiUsage.answers（配额的权威计数）。
   aiResolvedCount  Int      @default(0)
+  /// 当天有活动的会话数。图表与分流率的分母。
+  threadCount      Int      @default(0)
+  /// 当天被人工接管的会话数。图表的 human 序列；ai 序列 = threadCount - 它。
+  humanThreadCount Int      @default(0)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -225,30 +238,52 @@ model AiUsage {
 }
 
 /// 访客会话线程 — storefront inbox / dashboard
+/// 会话归属状态。裸 String 曾让 'human' 成为一个前端自说自话、后端从不写入的
+/// 幽灵取值——指标据此计算，于是恒为零。词表由数据库守住，应用层写错即 5xx。
+enum ChatThreadStatus {
+  ai
+  pending
+  human
+  closed
+}
+
+/// 消息作者。agent = 商家人工回复，必须与 AI 的 assistant 区分：
+/// 旧前端把商家消息标成 user，落库后模型会把商家的话当成顾客说的。
+enum ChatMessageRole {
+  user
+  assistant
+  agent
+}
+
 model ChatThread {
-  id          String        @id @default(cuid())
-  shopDomain  String
-  visitorId   String
-  status      String        @default("ai")
-  channel     String        @default("web")
-  topic       String?
-  lastMessage String?       @db.Text
-  unread      Int           @default(0)
-  messages    ChatMessage[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id            String           @id @default(cuid())
+  shopDomain    String
+  visitorId     String
+  status        ChatThreadStatus @default(ai)
+  channel       String           @default("web")
+  topic         String?
+  lastMessage   String?          @db.Text
+  unread        Int              @default(0)
+  /// 最近一次转人工的时刻。图表与分流率按它切窗——用当前 status 算会把历史
+  /// 会话的终态算进当期。
+  handedOverAt  DateTime?
+  closedAt      DateTime?
+  messages      ChatMessage[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   @@unique([shopDomain, visitorId])
   @@index([shopDomain, updatedAt])
+  @@index([shopDomain, handedOverAt])
 }
 
 model ChatMessage {
-  id        String     @id @default(cuid())
+  id        String          @id @default(cuid())
   threadId  String
-  thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
-  role      String
-  content   String     @db.Text
-  createdAt DateTime   @default(now())
+  thread    ChatThread      @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  role      ChatMessageRole
+  content   String          @db.Text
+  createdAt DateTime        @default(now())
 
   @@index([threadId, createdAt])
 }

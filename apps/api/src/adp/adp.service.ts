@@ -1,14 +1,22 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { createOpenClawClient } from '@drsell/openclaw';
+import { ChatMessageRole, ChatThread, ChatThreadStatus } from '@prisma/client';
+import { buildSupportSystemPrompt, createOpenClawClient } from '@drsell/openclaw';
 import { PrismaService } from '../prisma/prisma.service';
+import { ConversationService } from '../conversation/conversation.service';
 import { QuotaExceededError, QuotaService } from '../quota/quota.service';
 
 /**
  * 额度用尽时给顾客看的话。要点：说明白当前答不了、不怪顾客、给一条出路，
  * 且不暴露商家的套餐或用量——那是商家的商业信息，不该出现在顾客侧。
+ *
+ * 这句话承诺了人工跟进，所以商家侧必须真的有回复能力（见 conversation-handoff）。
  */
 const QUOTA_EXHAUSTED_REPLY =
   "I'm not able to answer right now. Please leave your question here and the store team will follow up.";
+
+function preview(text: string): string {
+  return text.length > 120 ? `${text.slice(0, 117)}...` : text;
+}
 
 @Injectable()
 export class AdpService {
@@ -17,6 +25,7 @@ export class AdpService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly quota: QuotaService,
+    private readonly conversations: ConversationService,
   ) {}
 
   async syncKnowledge(params: {
@@ -49,31 +58,62 @@ export class AdpService {
   }) {
     if (!params.shopDomain) throw new BadRequestException('shopDomain required');
 
-    const preview =
-      params.text.length > 120 ? `${params.text.slice(0, 117)}...` : params.text;
-    const thread = await this.prisma.chatThread.upsert({
+    const now = new Date();
+    const head = preview(params.text);
+    const existing = await this.prisma.chatThread.findUnique({
       where: {
         shopDomain_visitorId: {
           shopDomain: params.shopDomain,
           visitorId: params.visitorId,
         },
       },
-      create: {
-        shopDomain: params.shopDomain,
-        visitorId: params.visitorId,
-        status: 'ai',
-        channel: 'web',
-        topic: preview,
-        lastMessage: preview,
-        unread: 0,
-      },
-      update: {
-        lastMessage: preview,
-        updatedAt: new Date(),
-      },
     });
 
-    // 配额闸门：必须在调模型之前。超额就不发上游请求——商家不该为拦下的对话付费。
+    const thread: ChatThread = existing
+      ? await this.prisma.chatThread.update({
+          where: { id: existing.id },
+          data: { lastMessage: head, updatedAt: now },
+        })
+      : await this.prisma.chatThread.create({
+          data: {
+            shopDomain: params.shopDomain,
+            visitorId: params.visitorId,
+            status: ChatThreadStatus.ai,
+            channel: 'web',
+            topic: head,
+            lastMessage: head,
+            unread: 0,
+          },
+        });
+
+    // 用户消息在调模型之前落库：上游失败时它不该跟着丢，而且它就是上下文本身。
+    await this.conversations.appendMessage(thread.id, ChatMessageRole.user, params.text);
+    await this.conversations.recordActivity(
+      params.shopDomain,
+      existing ? existing.updatedAt : null,
+      now,
+    );
+
+    // ── 应答闸门 ──────────────────────────────────────────────────────────
+    // 必须在配额扣减之前：被拦下的对话不该让商家付费。
+    if (thread.status === ChatThreadStatus.human) {
+      // 人工已接管，AI 不得抢答。消息留给商家，未读加一，SSE 正常收尾——
+      // 报错会让 widget 显示一条红字，而顾客其实什么都没做错。
+      await this.prisma.chatThread.update({
+        where: { id: thread.id },
+        data: { unread: { increment: 1 }, updatedAt: now },
+      });
+      return;
+    }
+
+    if (thread.status === ChatThreadStatus.closed) {
+      // 顾客在已结束的会话上又开口 = 新问题，回到 AI。
+      await this.prisma.chatThread.update({
+        where: { id: thread.id },
+        data: { status: ChatThreadStatus.ai, closedAt: null, topic: head, updatedAt: now },
+      });
+    }
+
     try {
       await this.quota.assertWithinQuota(params.shopDomain);
     } catch (e) {
@@ -81,31 +121,44 @@ export class AdpService {
       params.onChunk(QUOTA_EXHAUSTED_REPLY);
       await this.prisma.$transaction([
         this.prisma.chatMessage.create({
-          data: { threadId: thread.id, role: 'user', content: params.text },
-        }),
-        this.prisma.chatMessage.create({
-          data: { threadId: thread.id, role: 'assistant', content: QUOTA_EXHAUSTED_REPLY },
+          data: {
+            threadId: thread.id,
+            role: ChatMessageRole.assistant,
+            content: QUOTA_EXHAUSTED_REPLY,
+          },
         }),
         // 转成待人工接管：额度用尽的会话必须让商家看得见，否则顾客石沉大海。
         this.prisma.chatThread.update({
           where: { id: thread.id },
           data: {
-            status: 'pending',
-            lastMessage: QUOTA_EXHAUSTED_REPLY,
+            status: ChatThreadStatus.pending,
+            lastMessage: preview(QUOTA_EXHAUSTED_REPLY),
             unread: { increment: 1 },
-            updatedAt: new Date(),
+            updatedAt: now,
           },
         }),
       ]);
       return;
     }
 
+    // 配额通过：pending 是「等人工救场」的临时态，额度回来了就该回到 AI。
+    if (thread.status === ChatThreadStatus.pending) {
+      await this.prisma.chatThread.update({
+        where: { id: thread.id },
+        data: { status: ChatThreadStatus.ai, updatedAt: now },
+      });
+    }
+
+    // 上下文从自己的库里组装——网关侧会话丢失也重建得出来。
+    const messages = await this.conversations.buildContext(thread.id);
+
     let assistantText = '';
     await this.openclaw.chatStream({
       shopDomain: params.shopDomain,
       visitorId: params.visitorId,
-      message: params.text,
       conversationId: params.conversationId,
+      systemPrompt: buildSupportSystemPrompt(params.shopDomain),
+      messages,
       onChunk: (chunk) => {
         assistantText += chunk;
         params.onChunk(chunk);
@@ -113,22 +166,18 @@ export class AdpService {
       signal: params.signal,
     });
 
-    const assistantPreview =
-      assistantText.length > 120
-        ? `${assistantText.slice(0, 117)}...`
-        : assistantText;
-
     await this.prisma.$transaction([
       this.prisma.chatMessage.create({
-        data: { threadId: thread.id, role: 'user', content: params.text },
-      }),
-      this.prisma.chatMessage.create({
-        data: { threadId: thread.id, role: 'assistant', content: assistantText },
+        data: {
+          threadId: thread.id,
+          role: ChatMessageRole.assistant,
+          content: assistantText,
+        },
       }),
       this.prisma.chatThread.update({
         where: { id: thread.id },
         data: {
-          lastMessage: assistantPreview || thread.lastMessage,
+          lastMessage: preview(assistantText) || thread.lastMessage,
           updatedAt: new Date(),
         },
       }),
@@ -138,30 +187,5 @@ export class AdpService {
     if (assistantText.trim()) {
       await this.quota.recordAnswer(params.shopDomain);
     }
-
-    await this.bumpChatStat(params.shopDomain);
-    if (thread.status === 'ai') {
-      await this.bumpAiResolvedStat(params.shopDomain);
-    }
-  }
-
-  async bumpChatStat(shopDomain: string) {
-    const day = new Date();
-    day.setUTCHours(0, 0, 0, 0);
-    await this.prisma.chatStatDaily.upsert({
-      where: { shopDomain_day: { shopDomain, day } },
-      create: { shopDomain, day, count: 1 },
-      update: { count: { increment: 1 } },
-    });
-  }
-
-  async bumpAiResolvedStat(shopDomain: string) {
-    const day = new Date();
-    day.setUTCHours(0, 0, 0, 0);
-    await this.prisma.chatStatDaily.upsert({
-      where: { shopDomain_day: { shopDomain, day } },
-      create: { shopDomain, day, aiResolvedCount: 1 },
-      update: { aiResolvedCount: { increment: 1 } },
-    });
   }
 }

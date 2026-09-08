@@ -8,6 +8,7 @@ describe('OpsService', () => {
     adminUser: { findMany: jest.fn(), findUnique: jest.fn() },
     shop: { findUnique: jest.fn(), findMany: jest.fn() },
     chatStatDaily: { aggregate: jest.fn() },
+    aiUsage: { aggregate: jest.fn() },
     knowledgeSyncJob: { create: jest.fn(), update: jest.fn() },
     botSetting: { update: jest.fn() },
     auditLog: { findMany: jest.fn(), count: jest.fn() },
@@ -168,9 +169,9 @@ describe('OpsService', () => {
       botSetting: { widgetVisible: true },
       memberships: [],
     });
-    prisma.chatStatDaily.aggregate.mockResolvedValue({
-      _sum: { count: 100, aiResolvedCount: 42 },
-    });
+    prisma.chatStatDaily.aggregate.mockResolvedValue({ _sum: { count: 100 } });
+    // AI 用量来自 AiUsage.answers（配额的权威计数器），不再是 AI 消息数。
+    prisma.aiUsage.aggregate.mockResolvedValue({ _sum: { answers: 42 } });
     prisma.membership.count.mockResolvedValue(2);
     const detail = await svc.getShop('a.myshopify.com');
     expect(detail.aiResolved).toBe(42);

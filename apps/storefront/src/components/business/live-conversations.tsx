@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { Conversation } from "@/lib/types";
+import type { Conversation, ConversationStatus } from "@/lib/types";
 import { stripMarkdown } from "@/lib/markdown";
 
 const CHANNEL_ICON = {
@@ -17,11 +17,12 @@ const CHANNEL_ICON = {
  * 稿中每行右侧不是徽章，而是一枚状态圆点（多数为绿、待接管为红）。
  * 保留 label 供屏幕阅读器使用，避免为了像素还原丢掉可访问性。
  */
-const STATUS_DOT = {
+const STATUS_DOT: Record<ConversationStatus, { label: string; className: string }> = {
   ai: { label: "AI handling", className: "bg-primary-container" },
   pending: { label: "Pending takeover", className: "bg-destructive" },
   human: { label: "Human handling", className: "bg-info" },
-} as const;
+  closed: { label: "Closed", className: "bg-muted-foreground" },
+};
 
 interface LiveConversationsProps {
   conversations: Conversation[];

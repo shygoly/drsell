@@ -41,7 +41,8 @@ export class AdpController {
         conversationId: body.conversationId,
         onChunk: (chunk) => res.write(chunk),
       });
-      await this.adp.bumpChatStat(body.shopDomain);
+      // 计数由 proxyChatSse 内部完成。这里原先又补了一次 bumpChatStat，
+      // 让商家侧的试聊在同一条对话上重复计数。
       res.end();
     } catch (e) {
       res.write(`event: error\ndata: ${JSON.stringify({ message: String(e) })}\n\n`);

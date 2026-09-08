@@ -16,7 +16,7 @@
 | 前缀 | 含义 | 出处（论证在此） | 数量 |
 |---|---|---|---|
 | `INV-n` | **不变量**：任何实现都不得违反的硬约束 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 3 |
-| `ADR-n` | **架构决策**：工程层不可逆选择 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 13 |
+| `ADR-n` | **架构决策**：工程层不可逆选择 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 17 |
 | `B-n` | **边界规矩**：模块/包之间的硬边界 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 5 |
 | `DS-n` | **UI 反模式**：呈现层禁止事项 | [`DESIGN.md`](DESIGN.md) | 10 |
 
@@ -54,6 +54,8 @@
 | `ADR-13` | 本地订阅状态只镜像 Shopify `AppSubscriptionStatus` 的六个取值，不自造状态词 | `apps/api/prisma/schema.prisma` + `spec/check-ops-status.mjs` | 已守护 |
 | `ADR-14` | 套餐只有两档，价格与 AI 回答额度定义在 `@drsell/shared` 的 `PLANS`（basic $15/1500、pro $30/5000）；走 Shopify 托管计费，plan handle 即 `PlanCode`，靠 `app_subscriptions/update` 同步 | `packages/shared/src/index.ts` + `spec/check-pricing.mjs` | 已守护 |
 | `ADR-15` | 模型主备：primary `deepseek-v4/deepseek-v4-pro`，fallbacks `zhipu/glm-4.5-flash`；余额不足（`billing`）自动切换。备用模型必须支持 tool calling | `infra/openclaw/drsell/openclaw.json.example` + `setup-wjclaw.sh` | 已守护 |
+| `ADR-16` | 会话状态是数据库枚举 `ChatThreadStatus`（`ai`/`pending`/`human`/`closed`），迁移统一经 `ConversationService` | `apps/api/prisma/schema.prisma` + `apps/api/src/adp/adp.service.spec.ts` | 已守护 |
+| `ADR-17` | 会话上下文由本地 `ChatMessage` 组装为完整 `messages`，system prompt 走 system 角色；网关会话键只作日志关联 | `packages/openclaw/src/index.ts` + `apps/api/src/adp/adp.service.spec.ts` | 已守护 |
 
 ---
 

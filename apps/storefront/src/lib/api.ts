@@ -3,6 +3,7 @@ import type {
   ChartPoint,
   ChatMessage,
   Conversation,
+  ConversationStatus,
   DashboardStats,
   KnowledgeBaseSuggestion,
 } from "./types";
@@ -19,11 +20,11 @@ import type {
 export const EMPTY_STATS: DashboardStats = {
   conversationsToday: 0,
   conversationsTrendPct: 0,
-  aiResolution: 0,
+  aiResolution: null,
   aiResolutionTarget: 70,
-  avgFirstResponseSec: 0,
-  avgResponseTrendSec: 0,
+  avgFirstResponseSec: null,
   pendingTakeover: 0,
+  windowDays: 30,
 };
 
 export function fetchStats(token: string) {
@@ -46,5 +47,33 @@ export function fetchThreadMessages(threadId: string, token: string) {
   return merchantFetch<ChatMessage[]>(
     `/storefront/inbox/${encodeURIComponent(threadId)}/messages`,
     token,
+  );
+}
+
+/**
+ * 人工接管。以前这三个动作只改前端 state——刷新页面就没了，
+ * 商家的消息也从未离开过浏览器。
+ */
+export function takeOverThread(threadId: string, token: string) {
+  return merchantFetch<{ id: string; status: ConversationStatus }>(
+    `/storefront/inbox/${encodeURIComponent(threadId)}/takeover`,
+    token,
+    { method: "POST" },
+  );
+}
+
+export function replyToThread(threadId: string, token: string, text: string) {
+  return merchantFetch<ChatMessage & { threadStatus: ConversationStatus }>(
+    `/storefront/inbox/${encodeURIComponent(threadId)}/reply`,
+    token,
+    { method: "POST", body: JSON.stringify({ text }) },
+  );
+}
+
+export function closeThread(threadId: string, token: string) {
+  return merchantFetch<{ id: string; status: ConversationStatus }>(
+    `/storefront/inbox/${encodeURIComponent(threadId)}/close`,
+    token,
+    { method: "POST" },
   );
 }
