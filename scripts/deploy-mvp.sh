@@ -195,6 +195,40 @@ EOF
 echo "==> Reload nginx vhost"
 ssh "$HOST" 'docker exec webrtc-ws-proxy nginx -t && docker exec webrtc-ws-proxy nginx -s reload && echo nginx_ok'
 
+echo "==> Verify via public domain (content assertions, not just status codes)"
+# 上面那些 curl 127.0.0.1 直连上游、绕过 nginx 和 Cloudflare —— AGENTS.md 陷阱 3
+# 记着它们曾让两个生产故障全程绿灯。这一段走公网，覆盖的失败面是前者到不了的：
+#   Cloudflare SSL/TLS 被调成 Strict（源站自签证书）→ 526
+#   边缘回源不通 → 522 / 1003
+#   nginx location 走错应用 → 200 但内容是另一个站
+# 纯状态码断言覆盖不了「200 但内容错」，所以每条都要断言内容特征。
+verify_public() {
+  local url="$1" needle="$2" code body
+  for attempt in 1 2 3 4 5; do
+    body=$(curl -s --max-time 25 "$url" 2>/dev/null || true)
+    code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 25 "$url" 2>/dev/null || echo 000)
+    if [[ "$code" == "200" && "$body" == *"$needle"* ]]; then
+      echo "  ok  $url  (200, 命中 \"$needle\")"
+      return 0
+    fi
+    sleep 3
+  done
+  echo "  FAIL  $url  HTTP=$code  未命中 \"$needle\""
+  echo "        526=Cloudflare SSL 模式被调成 Strict（源站是自签证书，必须 Full）"
+  echo "        522/1003=边缘回源不通；200 但未命中=nginx 把路由指到了别的应用"
+  return 1
+}
+
+PUBLIC_FAIL=0
+verify_public "https://drsell.szchada.top/"            "AI customer support"   || PUBLIC_FAIL=1
+verify_public "https://drsell.szchada.top/api/health"  '"service":"drsell-api"' || PUBLIC_FAIL=1
+verify_public "https://ops.szchada.top/login"          "Drsell"                || PUBLIC_FAIL=1
+if [[ "$PUBLIC_FAIL" != "0" ]]; then
+  echo ""
+  echo "公网验证未通过 —— 进程可能都活着，但商家访问到的东西是坏的。不要当作部署成功。"
+  exit 1
+fi
+
 echo "==> Prune stale drsell nginx backups on wjclaw"
 ssh "$HOST" "rm -f ${NGINX_CONF_DIR}/drsell.szchada.com.conf.bak ${NGINX_CONF_DIR}/default.conf.bak 2>/dev/null || true"
 

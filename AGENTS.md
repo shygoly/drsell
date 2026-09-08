@@ -95,8 +95,13 @@ bash scripts/deploy-mvp.sh   # 构建 + rsync 到 wjclaw + pm2 重启四进程 +
    **「该留哪个应用」仍是未决架构问题**，assetPrefix 只是止血。
 
 3. **验证生产必须走公网域名并断言内容特征**（如 `<title>`）。
-   `scripts/deploy-mvp.sh` 的健康检查用 `curl 127.0.0.1:5012/app` 直连上游、绕过 nginx，
-   曾让两个生产故障全程绿灯。纯状态码断言覆盖不了「200 但内容错」。
+   `scripts/deploy-mvp.sh` 里那几条 `curl 127.0.0.1:50xx` 直连上游、绕过 nginx 与
+   Cloudflare，曾让两个生产故障全程绿灯。纯状态码断言覆盖不了「200 但内容错」。
+   **2026-09-08 起这条规矩有执行体**：同一脚本在 nginx reload 后跑 `verify_public`，
+   走公网逐条断言内容，不过就 `exit 1`。它覆盖的失败面是直连检查到不了的——
+   Cloudflare SSL 模式被调成 Strict（源站自签证书）→ 526、边缘回源不通 → 522/1003、
+   nginx location 指错应用 → 200 但内容是另一个站。
+   直连那几条保留：它们区分「应用挂了」和「应用活着但对外是坏的」。
 
 4. **Shopify app 只有一个合法身份**：client_id `0b36b70772220b71b2fe296b3deba914`
    （name `Drsell`，handle `drseller-alpha`，App ID 264501002241）。
