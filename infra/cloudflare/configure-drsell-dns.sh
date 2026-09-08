@@ -2,8 +2,16 @@
 # drsell.szchada.top DNS — use orange-cloud A record (NOT Worker custom_domain).
 #
 # Why: Worker custom_domain creates a Workers DNS entry that blocks adding a plain
-# A record, and Worker→origin fetch often 522/1003 on this host. The same pattern
-# as dingding.szchada.top (proxied A → wjclaw :443) works reliably.
+# A record, and Worker→origin fetch often 522/1003 on this host.
+#
+# 实况（2026-09-08 经 CF API 核对，勿再照抄旧注释）：
+#   drsell.szchada.top  A 163.7.7.160  橙云 ttl=auto —— 没有 Worker 路由，也没有 custom domain
+#   ops.szchada.top     A 163.7.7.160  橙云 ttl=auto —— 同上
+#   Worker drsell-origin-proxy 已部署但未绑定任何域名，当前不在链路里
+# 旧注释说「dingding.szchada.top 也是 proxied A → wjclaw」是错的：dingding 实际是
+# Worker custom domain（script dingding-a1-spi），DNS 那条 AAAA 100:: 只是占位记录。
+# szchada.top 上走 Worker custom domain 的是这 7 个：
+#   api.kaoyan / dingding / api / web / mpc / chain / vault —— 它们都是 AAAA 100::。
 #
 # Manual steps (Cloudflare Dashboard → szchada.top):
 #   1. Workers & Pages → drsell-origin-proxy → Settings → Domains & Routes
