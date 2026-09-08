@@ -171,20 +171,30 @@ widget 在打开状态下按固定间隔拉取 `GET public/chat/messages?after=<
 即只覆盖 ops 控制器，不会误扫 storefront 的新写路由。
 若该检查器将来扩大扫描范围，D5 的结论需要重新讨论。
 
-**R8 — OpenClaw 工作区记忆是一条跨租户通道（新发现，未关闭）**
+**R8 — OpenClaw 工作区记忆是一条跨租户通道（已关闭）**
 除会话记忆外，网关还有一层**落盘的 agent 记忆**：工作区
 `/root/.openclaw/workspace-drsell/memory/YYYY-MM-DD.md`，由 OpenClaw 通用
 `AGENTS.md` 模板指示 agent「Capture what matters」自行写入，并在每次请求的启动
 上下文里回灌。实测：探针请求「记住 4271」后该文件被创建，随后**换一个会话键、
 甚至完全不带会话键**的请求仍能读出 4271，模型自述"found this recorded in my
-daily memory file"。探针写入的文件已删除（此前该目录不存在，即历史上未累积过）。
+daily memory file"。这层记忆没有任何店铺维度：一个工作区服务所有商家的所有顾客，
+绕过 `INV-2`——`adp_reader` 的零表权限管得住 SQL，管不住一个 Markdown 文件。
 
-这层记忆**没有任何店铺维度**：一个工作区服务所有商家的所有顾客。
-它绕过了 `INV-2`——`adp_reader` 的零表权限管得住 SQL，管不住一个 Markdown 文件。
-本变更在 `infra/openclaw/drsell/workspace/SOUL.md` 加了硬性规则 5 禁止写记忆文件，
-**但那是提示词级的约束，不是守护方式**：按本仓规矩，它现在是一条说不出守护方式的
-规则。真正的解法在 OpenClaw 侧（按 agent/会话隔离工作区，或关掉记忆能力），
-超出本变更范围，应单独立项。
+**解法不是提示词，是配置开关。** OpenClaw 有两个带明确文档的键：
+`agents.defaults.startupContext.enabled=false`
+（"no runtime-loaded daily memory"）与
+`agents.defaults.memorySearch.enabled=false`
+（"disable when you want fully stateless responses"）。两个都已置 false 并重启。
+
+**验证**：要求 agent 记住 5309 → 换全新会话键、不带历史再问 → 回 `UNKNOWN`，
+且 `memory/` 目录**根本没被创建**。读写两侧都断了。
+回归：同一网关下正常问答仍能触发 MCP 工具并返回真实数据（Ski Wax $24.95、库存 30）。
+
+`SOUL.md` 的硬性规则 5（禁止写记忆）作为纵深防御保留，但它不再是唯一防线。
+配置已写进 `infra/openclaw/drsell/openclaw.json.example`，服务器重建即复现。
+
+**残留**：这个配置本身仍**没有机器守护**——没有检查器能防止有人把
+`startupContext.enabled` 改回 true。它靠的是配置模板 + `ADR-17` 的论证。
 
 **R7 — 引入 `openspec/` 与单一事实来源的张力（已关闭）**
 本仓 `AGENTS.md` 是 agent 指引唯一事实来源，且明确记录过「两份事实来源漂移」的教训。

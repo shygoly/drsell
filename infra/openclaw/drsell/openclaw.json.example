@@ -59,7 +59,13 @@
         ]
       },
       "workspace": "/root/.openclaw/workspace-drsell",
-      "maxConcurrent": 4
+      "maxConcurrent": 4,
+      "startupContext": {
+        "enabled": false
+      },
+      "memorySearch": {
+        "enabled": false
+      }
     }
   },
   "gateway": {

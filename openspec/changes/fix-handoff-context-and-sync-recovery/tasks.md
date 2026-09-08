@@ -1,5 +1,5 @@
-> 实施于分支 `feat/handoff-context-sync-recovery`。
-> `⛔` = 需要本地拿不到的环境（生产库 / OpenClaw 网关 / 已部署实例），未执行。
+> 实施于分支 `feat/handoff-context-sync-recovery`，2026-09-08 已部署到 wjclaw。
+> 唯一未完成的是 6.4 的商家侧往返——需要真实商家会话，只能由商家本人点一次。
 
 ## 1. 前置核实（不写代码，先证伪假设）
 
@@ -57,9 +57,11 @@
 - [x] 6.1 `handleTakeOver`/`handleResolve`/`handleSend` 改调真实 API
 - [x] 6.2 失败渲染可见错误条（"nothing was sent"）+ 按钮 busy 禁用，不静默吞掉
 - [x] 6.3 `ConversationStatus` 增加 `closed`；`ChatMessage.role` 增加 `agent`；`resolvedIds` 本地态删除，改由服务端 `closed` 决定
-- [ ] ⛔ 6.4 手工验证「接管后刷新页面状态仍在」——**本分支尚未部署**，已在公网确认
-      `POST /api/storefront/inbox/:id/reply` 与 `GET /api/public/chat/messages` 均返回 404，
-      即生产跑的仍是旧代码。部署后必须补做。
+- [ ] 6.4 **部分完成**。已部署，公网确认：`GET /api/public/chat/messages` 200 且返回
+      真实两条消息（探针会话，已清理）；`POST /api/storefront/inbox/:id/reply` 由 404
+      变为 401（路由存在且鉴权生效）。
+      **仍未做**：带真实商家会话 token 的「接管 → 刷新 → 状态仍在」往返——
+      需要商家自己在嵌入应用里点一次，我不持有也不应持有商家凭据。
 
 ## 7. 上下文所有权（F2）
 
@@ -96,7 +98,9 @@
 - [x] 10.3 新增 `ADR-16`（会话状态词表由 DB 枚举守住）与 `ADR-17`（上下文所有权在本地库），
       论证入 `ARCHITECTURE.md`，登记入 `DECISIONS.md`，`check-links`/`check-ids` 绿
 - [x] 10.4 `openspec/` 与治理文档的分工已写入 `AGENTS.md` 事实来源表
-- [ ] ⛔ 10.5 本分支的生产验证——尚未部署。
-      已做的公网基线（改模型后）：`drsell.szchada.top/` 200 且 `<title>Dr Sell — AI customer
-      support`；`/api/health` 返回 `{"ok":true,"service":"drsell-api"}`；`ops.szchada.top`
-      307 → `/login`。
+- [x] 10.5 已部署并走公网验证：迁移 `20260908040000` 于 14:11:48 落地，
+      `ChatThread.status`→`ChatThreadStatus`、`ChatMessage.role`→`ChatMessageRole`
+      均为枚举，数据完好（6 threads / 38 messages）。
+      内容断言：`drsell.szchada.top/` 与 `/inbox` 200 且 `<title>Dr Sell — AI customer
+      support`；`ops.szchada.top/login` 200 `<title>Drsell 运营台`。
+      端到端对话经公网跑通并返回真实商品数据（探针会话与计数已回退）。

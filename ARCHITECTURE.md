@@ -189,8 +189,16 @@ system prompt 以独立 `system` 角色发出；网关侧会话键仅用于日�
 正文里伪造 `[shop=...]` 无效。
 **注意**：这条只降低 prompt injection 的难度，不消除它。真正的边界仍是
 `adp_reader` 的零表权限（`INV-2`）——即使模型被说服，它也只能调那三个只读函数。
+**必须同时关掉网关侧记忆**，否则两份上下文叠加：实测网关的会话记忆按
+`x-openclaw-session-key` 累积（同键第二轮不带历史仍答得出第一轮口令），
+另有一层跨租户的落盘 agent 记忆（`workspace-drsell/memory/*.md`，换键甚至不带键
+都读得到）。故 `sessionKey()` 每请求附 uuid，且 profile 置
+`startupContext.enabled=false` + `memorySearch.enabled=false`。
 **守护**：`packages/openclaw` 的接口只收 `messages` + `systemPrompt`，
-不泄漏网关专有语义；`adp.service.spec.ts` 断言网关记忆缺失时仍能从本地库重建上下文。
+不泄漏网关专有语义；`adp.service.spec.ts` 断言网关记忆缺失时仍能从本地库重建上下文；
+`infra/openclaw/drsell/openclaw.json.example` 固化记忆关闭，
+`scripts/deploy-mvp.sh` 每次部署同步 `SOUL.md`/`SKILL.md`（此前只有重建服务器才推，
+导致提示词与代码失配）。
 
 ## 3. B — 边界规矩论证
 

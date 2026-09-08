@@ -114,6 +114,18 @@ fi
 
 rsync -az "$ROOT/package.json" "$ROOT/pnpm-workspace.yaml" "$ROOT/pnpm-lock.yaml" "${HOST}:${REMOTE}/"
 
+echo "==> Sync OpenClaw agent prompts (SOUL/IDENTITY/SKILL) + restart gateway"
+# 提示词是仓库拥有的，但此前只有 setup-wjclaw.sh（重建服务器时才跑）会推。
+# 结果是 ADR-17 把店铺域挪进 system 消息后，生产上的 SOUL.md 还写着「取自用户消息」——
+# 部署完就失配。放这里，让每次部署都把两边拉齐。
+rsync -az "$ROOT/infra/openclaw/drsell/workspace/SOUL.md" \
+  "${HOST}:/root/.openclaw/workspace-drsell/SOUL.md"
+rsync -az "$ROOT/infra/openclaw/drsell/workspace/IDENTITY.md" \
+  "${HOST}:/root/.openclaw/workspace-drsell/IDENTITY.md"
+rsync -az "$ROOT/infra/openclaw/drsell/workspace/skills/" \
+  "${HOST}:/root/.openclaw/workspace-drsell/skills/"
+ssh "$HOST" 'pm2 restart openclaw-drsell --update-env >/dev/null 2>&1 && echo openclaw_restarted || echo "openclaw restart skipped (not running)"'
+
 echo "==> Sync nginx vhost"
 rsync -az "$ROOT/infra/nginx/drsell.szchada.top.conf" "${HOST}:${NGINX_CONF_DIR}/drsell.szchada.top.conf"
 rsync -az "$ROOT/infra/nginx/ops.szchada.top.conf" "${HOST}:${NGINX_CONF_DIR}/ops.szchada.top.conf"
