@@ -32,6 +32,11 @@ const files = [
   ...walk('apps', { exts: ['.ts', '.tsx'] }),
   ...walk('packages', { exts: ['.ts'] }),
   ...walk('spec', { exts: ['.mjs'] }),
+  // openspec 归档后 openspec/specs/ 才有内容，而它引用 INV/ADR/B 是被允许的
+  // （AGENTS.md 里的分工：openspec 只描述行为需求，不可逆决策留给出处文档，
+  // 需求牵出不可逆选择时只留指向 ID 的引用）。既然允许引用，就得守住
+  // 「引用的 ID 必须在册」——否则一条 ADR-99 能在 openspec 里活得好好的。
+  ...walk('openspec', { exts: ['.md'] }),
 ].filter((f) => !EXCLUDE_FILES.has(f));
 
 const ID_RE = /\b(?:INV|ADR|B|DS)-\d+(?:\.\d+)?\b/;

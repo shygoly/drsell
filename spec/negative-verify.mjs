@@ -178,6 +178,16 @@ const CASES = [
     expect: 1,
     expectMatch: /必须在窗内无会话时返回 null/,
   },
+  {
+    name: 'check-ids 抓 openspec 里未在册的 ID',
+    checker: 'check-ids.mjs',
+    inject: () => tempFile(
+      'openspec/specs/conversation-handoff/__negverify.md',
+      '# 负向验证\n\n引用一条不存在的 ADR-99。\n',
+    ),
+    expect: 1,
+    expectMatch: /未在册的 ADR-99/,
+  },
 ];
 
 const gitStatus = () =>
