@@ -93,7 +93,15 @@ function useShopSessionState() {
         history.replaceState(null, "", window.location.pathname + window.location.search);
       }
     }
-    const storedToken = fragmentToken || safeStorageGet(TOKEN_KEY);
+    // 存着的 JWT 是**绑定到某一个店**的（服务端按 token 里的 shop 解析数据）。
+    // URL 指向的店和存的店不是同一个时，那枚 token 属于别人——必须丢掉，
+    // 否则同一个人先后打开 A、B 两个店，B 会看到 A 的会话列表。
+    // 服务端隔离本身是对的，泄露发生在这里：复用了另一个店的会话。
+    const tokenIsForAnotherShop = Boolean(fromUrl && storedShop && fromUrl !== storedShop);
+    if (tokenIsForAnotherShop) {
+      safeStorageSet(TOKEN_KEY, "");
+    }
+    const storedToken = fragmentToken || (tokenIsForAnotherShop ? "" : safeStorageGet(TOKEN_KEY));
     if (fragmentToken) safeStorageSet(TOKEN_KEY, fragmentToken);
     // shop 一律落盘：客户端路由跳转会丢掉查询串，之前只在拿到 fragment token 时才存，
     // 于是进到 /inbox 之后 shop 变空，换发条件永远不成立。

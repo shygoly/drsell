@@ -31,7 +31,7 @@ type DashboardData = {
  * 能看到真实会话数据的原因）。
  */
 export function useDashboardData(): DashboardData {
-  const { token, ready } = useShopSession();
+  const { token, ready, shop } = useShopSession();
   const [stats, setStats] = useState<DashboardStats>(EMPTY_STATS);
   const [chart, setChart] = useState<ChartPoint[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -49,10 +49,10 @@ export function useDashboardData(): DashboardData {
     setLoading(true);
     setError("");
     Promise.all([
-      fetchStats(token),
-      fetchChart(token),
-      fetchConversations(token),
-      fetchSuggestion(token),
+      fetchStats(token, shop),
+      fetchChart(token, shop),
+      fetchConversations(token, shop),
+      fetchSuggestion(token, shop),
     ])
       .then(([s, c, conv, sug]) => {
         if (cancelled) return;
@@ -70,7 +70,7 @@ export function useDashboardData(): DashboardData {
     return () => {
       cancelled = true;
     };
-  }, [ready, token]);
+  }, [ready, token, shop]);
 
   return { stats, chart, conversations, suggestion, loading, error };
 }

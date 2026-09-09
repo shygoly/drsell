@@ -27,25 +27,38 @@ export const EMPTY_STATS: DashboardStats = {
   windowDays: 30,
 };
 
-export function fetchStats(token: string) {
-  return merchantFetch<DashboardStats>("/storefront/stats", token);
+/**
+ * 每个请求都带上当前店铺域。
+ *
+ * 服务端 `resolveShopDomain` 早就有这道闸门：shop 会话里 `asked !== bound` 直接
+ * ForbiddenException。但前端一直不传 shop，`asked` 恒为 undefined，闸门从没被
+ * 触发过——于是「拿着 A 店的 token 打开 B 店」会静默返回 A 的数据，而不是被拒。
+ * 传上之后，同类问题从「悄悄给错数据」变成「403 硬拒」。
+ */
+function withShop(path: string, shop: string) {
+  if (!shop) return path;
+  return `${path}${path.includes("?") ? "&" : "?"}shop=${encodeURIComponent(shop)}`;
 }
 
-export function fetchChart(token: string) {
-  return merchantFetch<ChartPoint[]>("/storefront/chart", token);
+export function fetchStats(token: string, shop = "") {
+  return merchantFetch<DashboardStats>(withShop("/storefront/stats", shop), token);
 }
 
-export function fetchConversations(token: string) {
-  return merchantFetch<Conversation[]>("/storefront/conversations", token);
+export function fetchChart(token: string, shop = "") {
+  return merchantFetch<ChartPoint[]>(withShop("/storefront/chart", shop), token);
 }
 
-export function fetchSuggestion(token: string) {
-  return merchantFetch<KnowledgeBaseSuggestion>("/storefront/suggestion", token);
+export function fetchConversations(token: string, shop = "") {
+  return merchantFetch<Conversation[]>(withShop("/storefront/conversations", shop), token);
 }
 
-export function fetchThreadMessages(threadId: string, token: string) {
+export function fetchSuggestion(token: string, shop = "") {
+  return merchantFetch<KnowledgeBaseSuggestion>(withShop("/storefront/suggestion", shop), token);
+}
+
+export function fetchThreadMessages(threadId: string, token: string, shop = "") {
   return merchantFetch<ChatMessage[]>(
-    `/storefront/inbox/${encodeURIComponent(threadId)}/messages`,
+    withShop(`/storefront/inbox/${encodeURIComponent(threadId)}/messages`, shop),
     token,
   );
 }
@@ -54,25 +67,25 @@ export function fetchThreadMessages(threadId: string, token: string) {
  * 人工接管。以前这三个动作只改前端 state——刷新页面就没了，
  * 商家的消息也从未离开过浏览器。
  */
-export function takeOverThread(threadId: string, token: string) {
+export function takeOverThread(threadId: string, token: string, shop = "") {
   return merchantFetch<{ id: string; status: ConversationStatus }>(
-    `/storefront/inbox/${encodeURIComponent(threadId)}/takeover`,
+    withShop(`/storefront/inbox/${encodeURIComponent(threadId)}/takeover`, shop),
     token,
     { method: "POST" },
   );
 }
 
-export function replyToThread(threadId: string, token: string, text: string) {
+export function replyToThread(threadId: string, token: string, text: string, shop = "") {
   return merchantFetch<ChatMessage & { threadStatus: ConversationStatus }>(
-    `/storefront/inbox/${encodeURIComponent(threadId)}/reply`,
+    withShop(`/storefront/inbox/${encodeURIComponent(threadId)}/reply`, shop),
     token,
     { method: "POST", body: JSON.stringify({ text }) },
   );
 }
 
-export function closeThread(threadId: string, token: string) {
+export function closeThread(threadId: string, token: string, shop = "") {
   return merchantFetch<{ id: string; status: ConversationStatus }>(
-    `/storefront/inbox/${encodeURIComponent(threadId)}/close`,
+    withShop(`/storefront/inbox/${encodeURIComponent(threadId)}/close`, shop),
     token,
     { method: "POST" },
   );

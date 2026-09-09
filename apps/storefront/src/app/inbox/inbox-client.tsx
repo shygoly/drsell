@@ -63,7 +63,7 @@ interface InboxClientProps {
 }
 
 export function InboxClient({ initialConversations }: InboxClientProps) {
-  const { token } = useShopSession();
+  const { token, shop } = useShopSession();
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("open");
   const [search, setSearch] = useState("");
@@ -104,7 +104,7 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
     }
     let cancelled = false;
     setLoadingMessages(true);
-    void fetchThreadMessages(selectedId, token)
+    void fetchThreadMessages(selectedId, token, shop)
       .catch(() => null)
       .then((data) => {
         if (cancelled) return;
@@ -115,7 +115,7 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId, token]);
+  }, [selectedId, token, shop]);
 
   function patchStatus(id: string, status: ConversationStatus) {
     setConversations((prev) =>
@@ -145,7 +145,7 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
     if (!selected || !token) return;
     const id = selected.id;
     void run(async () => {
-      const r = await takeOverThread(id, token);
+      const r = await takeOverThread(id, token, shop);
       patchStatus(id, r.status);
     });
   }
@@ -154,7 +154,7 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
     if (!selected || !token) return;
     const id = selected.id;
     void run(async () => {
-      const r = await closeThread(id, token);
+      const r = await closeThread(id, token, shop);
       patchStatus(id, r.status);
     });
   }
@@ -164,7 +164,7 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
     if (!text || !selected || !token) return;
     const id = selected.id;
     void run(async () => {
-      const sent = await replyToThread(id, token, text);
+      const sent = await replyToThread(id, token, text, shop);
       setDraft("");
       setMessages((prev) => [
         ...prev,
