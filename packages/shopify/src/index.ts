@@ -8,19 +8,47 @@ export type ShopifyAppConfig = {
   apiVersion?: string;
 };
 
-export function verifyShopifyWebhookHmac(
-  rawBody: Buffer | string,
-  hmacHeader: string | undefined,
-  apiSecret: string,
-): boolean {
-  if (!hmacHeader) return false;
-  const digest = createHmac('sha256', apiSecret)
-    .update(typeof rawBody === 'string' ? rawBody : rawBody)
-    .digest('base64');
+function hmacMatches(rawBody: Buffer | string, hmacHeader: string, secret: string): boolean {
+  if (!secret) return false;
+  const digest = createHmac('sha256', secret).update(rawBody).digest('base64');
   const a = Buffer.from(digest);
   const b = Buffer.from(hmacHeader);
   if (a.length !== b.length) return false;
   return timingSafeEqual(a, b);
+}
+
+/**
+ * 校验 Shopify webhook 签名。
+ *
+ * 支持一个可选的**上一把密钥**：轮换 client secret 后，Shopify 在一段时间内
+ * 仍可能用旧密钥签名，而我们已经换成新的——表现就是所有 webhook 401，
+ * 且用新密钥自签测试全部通过（2026-09-09 生产上就是这个形态）。
+ * 只在新密钥不匹配时才回退到旧密钥，并把「命中了哪一把」返回给调用方，
+ * 好让日志说清楚轮换窗口是否还没过去。
+ */
+export type WebhookHmacResult = { ok: boolean; matched: 'current' | 'previous' | null };
+
+export function verifyShopifyWebhookHmacDetailed(
+  rawBody: Buffer | string,
+  hmacHeader: string | undefined,
+  apiSecret: string,
+  previousApiSecret?: string,
+): WebhookHmacResult {
+  if (!hmacHeader) return { ok: false, matched: null };
+  if (hmacMatches(rawBody, hmacHeader, apiSecret)) return { ok: true, matched: 'current' };
+  if (previousApiSecret && hmacMatches(rawBody, hmacHeader, previousApiSecret)) {
+    return { ok: true, matched: 'previous' };
+  }
+  return { ok: false, matched: null };
+}
+
+export function verifyShopifyWebhookHmac(
+  rawBody: Buffer | string,
+  hmacHeader: string | undefined,
+  apiSecret: string,
+  previousApiSecret?: string,
+): boolean {
+  return verifyShopifyWebhookHmacDetailed(rawBody, hmacHeader, apiSecret, previousApiSecret).ok;
 }
 
 export function buildAdminGraphqlUrl(shop: string, apiVersion = '2026-07'): string {

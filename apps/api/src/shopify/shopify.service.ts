@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import '@shopify/shopify-api/adapters/node';
 import { ApiVersion, shopifyApi } from '@shopify/shopify-api';
-import { verifyShopifyWebhookHmac, shopifyGraphql } from '@drsell/shopify';
+import { verifyShopifyWebhookHmacDetailed, shopifyGraphql } from '@drsell/shopify';
 import { Decimal } from '@prisma/client/runtime/library';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -448,8 +448,14 @@ export class ShopifyService implements OnModuleInit {
     return out;
   }
 
+  /** 返回是否通过 + 命中的是哪把密钥（轮换窗口内可能仍是旧的）。 */
   verifyWebhook(rawBody: Buffer | string, hmac?: string) {
-    return verifyShopifyWebhookHmac(rawBody, hmac, this.secret());
+    return verifyShopifyWebhookHmacDetailed(
+      rawBody,
+      hmac,
+      this.secret(),
+      process.env.SHOPIFY_API_SECRET_PREVIOUS || undefined,
+    );
   }
 
   async handleUninstall(shopDomain: string) {

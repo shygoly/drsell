@@ -225,7 +225,17 @@ export class ShopifyController {
     @Headers('x-shopify-shop-domain') shop?: string,
   ) {
     const raw = req.rawBody ?? Buffer.from(JSON.stringify(req.body ?? {}));
-    if (!this.shopify.verifyWebhook(raw, hmac)) {
+    const hmacCheck = this.shopify.verifyWebhook(raw, hmac);
+    if (hmacCheck.matched === 'previous') {
+      // 轮换窗口还没过去：Shopify 仍在用旧密钥签。收下，但必须吵——
+      // 一旦 Shopify 切到新密钥，SHOPIFY_API_SECRET_PREVIOUS 就该删掉，
+      // 留着等于长期接受一把本该作废的密钥。
+      this.logger.warn(
+        `webhook accepted with PREVIOUS secret: topic=${topic ?? '-'} shop=${shop ?? '-'} ` +
+          `——Shopify 仍在用旧密钥签名，确认切换完成后请删除 SHOPIFY_API_SECRET_PREVIOUS`,
+      );
+    }
+    if (!hmacCheck.ok) {
       // 验签失败必须留下「是谁、什么主题」——2026-09-09 生产上 12 次真实 webhook
       // 全部 401，而用本地密钥自签三条路径全过，光看 nginx 日志分不出是密钥错
       // 还是这些 webhook 根本属于另一个 app。只记非敏感元信息，不记 body 与签名。
