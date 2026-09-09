@@ -71,6 +71,16 @@ export class OpsController {
     return this.ops.listShops();
   }
 
+  @Get('subscription-gate')
+  subscriptionGate() {
+    return this.ops.subscriptionGate();
+  }
+
+  @Get('webhook-secret')
+  webhookSecret() {
+    return this.ops.webhookSecretStatus();
+  }
+
   @Get('shops/:domain')
   shop(@Param('domain') domain: string) {
     return this.ops.getShop(domain);

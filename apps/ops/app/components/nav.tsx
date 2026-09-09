@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Clock, Layers, ScrollText, Store, Users, HeartPulse } from 'lucide-react';
+import { Clock, Layers, ScrollText, ShieldCheck, Store, Users, HeartPulse } from 'lucide-react';
 import { clearToken, opsFetch } from '@/lib/api';
 
 /**
@@ -15,6 +15,7 @@ const LINKS = [
   { href: '/', key: 'queue' as const, label: '到期队列', Icon: Clock },
   { href: '/accounts', key: 'accounts' as const, label: '账号与店铺', Icon: Users },
   { href: '/shops', key: 'shops' as const, label: '订阅与计费', Icon: Store },
+  { href: '/gate', key: 'gate' as const, label: '订阅闸门', Icon: ShieldCheck },
   { href: '/system', key: 'system' as const, label: '系统健康', Icon: HeartPulse },
   { href: '/audit', key: 'audit' as const, label: '审计日志', Icon: ScrollText },
   { href: '/plans', key: 'plans' as const, label: '全局配置', Icon: Layers },

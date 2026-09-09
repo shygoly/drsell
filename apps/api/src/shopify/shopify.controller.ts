@@ -235,6 +235,13 @@ export class ShopifyController {
           `——Shopify 仍在用旧密钥签名，确认切换完成后请删除 SHOPIFY_API_SECRET_PREVIOUS`,
       );
     }
+    if (hmacCheck.ok) {
+      // 记账在处理之前，且不 await 失败：判据要留痕，但不能影响 webhook 的 2xx。
+      void this.shopify.recordWebhookSecretUse(
+        hmacCheck.matched === 'previous' ? 'previous' : 'current',
+        topic ?? '-',
+      );
+    }
     if (!hmacCheck.ok) {
       // 验签失败必须留下「是谁、什么主题」——2026-09-09 生产上 12 次真实 webhook
       // 全部 401，而用本地密钥自签三条路径全过，光看 nginx 日志分不出是密钥错

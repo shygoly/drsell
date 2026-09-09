@@ -60,3 +60,25 @@
 - **WHEN** 邮件通道故障
 - **THEN** 失败被记录并可被观察到，SHALL NOT 静默丢弃
 - **AND** 商家端仍能在应用内看到到期提示（应用内提示不依赖出站通道）
+
+---
+
+### Requirement: 出站通道不绑定服务商
+
+出站邮件 SHALL 走 SMTP，由环境变量配置（`SMTP_HOST`、`MAIL_FROM`，可选
+`SMTP_PORT`/`SMTP_USER`/`SMTP_PASS`）。SHALL NOT 把某家服务商的 SDK 焊进代码——
+那会把一个可逆的运维选择变成不可逆的代码选择。
+
+通道未配置时系统 SHALL 抛错并把失败落库，SHALL NOT 静默视为已送达。
+
+#### Scenario: 通道未配置
+
+- **WHEN** 到期提醒到达发送时机，但 `SMTP_HOST` 或 `MAIL_FROM` 缺失
+- **THEN** 发送失败，原因落进 `ExpiryNotice.error`
+- **AND** 应用内横幅不受影响，商家仍能看到提示
+
+#### Scenario: 商家已退订
+
+- **WHEN** 收件人在 `MailSubscriber` 中状态为 `unsubscribed`
+- **THEN** 不发送，且失败原因可追
+

@@ -5,7 +5,12 @@
 
 ## 0. 前置（不写业务代码）
 
-- [ ] 0.1 收尾密钥：确认 Shopify 何时切到新密钥签 webhook，切换后删除 `SHOPIFY_API_SECRET_PREVIOUS`
+- [~] 0.1 收尾密钥。**「确认何时切换」已建成判据**：`WebhookSecretUse` 按「密钥代 × topic」
+      持久化每条 webhook 的验签命中，运营台 `/gate` 显示能否删除。此前判据只有一行会滚掉的
+      pm2 日志。**删除动作仍被 Shopify 阻断**——2026-09-09 实测 `app/scopes_update`
+      仍用旧密钥签名，此刻删会让该 topic 全部 401。
+      ⚠ 该表是证据表，只能由真实 Shopify webhook 填充——自签探针会伪造出
+      「已切换」的观测（2026-09-09 污染过一次，已清表）
 - [x] 0.2 定试用期额度：`@drsell/shared` 的 `PLANS` 目前没有试用档，D2 的实现依赖它 —— 已定：按 basic 档给（2026-09-09）
 - [x] 0.3 定按天触发方案（D4 的 a / b / c），b 应排除——没人访问就不提醒，而临近到期的店恰恰可能没人访问 —— 已定：方案 a；但 @nestjs/schedule@12 是 ESM-only（无 CJS 产物）而本应用编译成 CommonJS，装上生产启动即崩，改用 setInterval 自实现
 - [x] 0.4 核实生产上每个店的订阅镜像是否已与 Shopify 一致 —— 2026-09-09 用一条真实签名的
@@ -34,7 +39,8 @@
 ## 3. 只读观测期（D6，先不拦截）
 
 - [x] 3.1 闸门判定结果只记录不拦截：记下「若开闸会拦谁、原因、订阅快照」
-- [ ] 3.2 运营台能看到这份清单，便于人工核对是否误判（当前只有 `subscription gate OBSERVE` 日志）
+- [x] 3.2 运营台 `/gate`：逐店显示判定/原因/订阅快照/镜像最后同步时间，并显示 enforce 开关状态。
+      取数与闸门同款（`orderBy updatedAt desc` + `take 1`），单测锁死——控制台撒谎比没有清单更糟
 - [ ] 3.3 观察期结束、确认无误判后，把 `SUBSCRIPTION_GATE_ENFORCE=true` 打开。
       **前置**：0.5 已落地且生产上 `isTest` 已由一次 `syncFromShopify` 写入权威值——
       迁移默认 `false`，在同步跑过之前开闸会停掉测试店
@@ -53,10 +59,11 @@
 - [x] 5.3 去重持久化，键为「店 + 周期 + 档位」，重启与多实例都不重复打扰
 - [x] 5.4 续费后针对旧周期的剩余提醒不再发出
 - [x] 5.5 应用内提示先落地（不依赖出站通道）
-- [ ] 5.6 **出站邮件通道仍不存在**：全仓无 SMTP 配置、无邮件依赖，`MailService`
-      只是订阅者列表的 CRUD。`sendExpiryNotice` 现在明确抛错而不是假装发出，
-      失败落进 `ExpiryNotice.error` 因而可见——但商家收不到邮件，只能看到应用内
-      横幅。接通道时替换该方法即可，调用方无需改动。
+- [x] 5.6 出站通道走 **SMTP**（nodemailer），不绑服务商：SES / Resend / Mailgun /
+      Postmark / 自建都讲 SMTP，换供应商只改环境变量。未配置时不静默降级——抛错并
+      落进 `ExpiryNotice.error`。**仍需你提供凭据**：`SMTP_HOST`、`MAIL_FROM`
+      （可选 `SMTP_PORT`/`SMTP_USER`/`SMTP_PASS`）。密钥不入库（AGENTS.md 陷阱 6），
+      我不代填。填之前商家只看得到应用内横幅。
 - [x] 5.7 发送失败必须可被发现，不静默丢弃
 
 ## 6. 解冻
@@ -71,4 +78,6 @@
 - [x] 7.2 `openspec validate subscription-gating-and-expiry --strict` 通过
 - [x] 7.3 「订阅失效即停服」是产品语义的不可逆选择，结论入 `DECISIONS.md` 并在
       `ARCHITECTURE.md` 补论证；openspec 里只留指向该 ID 的引用
-- [ ] 7.4 部署后走公网验证；观察期内确认没有商家被误停
+- [x] 7.4 部署后走公网验证（2026-09-09：退出码 0、三条公网断言过、迁移落地、
+      触发真实对话验证观测日志确实在打）
+- [ ] 7.5 观察期内确认没有商家被误停 —— 需要时间流逝，非代码问题

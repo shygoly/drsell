@@ -283,6 +283,22 @@ enum ChatMessageRole {
   agent
 }
 
+/// webhook 验签命中的是哪一代密钥。存在的理由：删 SHOPIFY_API_SECRET_PREVIOUS
+/// 的判据此前只有一行 pm2 日志，而日志会滚掉——没人能回答「Shopify 切到新密钥了吗」。
+/// 按 topic 分行是必需的：2026-09-09 实测 app/scopes_update 仍用旧密钥签，
+/// 不同 topic 未必同时切换，只看整体会过早删掉旧密钥而让部分 webhook 全挂。
+model WebhookSecretUse {
+  id          String   @id @default(cuid())
+  /// current | previous
+  generation  String
+  topic       String
+  count       Int      @default(0)
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @updatedAt
+
+  @@unique([generation, topic])
+}
+
 model ChatThread {
   id            String           @id @default(cuid())
   shopDomain    String

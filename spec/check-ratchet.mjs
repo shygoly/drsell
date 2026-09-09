@@ -27,12 +27,27 @@ function countUnconfiguredAdr() {
   ).length;
 }
 
+/**
+ * 真正无租户维度的表 —— 不是欠账，加隔离键反而是错的。
+ *
+ * 判据很窄：**这张表记录的事实在全平台只有一份**。放宽一点点，这个白名单
+ * 就会变成绕过棘轮的后门，所以每加一行都要能回答「它按哪个租户分会得到
+ * 什么荒谬结论」。白名单写在校验器里而不是基线数字里，是为了让例外必须以
+ * 一次可审的 diff 出现——抬基线只会看到一个数字变大，看不出为什么。
+ *
+ * - WebhookSecretUse：一个 Shopify app 只有一对签名密钥，"哪一代密钥签了
+ *   哪个 topic" 是 app 级事实。按店分会得出「A 店已切新密钥、B 店没切」——
+ *   而密钥根本不按店发。
+ */
+const GLOBAL_MODELS = new Set(['WebhookSecretUse']);
+
 function countSoftTenantModels() {
   const s = readFileSync(join(REPO_ROOT, 'apps/api/prisma/schema.prisma'), 'utf8');
   let n = 0;
   for (const m of s.matchAll(/^model\s+(\w+)\s*\{([\s\S]*?)^\}/gm)) {
     const [, name, body] = m;
     if (name === 'Tenant') continue;          // 租户表自身无需隔离键
+    if (GLOBAL_MODELS.has(name)) continue;    // 无租户维度，见上方判据
     if (!/\btenantId\b/.test(body) && !/\bshopId\b/.test(body)) n++;
   }
   return n;

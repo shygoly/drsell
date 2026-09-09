@@ -458,6 +458,36 @@ export class ShopifyService implements OnModuleInit {
     );
   }
 
+  /**
+   * 记下这条 webhook 是被哪一代密钥验过的（openspec tasks 0.1）。
+   *
+   * 删 `SHOPIFY_API_SECRET_PREVIOUS` 的判据此前只有一行 `logger.warn`，
+   * 而 pm2 日志会滚掉——没人能回答「Shopify 切到新密钥了吗」，只能靠猜。
+   * 猜错的代价是所有 webhook 同时 401（2026-09-09 之前刚发生过），
+   * 而 `app_subscriptions/update` 是付款解冻的唯一渠道。
+   *
+   * 按 topic 分行：实测 `app/scopes_update` 仍用旧密钥，不同 topic 未必同时切。
+   *
+   * **永不抛错**：记账失败不该让一条验签已通过的 webhook 变成非 2xx，
+   * 那会让 Shopify 重投甚至停投。
+   *
+   * ⚠ 这张表是**证据**，只应由 Shopify 真实发来的 webhook 填充。
+   * 用本地密钥自签一条打到生产（调试时很顺手）会伪造出「该 topic 已改用新密钥」
+   * 的观测，进而让 `webhookSecretStatus` 得出「可以删旧密钥」的假结论。
+   * 2026-09-09 就这样污染过一次，已清表。要验链路请在测试里验，别打生产。
+   */
+  async recordWebhookSecretUse(generation: 'current' | 'previous', topic: string) {
+    try {
+      await this.prisma.webhookSecretUse.upsert({
+        where: { generation_topic: { generation, topic } },
+        create: { generation, topic, count: 1, lastSeenAt: new Date() },
+        update: { count: { increment: 1 } },
+      });
+    } catch (e) {
+      this.logger.error(`webhook secret bookkeeping failed: ${String(e)}`);
+    }
+  }
+
   async handleUninstall(shopDomain: string) {
     const shop = await this.tenants.getByShopDomain(shopDomain);
     if (!shop) return { ok: true };

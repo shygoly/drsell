@@ -9,6 +9,7 @@ import { ShopifyService } from '../shopify/shopify.service';
 import { BillingService } from '../subscription/billing.service';
 import { SubscriptionMirrorService } from './subscription-mirror.service';
 import { buildAuditWhere } from './ops-audit.util';
+import { evaluateServiceability } from '../subscription/subscription-state';
 import { listOpsPlans, resolveOpsPlan } from './ops-plan.config';
 
 const TERMINAL = new Set(['DECLINED', 'EXPIRED', 'CANCELLED']);
@@ -191,6 +192,137 @@ export class OpsService {
         unfreezeBy: sub?.unfreezeBy ?? null,
       };
     });
+  }
+
+  /**
+   * 订阅闸门的观测清单（openspec tasks 3.2）。
+   *
+   * 观测期里只有一行 `subscription gate OBSERVE` 日志，而 pm2 日志会滚掉，
+   * 也没法回答「现在一共有几个店会被拦」。开闸（3.3）是不可逆的商家体验损失，
+   * 决策前必须有一份能逐店核对的清单。
+   *
+   * **取数必须与闸门完全一致**，否则控制台会撒谎：`listShops` 用的是
+   * `subscriptions[0]`（无序），而 `QuotaService.latestSubscription` 用
+   * `orderBy updatedAt desc`。同店多条订阅时两者会指向不同的行，
+   * 控制台说「放行」而闸门实际拦下——这种谎比没有清单更糟。
+   * 判定本身直接调 `evaluateServiceability`，不在这里重写一遍规则。
+   *
+   * `lastSyncedAt` 是判断「是不是误判」的关键：从未同步过的镜像，
+   * 它的 `currentPeriodEnd` 不代表 Shopify 的事实，据此停服就是误停。
+   */
+  async subscriptionGate(now = new Date()) {
+    const shops = await this.prisma.shop.findMany({
+      orderBy: { shopDomain: 'asc' },
+      select: {
+        id: true,
+        shopDomain: true,
+        subscriptions: {
+          orderBy: { updatedAt: 'desc' },
+          take: 1,
+          select: {
+            status: true,
+            planCode: true,
+            trialEnds: true,
+            currentPeriodEnd: true,
+            isTest: true,
+            updatedAt: true,
+          },
+        },
+      },
+    });
+
+    const syncs = await this.prisma.knowledgeSyncJob.findMany({
+      where: { kind: 'billing:sync', shopDomain: { in: shops.map((s) => s.shopDomain) } },
+      orderBy: { createdAt: 'desc' },
+      select: { shopDomain: true, createdAt: true },
+    });
+    const lastSync = new Map<string, Date>();
+    for (const j of syncs) if (!lastSync.has(j.shopDomain)) lastSync.set(j.shopDomain, j.createdAt);
+
+    const rows = shops.map((shop) => {
+      const sub = shop.subscriptions[0] ?? null;
+      const verdict = evaluateServiceability(sub, now);
+      return {
+        shopDomain: shop.shopDomain,
+        serviceable: verdict.serviceable,
+        reason: verdict.reason,
+        graceEndsAt: verdict.graceEndsAt?.toISOString() ?? null,
+        status: sub?.status ?? null,
+        planCode: sub?.planCode ?? null,
+        isTest: sub?.isTest ?? false,
+        trialEnds: sub?.trialEnds?.toISOString() ?? null,
+        currentPeriodEnd: sub?.currentPeriodEnd?.toISOString() ?? null,
+        mirrorUpdatedAt: sub?.updatedAt?.toISOString() ?? null,
+        lastSyncedAt: lastSync.get(shop.shopDomain)?.toISOString() ?? null,
+      };
+    });
+
+    return {
+      // 开关读的是 API 进程的环境变量——控制台必须显示它，否则没人知道
+      // 现在这份清单是「会拦」还是「已经在拦」。
+      enforcing: process.env.SUBSCRIPTION_GATE_ENFORCE === 'true',
+      evaluatedAt: now.toISOString(),
+      blockedCount: rows.filter((r) => !r.serviceable).length,
+      neverSyncedCount: rows.filter((r) => !r.lastSyncedAt).length,
+      shops: rows,
+    };
+  }
+
+  /**
+   * 旧密钥还能不能删（openspec tasks 0.1）。
+   *
+   * `SHOPIFY_API_SECRET_PREVIOUS` 目前是 webhook 能通过的**必要条件**。
+   * 删早了所有 webhook 同时 401，而 `app_subscriptions/update` 是付款解冻的
+   * 唯一渠道——那等于让付了钱的商家恢复不了服务。
+   *
+   * 判据必须是证据而不是感觉：**每一个见过的 topic 都已改用新密钥**，
+   * 且旧密钥已连续 `quietDays` 天没有再命中。只看整体会漏掉个别 topic
+   * （实测 `app/scopes_update` 就比其他 topic 晚切）。
+   */
+  async webhookSecretStatus(now = new Date(), quietDays = 14) {
+    const rows = await this.prisma.webhookSecretUse.findMany({
+      orderBy: [{ generation: 'asc' }, { topic: 'asc' }],
+    });
+    const previous = rows.filter((r) => r.generation === 'previous');
+    const currentTopics = new Set(
+      rows.filter((r) => r.generation === 'current').map((r) => r.topic),
+    );
+
+    const lastPreviousAt = previous.reduce<Date | null>(
+      (acc, r) => (!acc || r.lastSeenAt > acc ? r.lastSeenAt : acc),
+      null,
+    );
+    // 还在用旧密钥、且没有在新密钥下出现过的 topic —— 删掉旧密钥它们就全挂
+    const stillOnPrevious = previous
+      .filter((r) => !currentTopics.has(r.topic))
+      .map((r) => r.topic);
+    const quietFor = lastPreviousAt
+      ? Math.floor((now.getTime() - lastPreviousAt.getTime()) / 86400000)
+      : null;
+
+    const configured = Boolean(process.env.SHOPIFY_API_SECRET_PREVIOUS);
+    const safeToDelete =
+      configured &&
+      // 从没观测到过任何 webhook 就不能下结论——那只说明还没人发过
+      rows.length > 0 &&
+      stillOnPrevious.length === 0 &&
+      (quietFor === null || quietFor >= quietDays);
+
+    return {
+      previousSecretConfigured: configured,
+      safeToDelete,
+      quietDays,
+      lastPreviousAt: lastPreviousAt?.toISOString() ?? null,
+      quietForDays: quietFor,
+      stillOnPreviousTopics: stillOnPrevious,
+      observations: rows.map((r) => ({
+        generation: r.generation,
+        topic: r.topic,
+        count: r.count,
+        firstSeenAt: r.firstSeenAt.toISOString(),
+        lastSeenAt: r.lastSeenAt.toISOString(),
+      })),
+    };
   }
 
   async getShop(shopDomain: string) {
