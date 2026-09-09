@@ -57,11 +57,16 @@
 - [x] 6.1 `handleTakeOver`/`handleResolve`/`handleSend` 改调真实 API
 - [x] 6.2 失败渲染可见错误条（"nothing was sent"）+ 按钮 busy 禁用，不静默吞掉
 - [x] 6.3 `ConversationStatus` 增加 `closed`；`ChatMessage.role` 增加 `agent`；`resolvedIds` 本地态删除，改由服务端 `closed` 决定
-- [ ] 6.4 **部分完成**。已部署，公网确认：`GET /api/public/chat/messages` 200 且返回
-      真实两条消息（探针会话，已清理）；`POST /api/storefront/inbox/:id/reply` 由 404
-      变为 401（路由存在且鉴权生效）。
-      **仍未做**：带真实商家会话 token 的「接管 → 刷新 → 状态仍在」往返——
-      需要商家自己在嵌入应用里点一次，我不持有也不应持有商家凭据。
+- [ ] 6.4 **前置障碍已清除，接管往返本身仍未验**。
+      嵌入应用此前整页 401，商家根本进不到能点接管的界面。根因是四层叠加，
+      每层都能单独致命、且会完全遮住下一层：
+        1. App Bridge 脚本带 `async` → 它自己 Aborting，换发请求从未发出
+        2. `SHOPIFY_API_SECRET` 是错的 → 发出去也 `signature verification failed`
+        3. `shop` 不落盘 → 客户端路由跳转后换发条件不成立
+        4. `useShopSession` 无 context，12 个组件各持一份 state → 换发成功也传不到用数据的组件
+      2026-09-09 全部修复并验证：`POST .../app-bridge` 201，
+      `storefront/stats`、`chart`、`conversations` 均 200。
+      **仍未做**：真正点一次「接管 → 刷新 → 状态仍在」。现在能点了。
 
 ## 7. 上下文所有权（F2）
 

@@ -103,6 +103,13 @@ bash scripts/deploy-mvp.sh   # 构建 + rsync 到 wjclaw + pm2 重启四进程 +
    nginx location 指错应用 → 200 但内容是另一个站。
    直连那几条保留：它们区分「应用挂了」和「应用活着但对外是坏的」。
 
+   **别把脚本输出接管道看**：`bash scripts/deploy-mvp.sh | tail -10` 拿到的是
+   `tail` 的退出码，不是脚本的。脚本 `set -euo pipefail`，rsync 失败会中止，
+   但管道会把非零退出码吞掉——2026-09-08 就这样误报过一次成功，
+   实际产物根本没变。要么重定向到文件再单独取 `$?`，要么**验产物指纹**：
+   `curl` 首页取 `/_next/static/chunks/app/layout-<hash>.js`，
+   哈希没变就是没部署上去。指纹比任何退出码都硬。
+
 4. **Shopify app 只有一个合法身份**：client_id `0b36b70772220b71b2fe296b3deba914`
    （name `Drsell`，handle `drseller-alpha`，App ID 264501002241）。
    legacy jade app `f286a4af8f1d80cb8e6228bc648f4786` **严禁用于生产**——
