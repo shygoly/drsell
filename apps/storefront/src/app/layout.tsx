@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/app-shell";
 import { ShopifyBridgeProvider } from "@/components/business/shopify-bridge";
+import { ShopSessionProvider } from "@/hooks/useShopSession";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -47,7 +48,10 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <ShopifyBridgeProvider>
-          <AppShell>{children}</AppShell>
+          {/* 会话必须共享：换发只发生一次，结果要让整棵树都看到 */}
+          <ShopSessionProvider>
+            <AppShell>{children}</AppShell>
+          </ShopSessionProvider>
         </ShopifyBridgeProvider>
       </body>
     </html>

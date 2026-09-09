@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { useShopifyBridge } from "@/components/business/shopify-bridge";
 
 const TOKEN_KEY = "drsell_shop_token";
@@ -24,7 +31,17 @@ function safeStorageSet(key: string, value: string): void {
   }
 }
 
-export function useShopSession() {
+/**
+ * 会话状态的实现。**不要直接调用**——用下面的 `useShopSession()` 读共享实例。
+ *
+ * 这里曾经就是导出的 hook 本身，于是 12 个组件各持一份互不相通的 state。
+ * 平时看不出来：走 App Bridge 时每个实例都能自己换一次 token（浪费但能用）。
+ * 改成消费 URL 里的 id_token 后就致命了——那枚 token 用完即从地址栏抹掉，
+ * 只有最先挂载的那个实例换得到，它 setToken 更新的也只是自己那份，
+ * useDashboardData 那份永远停在 localStorage 里的旧 JWT 上。
+ * 实测形态：换发返回 201，但之后一个 API 调用都没有，页面停在 401。
+ */
+function useShopSessionState() {
   const bridge = useShopifyBridge();
   const [shop, setShop] = useState("");
   const [token, setToken] = useState("");
@@ -310,4 +327,26 @@ export function useShopSession() {
     listShops,
     switchShop,
   };
+}
+
+type ShopSession = ReturnType<typeof useShopSessionState>;
+
+const ShopSessionContext = createContext<ShopSession | null>(null);
+
+/** 挂在根 layout：整棵树共用同一份会话状态。 */
+export function ShopSessionProvider({ children }: { children: ReactNode }) {
+  const session = useShopSessionState();
+  return (
+    <ShopSessionContext.Provider value={session}>
+      {children}
+    </ShopSessionContext.Provider>
+  );
+}
+
+export function useShopSession(): ShopSession {
+  const ctx = useContext(ShopSessionContext);
+  if (!ctx) {
+    throw new Error("useShopSession 必须在 ShopSessionProvider 内使用");
+  }
+  return ctx;
 }
