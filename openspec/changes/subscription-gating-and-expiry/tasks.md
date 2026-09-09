@@ -16,7 +16,13 @@
 - [x] 0.4 核实生产上每个店的订阅镜像是否已与 Shopify 一致 —— 2026-09-09 用一条真实签名的
       `app_subscriptions/update` 触发 `syncFromShopify` 实时回查：生产仅一个店
       `chatbotdomaintest`，镜像与 Shopify **完全一致**（`basic ACTIVE until 2025-08-25`）。
-      滞后假设不成立；真因是 `test: true`（测试扣款不续期），见 0.5
+      滞后假设不成立；真因是 `test: true`（测试扣款不续期），见 0.5。
+      ⚠ **「仅一个店」只对我们的库成立**：2026-09-09 的 webhook 日志显示 Shopify 那边
+      至少 3 个店装着本应用（`chatbotdomaintest` ✓ 在库、`jade-shop-2024` ✗、
+      `quickstart-ff760338` ✗），三者验签用同一把密钥且 OAuth 的 client_id 确认是
+      drseller-alpha。**幽灵安装对闸门完全不可见**——它们没有 Shop 行，也就没有订阅、
+      配额与判定。这也解释了 Shopify 邮件里「4 个待迁移的令牌」而我们只有 1 个店：
+      拿不到令牌的店无法迁移。处置需要人工：在 Shopify 后台卸载这些测试店，或重装以捕获令牌
 
 - [x] 0.5 测试订阅豁免周期判定（D7）：镜像 `AppSubscription.test`，`test=true` 一律可服务。
       不做这条就会在恢复上架的审核里停掉 Shopify 审核员的开发店
