@@ -17,16 +17,46 @@ export default function DashboardPage() {
   const { shop, token } = useShopSession();
 
   /**
-   * 商家从 Shopify 套餐页选完套餐会被重定向回这里，URL 带 `plan_handle`。
-   * 这是唯一「刚刚变了」的确定信号（`app_subscriptions/update` 自 2026-04-28 起
-   * 已停发），落地就同步一次，否则页面会告诉刚付过钱的商家「没有有效套餐」。
+   * 商家从 Shopify 套餐页选完套餐会被重定向回这里，URL 带 `plan_handle` 与
+   * `charge_id`。这是唯一「刚刚变了」的确定信号（`app_subscriptions/update`
+   * 自 2026-04-28 起已停发），落地就同步一次，否则页面会告诉刚付过钱的商家
+   * 「没有有效套餐」。
+   *
+   * **必须先把参数从 URL 上摘掉再做任何事。** 初版是「同步完 reload」，
+   * 而 reload 之后参数还在，于是又同步又 reload——生产上整页无限闪动
+   * （2026-09-09）。摘参数放在最前面，即使后面每一步都失败也不会成环。
+   *
+   * 三重防护：sessionStorage 记住这笔 charge 已处理（跨 reload 有效）；
+   * replaceState 摘掉参数；ref 挡住同一次挂载内的重入。
    */
-  const syncedFor = useRef<string | null>(null);
+  const handledRef = useRef(false);
   useEffect(() => {
-    if (!shop || !token || typeof window === "undefined") return;
-    const planHandle = new URLSearchParams(window.location.search).get("plan_handle");
-    if (!planHandle || syncedFor.current === planHandle) return;
-    syncedFor.current = planHandle;
+    if (!shop || !token || typeof window === "undefined" || handledRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const planHandle = params.get("plan_handle");
+    if (!planHandle) return;
+    handledRef.current = true;
+
+    const key = `drsell_plan_synced_${params.get("charge_id") ?? planHandle}`;
+    let already = false;
+    try {
+      already = window.sessionStorage.getItem(key) === "1";
+      window.sessionStorage.setItem(key, "1");
+    } catch {
+      // 隐私模式下 sessionStorage 会抛；靠下面摘参数兜底
+    }
+
+    // 先摘参数，再做别的。摘掉之后即便 reload 也不会再进这个分支。
+    const url = new URL(window.location.href);
+    url.searchParams.delete("plan_handle");
+    url.searchParams.delete("charge_id");
+    try {
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      // 嵌入 iframe 里极端情况下可能被拒；sessionStorage 已经挡住了重复
+    }
+    if (already) return;
+
     void syncSubscription(shop, token)
       .then(() => window.location.reload())
       .catch(() => undefined); // 同步失败不打断商家；陈旧度补同步会兜住
