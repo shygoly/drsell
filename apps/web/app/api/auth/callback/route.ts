@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { shopify } from '@/lib/shopify';
 import { unsealInstallUserToken } from '@/lib/oauth-state';
 import { buildAdminAppUrl } from '@/lib/onboarding';
+import { diagnoseOAuthCallback } from '@/lib/oauth-diagnose';
 
 export async function GET(req: NextRequest) {
   try {
@@ -94,6 +95,25 @@ export async function GET(req: NextRequest) {
     // 所以这里不再把 shop token 挂在 fragment 上外带。
     return NextResponse.redirect(buildAdminAppUrl(session.shop));
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    // `Invalid OAuth callback.` 是两个独立检查的与（query HMAC、state 与 cookie
+    // 一致），库不告诉你坏在哪一个——商家看到这句话也不知道该做什么。这里把它
+    // 拆开：尤其要分清「Shopify 用旧密钥签的」和「链接过期」，两者处置完全不同。
+    // 本 app 已确证 Shopify 仍用旧密钥签 webhook，OAuth 同理并不意外。
+    const diag = diagnoseOAuthCallback({
+      query: req.nextUrl.searchParams,
+      stateCookie: req.cookies.get('shopify_app_state')?.value ?? null,
+      secret: process.env.SHOPIFY_API_SECRET || '',
+      previousSecret: process.env.SHOPIFY_API_SECRET_PREVIOUS || null,
+    });
+    // 只记判定结果，不记 hmac、state、密钥本身。
+    console.error(
+      `oauth callback failed: ${String(e)} | shop=${req.nextUrl.searchParams.get('shop') ?? '-'} ` +
+        `hmacCurrent=${diag.hmacMatchesCurrent} hmacPrevious=${diag.hmacMatchesPrevious} ` +
+        `stateCookie=${diag.stateCookiePresent} stateMatch=${diag.stateMatches} | ${diag.likelyCause}`,
+    );
+    return NextResponse.json(
+      { error: String(e), diagnosis: diag.likelyCause },
+      { status: 500 },
+    );
   }
 }
