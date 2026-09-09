@@ -85,4 +85,25 @@ if (/ops\.szchada\.top\/deploy|运营台.*\/deploy|\/deploy/.test(deployMd)) {
   r.fail('DEPLOY.md 未指向运营台 /deploy —— 读文档的人不知道哪里能看实况');
 }
 
+// 10. 验证脚本必须存在且被 DEPLOY.md 引用。文档里写「应该怎么验」而没有执行体，
+//     就是本仓反复吃亏的那种规矩——2026-09-09 一天内因此漏判三次。
+const vp = read('scripts/verify-prod.sh');
+if (!vp) {
+  r.fail('scripts/verify-prod.sh 缺失 —— DEPLOY.md 的验证规矩失去执行体');
+} else if (!/DEPLOY\.md|verify-prod\.sh/.test(deployMd)) {
+  r.fail('DEPLOY.md 未引用 scripts/verify-prod.sh');
+} else if (/set -e[^u]/.test(vp)) {
+  // -e 会让脚本停在第一个失败，看不到全貌；这里要的是「一次跑完，一次看全」
+  r.fail('verify-prod.sh 不应带 set -e —— 所有检查都要跑完才有诊断价值');
+} else {
+  r.pass('verify-prod.sh 存在且被 DEPLOY.md 引用');
+}
+
+// 11. 验证脚本只读。它会在生产上跑，误加写操作的代价很高。
+if (vp && /(pm2 (restart|stop|delete)|rm -|DELETE FROM|UPDATE |INSERT |migrate deploy|> *\/opt)/.test(vp)) {
+  r.fail('verify-prod.sh 含疑似写操作 —— 它必须是只读体检');
+} else if (vp) {
+  r.pass('verify-prod.sh 未见写操作');
+}
+
 r.done();

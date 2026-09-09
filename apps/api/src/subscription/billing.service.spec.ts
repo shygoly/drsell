@@ -46,6 +46,7 @@ function mockDeps(overrides: Record<string, unknown> = {}) {
     create,
     update,
     updateMany,
+    knowledgeJobCreate,
     shop,
   };
 }
@@ -209,5 +210,34 @@ describe('BillingService', () => {
       expect(planCodeFromShopifyName('')).toBeNull();
       expect(planCodeFromShopifyName(null)).toBeNull();
     });
+  });
+});
+
+describe('留痕的 shopDomain 列', () => {
+  it('sync 必须写店铺域名而不是 tenantId —— 否则运营台按店查不到', async () => {
+    // 2026-09-09：这里曾写 tenantId，于是运营台按域名查 billing:sync 永远查不到，
+    // 把刚同步过两次的店报成「镜像从未与 Shopify 同步过」。而那条警告恰恰用来
+    // 支撑「要不要开闸停服」这个不可逆决策。
+    const { svc, findFirst, knowledgeJobCreate } = mockDeps();
+    findFirst.mockResolvedValue(null);
+    mockedGraphql.mockReset();
+    mockedGraphql.mockResolvedValue({
+      data: {
+        currentAppInstallation: {
+          activeSubscriptions: [
+            { id: 'gid://1', name: 'Basic', status: 'ACTIVE', test: false, currentPeriodEnd: null },
+          ],
+        },
+      },
+    });
+
+    await svc.syncFromShopify('a.myshopify.com');
+
+    const logged = knowledgeJobCreate.mock.calls
+      .map((c: [{ data: Record<string, unknown> }]) => c[0].data)
+      .find((d: Record<string, unknown>) => d.kind === 'billing:sync');
+    expect(logged).toBeDefined();
+    expect(logged?.shopDomain).toBe('a.myshopify.com');
+    expect(logged?.shopDomain).not.toBe('t1');
   });
 });

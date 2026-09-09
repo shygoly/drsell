@@ -130,10 +130,24 @@ export class BillingService {
     }
   }
 
-  private async log(tenantId: string, kind: string, payload: string) {
+  /**
+   * 留痕。`shopDomain` 列**必须写店铺域名**——2026-09-09 之前这里写的是 tenantId，
+   * 于是运营台按域名查 `billing:sync` 永远查不到，把刚同步过的店报成
+   * 「镜像从未与 Shopify 同步过」。那条警告恰恰用来支撑「要不要开闸停服」
+   * 这个不可逆决策，说谎的代价很高。
+   *
+   * 租户级事件（reassign 一类）没有单一店铺，退回写 tenantId：
+   * 它们本来就不该被按店查询命中。
+   */
+  private async log(
+    tenantId: string,
+    kind: string,
+    payload: string,
+    shopDomain?: string | null,
+  ) {
     await this.prisma.knowledgeSyncJob.create({
       data: {
-        shopDomain: tenantId,
+        shopDomain: shopDomain ?? tenantId,
         kind: `billing:${kind}`,
         externalId: `${tenantId}:${kind}:${Date.now()}`,
         status: 'done',
@@ -212,6 +226,7 @@ export class BillingService {
         shop.tenantId,
         'switch',
         `billing shop -> ${shop.shopDomain} (${created.appSubscription?.id ?? 'pending'})`,
+        shop.shopDomain,
       );
       return sub;
     } catch (e) {
@@ -335,7 +350,12 @@ export class BillingService {
           where: { id: existing.id },
           data: { status: 'CANCELLED', isBillingShop: false },
         });
-        await this.log(shop.tenantId, 'sync', `${shopDomain}: no active subscription -> CANCELLED`);
+        await this.log(
+          shop.tenantId,
+          'sync',
+          `${shopDomain}: no active subscription -> CANCELLED`,
+          shopDomain,
+        );
       }
       return null;
     }
@@ -347,7 +367,12 @@ export class BillingService {
         `unmapped Shopify plan name ${JSON.stringify(active.name)} for ${shopDomain} — ` +
           'planCode left unchanged; align the App Pricing plan name with @drsell/shared PLANS',
       );
-      await this.log(shop.tenantId, 'sync-unmapped-plan', `${shopDomain}: ${active.name}`);
+      await this.log(
+        shop.tenantId,
+        'sync-unmapped-plan',
+        `${shopDomain}: ${active.name}`,
+        shopDomain,
+      );
     }
 
     const data = {
@@ -374,6 +399,7 @@ export class BillingService {
       'sync',
       `${shopDomain}: ${mapped ?? existing?.planCode ?? DEFAULT_PLAN} ${data.status} ` +
         `until ${data.currentPeriodEnd?.toISOString() ?? '-'}${data.isTest ? ' [test]' : ''}`,
+      shopDomain,
     );
     return sub;
   }

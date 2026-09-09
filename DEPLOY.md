@@ -79,6 +79,36 @@ Next 在**构建时**把本地 `apps/<app>/.env` 复制进 `.next/standalone/`�
 
 ## 4. 验证（每条都因为漏过真实故障而存在）
 
+### 一条命令跑完全部
+
+```bash
+bash scripts/verify-prod.sh
+```
+
+**只读**：全是 GET / SELECT，不写库、不重启进程、不改配置。
+输出只含指纹（sha256 前 12 位），绝不含密钥、令牌或连接串。
+任一硬断言失败则 `exit 1`，可直接接进 CI 或 cron。
+
+它覆盖的正是下面这些规矩——**写成可执行的断言，而不是靠人记得**：
+
+| 检查 | 对应的真实故障 |
+|---|---|
+| 三条公网入口走域名 + 断言内容 | nginx location 指错应用 → 200 但内容是另一个站 |
+| OAuth 入口带浏览器 UA，断言 307 与 client_id | 裸 curl 被 `isbot` 判成 bot → 假报「OAuth 全坏」 |
+| 部署清单 commit / 构建时刻 | 复合命令吞掉退出码 → 失败部署被当成成功 |
+| 两份 `.env` 指纹是否一致 | 改根 `.env` 重启，进程读的却是 standalone 那份 |
+| 迁移头代码 vs 数据库 | `migrate deploy` 失败或被跳过 |
+| 密钥槽位（`latestSlot`） | 轮换期把「将要接管的新密钥」当旧密钥删掉 |
+| 令牌到期与刷新令牌 | 令牌过期且无刷新令牌 = 该店 Admin API 已死 |
+| 闸门模式与「镜像从未同步」 | 据未同步的镜像停服 = 误停真实付费商家 |
+
+判据逻辑在 `scripts/verify-prod-report.mjs`（有分支的业务判断放 JS，
+不写成没人敢改的 jq 一行式）。
+
+### 逐条说明
+
+
+
 `AGENTS.md` 陷阱 3 是这几条的出处，不在此复述其论证。操作要点：
 
 - **走公网 + 断言内容**。`deploy-mvp.sh` 的 `verify_public` 在 nginx reload 后执行，
