@@ -157,6 +157,22 @@ grep -q '^NEXT_PUBLIC_API_BASE=' apps/web/.env && \
   sed -i 's|^NEXT_PUBLIC_API_BASE=.*|NEXT_PUBLIC_API_BASE=/api|' apps/web/.env || \
   echo 'NEXT_PUBLIC_API_BASE=/api' >> apps/web/.env
 
+# Next 的 standalone 产物**自带一份 .env**（构建时从本地 apps/<app>/.env 复制进
+# .next/standalone/），而 pm2 是在 standalone 目录里启动 server.js 的——进程读的是
+# 那一份，不是这里的 apps/<app>/.env。两份并存意味着上面所有 sed 修正、以及任何人
+# 直接改服务器上 apps/web/.env 的动作，**全都不生效**。
+# 2026-09-09 就踩过：给 apps/web/.env 加了一个变量并重启，进程始终读不到。
+# 故：修正完之后把根 .env 覆盖进 standalone，让链路只有一条
+# 本地 .env → 服务器根 .env →（修正）→ standalone/.env。
+for app in web storefront ops; do
+  root_env="apps/\$app/.env"
+  sa_env="apps/\$app/standalone/apps/\$app/.env"
+  if [[ -f "\$root_env" && -d "\$(dirname "\$sa_env")" ]]; then
+    cp "\$root_env" "\$sa_env"
+    echo "  env -> \$sa_env"
+  fi
+done
+
 corepack enable
 corepack prepare pnpm@8.15.4 --activate
 pnpm install --prod --filter @drsell/api... --frozen-lockfile || pnpm install --prod --filter @drsell/api...
