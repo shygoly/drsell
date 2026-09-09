@@ -303,10 +303,23 @@ export class BillingService {
   /**
    * 从 Shopify 拉取当前订阅并写回本地（app_subscriptions/update webhook 的落点）。
    *
-   * 为什么必须有这条路径：本 app 开了 Shopify 托管计费（App Pricing），商家是在
-   * **Shopify 自己的界面**选套餐的，根本不经过上面的 createCharge。不接这个 webhook，
-   * 本地 Subscription 就没有 planCode，QuotaService 会把付 $30 的 Pro 商家
-   * 当成 basic 只给 1500 次额度——收了钱不给货，而且没有任何报错。
+   * 本 app 开了 Shopify App Pricing（原 Managed Pricing），商家在 **Shopify 自己的
+   * 界面**选套餐，不经过上面的 createCharge。
+   *
+   * ⚠ **调用方 `app_subscriptions/update` 已经不会再触发了。**
+   * Shopify 文档原文：「After April 28, 2026, Shopify App Pricing no longer sends
+   * webhooks for subscription changes. Use the Partner API and URL redirect
+   * parameters instead.」——今天已是 2026-09，该 webhook 停了四个月。
+   *
+   * 这解释了生产上的全部异常：chatbotdomaintest 的镜像在 2025-08-25 停了一整年，
+   * 而 `billing:sync` 仅有的几条全是 2026-09-09 人工发自签 webhook 触发的。
+   * **订阅镜像目前没有任何自动数据源**，闸门与配额都建立在一份不会更新的镜像上。
+   *
+   * 替代方案是 Partner API 的 `activeSubscription(appId:, shopId:)` 加上商家选完
+   * 套餐后回跳带的 `plan_handle` 参数。本函数（回查 Admin API 的
+   * currentAppInstallation.activeSubscriptions）作为过渡仍然可用——它读的是
+   * 订阅合同本身，不依赖 webhook——但必须有东西来**调用**它，
+   * 而那个东西现在不存在。
    *
    * webhook 载荷里没有 currentPeriodEnd，而配额周期要靠它，所以这里不信载荷、
    * 回查 Shopify 拿权威值。

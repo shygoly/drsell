@@ -242,6 +242,27 @@ export default function OnboardingPage() {
     return () => clearInterval(id);
   }, [shop, token, step]);
 
+  /**
+   * 同步跑完就把乐观标志清掉。
+   *
+   * 原实现只在 catch 里 setSyncStarted(false)——成功完成时没有任何代码清它，
+   * 于是转圈永远转下去、"Sync now" 永久禁用。而后端实际 1 秒就做完了
+   * （2026-09-09 生产实测 products 18 条 / customers 3 条，各 1 秒）。
+   * 界面说谎的代价是商家干等着，以为还在跑。
+   */
+  useEffect(() => {
+    if (!syncStarted || !syncStatus) return;
+    const anyRunning = Object.values(syncStatus).some((s) => s.status === "running");
+    if (!anyRunning) setSyncStarted(false);
+  }, [syncStarted, syncStatus]);
+
+  /** 兜底：状态轮询若一直拿不到结果，也不能让这个标志永久钉住界面。 */
+  useEffect(() => {
+    if (!syncStarted) return;
+    const id = setTimeout(() => setSyncStarted(false), 60_000);
+    return () => clearTimeout(id);
+  }, [syncStarted]);
+
   const { live: embedLive, loading: embedLoading } = useEmbedStatus();
 
   useEffect(() => {

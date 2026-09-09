@@ -30,6 +30,24 @@ export const CLIENT_ID =
   process.env.NEXT_PUBLIC_SHOPIFY_API_KEY ||
   "0b36b70772220b71b2fe296b3deba914";
 
+/** app handle，用于托管计费的套餐选择页深链（与 shopify.app.toml 的 handle 一致）。 */
+export const APP_HANDLE = "drseller-alpha";
+
+/**
+ * Shopify 托管计费的套餐选择页。
+ *
+ * 本 app 开的是 App Pricing（托管计费），商家在 **Shopify 自己的界面**选套餐，
+ * 不经过我们的 createCharge。所以「去选套餐」必须给出这个链接——
+ * 2026-09-09 之前商家端只有一句 "Choose a plan in Shopify" 而没有出口，是条死路。
+ */
+export function buildPricingPlansLink(shop: string, handle = APP_HANDLE) {
+  const storeHandle = shop
+    .replace(/^https?:\/\//, "")
+    .replace(/\/$/, "")
+    .replace(/\.myshopify\.com$/i, "");
+  return `https://admin.shopify.com/store/${storeHandle}/charges/${handle}/pricing_plans`;
+}
+
 /** HTTPS Admin deep link that opens the theme editor focused on our app embed. */
 export function buildEmbedDeepLink(
   shop: string,

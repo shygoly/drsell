@@ -8,9 +8,11 @@ import { LiveConversations } from "@/components/business/live-conversations";
 import { StatCard } from "@/components/business/stat-card";
 import { StatusBanner } from "@/components/business/status-banner";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { useShopSession } from "@/hooks/useShopSession";
 
 export default function DashboardPage() {
   const { stats, chart, conversations, suggestion, error } = useDashboardData();
+  const { shop } = useShopSession();
 
   return (
     <div className="flex flex-col gap-6">
@@ -38,7 +40,7 @@ export default function DashboardPage() {
         </select>
       </div>
 
-      <SubscriptionBanner state={stats.subscription} />
+      <SubscriptionBanner state={stats.subscription} shop={shop} />
 
       {/* 4 指标卡 */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

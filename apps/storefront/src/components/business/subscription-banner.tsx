@@ -1,4 +1,5 @@
 import type { SubscriptionState } from "@/lib/types";
+import { buildPricingPlansLink } from "@/lib/onboarding";
 
 /**
  * 订阅状态横幅。
@@ -7,7 +8,13 @@ import type { SubscriptionState } from "@/lib/types";
  * 刻意不暴露商家的套餐与欠费。于是商家自己如果看不到原因，只会以为产品坏了。
  * 这里把「订阅问题」和「额度用尽」明确分开：两者的处置动作完全不同。
  */
-export function SubscriptionBanner({ state }: { state: SubscriptionState }) {
+export function SubscriptionBanner({
+  state,
+  shop,
+}: {
+  state: SubscriptionState;
+  shop?: string;
+}) {
   if (state.reason === "active") return null;
 
   const fmt = (iso: string | null) =>
@@ -59,6 +66,18 @@ export function SubscriptionBanner({ state }: { state: SubscriptionState }) {
     >
       <p className="font-semibold">{c.title}</p>
       <p className="mt-0.5 opacity-90">{c.body}</p>
+      {/* 光说「去 Shopify 选套餐」而不给链接是条死路：托管计费的套餐页在 admin 里，
+          商家不会自己拼出那个 URL。新标签页打开，别把应用现场导航走。 */}
+      {shop && state.reason !== "trial" ? (
+        <a
+          className="mt-2 inline-block font-semibold underline underline-offset-2"
+          href={buildPricingPlansLink(shop)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {state.reason === "no-subscription" ? "Choose a plan" : "Manage plan"} →
+        </a>
+      ) : null}
     </div>
   );
 }
