@@ -9,7 +9,7 @@ import { clearToken } from '@/lib/auth';
 import { resolveSearchRoute } from '@/lib/search-route';
 
 type Props = {
-  active: 'queue' | 'shops' | 'accounts' | 'audit' | 'plans' | 'gate' | 'system' | 'impersonation';
+  active: 'queue' | 'shops' | 'accounts' | 'audit' | 'plans' | 'gate' | 'deploy' | 'system' | 'impersonation';
   title?: string;
   subtitle?: string;
   meta?: string;

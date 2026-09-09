@@ -60,4 +60,29 @@ const ignore = read('.gitignore') ?? '';
 if (/apps\/\*\/\.env\.bak\.\*/.test(ignore)) r.pass('.gitignore 忽略 .env 的时间戳备份');
 else r.fail('.gitignore 未忽略 apps/*/.env.bak.* —— 备份文件会被 git add -A 扫进提交');
 
+// 7. 部署清单必须仍在生成。没有它，运营台 /deploy 会静默显示旧值或空白——
+//    而「看起来正常」比「明说不知道」更危险（openspec ops-deploy-observability 1.4）。
+if (/deploy-manifest\.mjs/.test(script) && /deploy-manifest\.json/.test(script)) {
+  r.pass('deploy-mvp.sh 仍生成部署清单');
+} else {
+  r.fail('deploy-mvp.sh 不再生成 deploy-manifest.json —— 运营台 /deploy 会失去数据来源');
+}
+
+// 8. 清单生成器不得输出明文：它读的是真 .env，一旦漏写指纹就是把密钥落盘到
+//    一个会被 API 读取并渲染到网页上的文件里。
+const gen = read('scripts/deploy-manifest.mjs') ?? '';
+if (!gen) r.fail('scripts/deploy-manifest.mjs 缺失');
+else if (/createHash\('sha256'\)/.test(gen) && /SECRET_KEYS/.test(gen)) {
+  r.pass('清单生成器对密钥类配置只写指纹');
+} else {
+  r.fail('scripts/deploy-manifest.mjs 未见 sha256 指纹化 —— 可能把密钥明文写进了清单');
+}
+
+// 9. DEPLOY.md 与运营台视图互相指认：文档记「应该是什么」，视图记「现在是什么」
+if (/ops\.szchada\.top\/deploy|运营台.*\/deploy|\/deploy/.test(deployMd)) {
+  r.pass('DEPLOY.md 指向运营台 /deploy');
+} else {
+  r.fail('DEPLOY.md 未指向运营台 /deploy —— 读文档的人不知道哪里能看实况');
+}
+
 r.done();

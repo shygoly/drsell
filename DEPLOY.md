@@ -94,7 +94,20 @@ Next 在**构建时**把本地 `apps/<app>/.env` 复制进 `.next/standalone/`�
   开头有 `isbot(userAgent)`，命中就返 410 且不设 `Location`，路由随即 500。
   curl 默认 UA 会被判成 bot。必须带浏览器 UA，健康时是 307 → Shopify 授权页。
 
-## 5. 配置决策
+## 5. 实况在哪看
+
+本文件记的是「配置**应该**是什么」。「**现在**是什么」在运营台：
+
+**`https://ops.szchada.top/deploy`** —— 线上 commit 与构建时刻、每个应用两份 `.env`
+的并排指纹（不一致即高亮）、迁移头是否一致、各店令牌到期与是否持有刷新令牌。
+
+数据来自部署时生成的 `/opt/drsell-run/deploy-manifest.json`（由
+`scripts/deploy-manifest.mjs` 在服务器上生成）。页面与清单**都只有指纹，没有值**。
+
+清单显示为「缺失」意味着这次部署没走 `deploy-mvp.sh`，或生成失败——
+那是「不知道」，不是「没问题」。
+
+## 6. 配置决策
 
 ### DEP-1：`SHOPIFY_API_SECRET` 与 `_PREVIOUS` 配反了（2026-09-09）
 

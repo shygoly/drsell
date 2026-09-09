@@ -11,6 +11,13 @@ import { SubscriptionMirrorService } from './subscription-mirror.service';
 import { buildAuditWhere } from './ops-audit.util';
 import { evaluateServiceability } from '../subscription/subscription-state';
 import { listOpsPlans, resolveOpsPlan } from './ops-plan.config';
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import {
+  summarizeDeploy,
+  tokenRows,
+  type DeployManifest,
+} from './deploy-status';
 
 const TERMINAL = new Set(['DECLINED', 'EXPIRED', 'CANCELLED']);
 
@@ -265,6 +272,75 @@ export class OpsService {
       blockedCount: rows.filter((r) => !r.serviceable).length,
       neverSyncedCount: rows.filter((r) => !r.lastSyncedAt).length,
       shops: rows,
+    };
+  }
+
+  /**
+   * 部署与配置实况（openspec ops-deploy-observability）。
+   *
+   * 数据来自部署时生成的 `deploy-manifest.json`，不是应用自省——应用无法可靠
+   * 知道自己是哪个 commit 构建的（design D1）。清单里只有指纹，没有值。
+   *
+   * 进程覆盖面要说实话：这里只能精确报出 **API 自己** 的启动时刻。
+   * 另外三个是独立的 Next 进程，本服务不 exec pm2 去问它们——为一个只读视图
+   * 给 API 开进程执行能力不划算。它们是否活着由公网断言覆盖。
+   */
+  async deployStatus(now = new Date()) {
+    const file = process.env.DEPLOY_MANIFEST_PATH || join(process.cwd(), '..', '..', 'deploy-manifest.json');
+    let manifest: DeployManifest | null = null;
+    try {
+      if (existsSync(file)) manifest = JSON.parse(readFileSync(file, 'utf8')) as DeployManifest;
+    } catch {
+      manifest = null; // 坏 JSON 与缺失同等对待：都是「不知道」，不是「没问题」
+    }
+    const deploy = summarizeDeploy(manifest);
+
+    const apiStartedAt = new Date(now.getTime() - Math.floor(process.uptime()) * 1000);
+    // API 比清单还老 = 这次部署没重启到它，页面上看到的版本是假的
+    const apiStale = deploy.builtAt ? apiStartedAt < new Date(deploy.builtAt) : false;
+
+    const shops = await this.prisma.shop.findMany({
+      select: {
+        shopDomain: true,
+        accessToken: true,
+        refreshToken: true,
+        accessTokenExpiresAt: true,
+        uninstalledAt: true,
+      },
+      orderBy: { shopDomain: 'asc' },
+    });
+
+    const [appliedHead] = await this.prisma.$queryRawUnsafe<Array<{ migration_name: string }>>(
+      'SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL ORDER BY finished_at DESC LIMIT 1',
+    ).catch(() => [] as Array<{ migration_name: string }>);
+
+    return {
+      ...deploy,
+      manifestPath: file,
+      api: {
+        startedAt: apiStartedAt.toISOString(),
+        uptimeSeconds: Math.floor(process.uptime()),
+        stale: apiStale,
+        note: apiStale
+          ? 'API 进程比部署清单还早启动——本次部署没有重启到它，上面的版本号不代表正在运行的代码'
+          : null,
+      },
+      migration: {
+        headInCode: deploy.migrationHeadInCode,
+        headApplied: appliedHead?.migration_name ?? null,
+        consistent:
+          !deploy.migrationHeadInCode || appliedHead?.migration_name === deploy.migrationHeadInCode,
+      },
+      tokens: tokenRows(
+        shops.map((s) => ({
+          shopDomain: s.shopDomain,
+          accessTokenExpiresAt: s.accessTokenExpiresAt,
+          hasRefreshToken: Boolean(s.refreshToken),
+          uninstalledAt: s.uninstalledAt,
+        })),
+        now,
+      ),
+      evaluatedAt: now.toISOString(),
     };
   }
 

@@ -4,6 +4,15 @@ set -euo pipefail
 
 # 配置改哪里才生效、密钥实况、验证方法 —— 见 DEPLOY.md，改配置前先读。
 echo "==> 先读 DEPLOY.md（配置生效链路与密钥实况）"
+
+# 部署清单要记「这份产物是哪个 commit 构建的」。工作区脏 = 产物与 commit 不对应，
+# 必须记下来，否则清单会理直气壮地报一个不成立的版本。
+DEPLOY_COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+DEPLOY_SUBJECT="$(git log -1 --format=%s 2>/dev/null | tr -d "'\"" | cut -c1-120 || echo '')"
+if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
+  DEPLOY_COMMIT="${DEPLOY_COMMIT}-dirty"
+  echo "!!  工作区有未提交改动，清单将记为 ${DEPLOY_COMMIT}"
+fi
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 HOST="${DEPLOY_HOST:-wjclaw}"
 REMOTE="${REMOTE_DIR:-/opt/drsell-run}"
@@ -111,11 +120,20 @@ rsync -az --delete "$ROOT/apps/ops/public/" "${HOST}:${REMOTE}/apps/ops/standalo
 
 rsync -az "$ROOT/apps/api/.env" "${HOST}:${REMOTE}/apps/api/.env"
 rsync -az "$ROOT/apps/web/.env" "${HOST}:${REMOTE}/apps/web/.env"
-if [[ -f apps/storefront/.env ]]; then
-  rsync -az "$ROOT/apps/storefront/.env" "${HOST}:${REMOTE}/apps/storefront/.env"
-fi
+for app in storefront ops; do
+  # ops 的 .env 此前从未同步：它的配置绕过服务器根 .env 直接从本地构建进 standalone，
+  # 是 DEPLOY.md §2「只有一条链路」的破口，也让运营台看不到它的配置。
+  if [[ -f "apps/$app/.env" ]]; then
+    rsync -az "$ROOT/apps/$app/.env" "${HOST}:${REMOTE}/apps/$app/.env"
+  fi
+done
 
 rsync -az "$ROOT/package.json" "$ROOT/pnpm-workspace.yaml" "$ROOT/pnpm-lock.yaml" "${HOST}:${REMOTE}/"
+
+# 部署清单生成器（运营台 /deploy 的数据来源）。必须在服务器上跑——它记的是
+# 实际写入服务器那些文件的指纹，不是本机模板的。
+ssh "$HOST" "mkdir -p ${REMOTE}/scripts"
+rsync -az "$ROOT/scripts/deploy-manifest.mjs" "${HOST}:${REMOTE}/scripts/deploy-manifest.mjs"
 
 echo "==> Sync OpenClaw agent prompts (SOUL/IDENTITY/SKILL) + restart gateway"
 # 提示词是仓库拥有的，但此前只有 setup-wjclaw.sh（重建服务器时才跑）会推。
@@ -175,6 +193,16 @@ for app in web storefront ops; do
     echo "  env -> \$sa_env"
   fi
 done
+
+# 部署清单（openspec ops-deploy-observability）。生成在 env 落定之后，
+# 这样记下的指纹就是进程真正会读到的那些。
+if node scripts/deploy-manifest.mjs --commit='${DEPLOY_COMMIT}' --subject='${DEPLOY_SUBJECT}' > deploy-manifest.json.tmp 2>/dev/null; then
+  mv deploy-manifest.json.tmp deploy-manifest.json
+  echo "  manifest -> ${REMOTE}/deploy-manifest.json (${DEPLOY_COMMIT})"
+else
+  rm -f deploy-manifest.json.tmp
+  echo "!!  部署清单生成失败——运营台 /deploy 会显示为未知"
+fi
 
 corepack enable
 corepack prepare pnpm@8.15.4 --activate

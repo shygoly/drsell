@@ -76,6 +76,11 @@ export class OpsController {
     return this.ops.subscriptionGate();
   }
 
+  @Get('deploy')
+  deploy() {
+    return this.ops.deployStatus();
+  }
+
   @Get('webhook-secret')
   webhookSecret() {
     return this.ops.webhookSecretStatus();
