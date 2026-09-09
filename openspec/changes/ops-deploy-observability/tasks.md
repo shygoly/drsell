@@ -27,7 +27,9 @@
 - [x] 4.1 `pnpm test`（含 `pnpm spec`）全绿 —— api 17 套/146 个，web 3/16，spec 12/12
 - [x] 4.2 `openspec validate ops-deploy-observability --strict` 通过
 - [x] 4.3 `DEPLOY.md` 指向该视图——文档记「应该是什么」，视图记「现在是什么」 —— DEPLOY.md §5「实况在哪看」
-- [x] 4.4 部署后走公网验证 —— 部署退出码 0，三条公网断言过；清单已落地且无明文；`/api/ops/deploy` 端到端返回真实数据
+- [x] 4.4 部署后走公网验证 —— 退出码 0，三条公网断言过；清单记的 commit 与 HEAD 一致
+      （`a20c168`）；`/api/ops/deploy` 端到端返回真实数据且无明文；三个 Next 应用的
+      standalone `.env` 均已覆盖（含此前从未同步的 ops）
 
 ## 5. 实施中发现
 
@@ -39,3 +41,7 @@
 - [x] 5.3 单测夹具曾直接用真实 Shopify app secret，靠 GitHub 推送保护才拦下。
       已换成「格式合法但含非十六进制字母」的合成值，并加 `spec/check-no-secrets.mjs`
       把发现点提前到提交之前——AGENTS.md 陷阱 6 此前没有执行体
+- [x] 5.4 收尾时一次部署因 ssh 断连失败（`exit=255`），而我几乎报成成功——
+      复合命令的退出码是最后那个 `curl` 的，`DEPLOY_EXIT` 打在中间被漏看。
+      **是这个视图本身抓住了它**：清单 commit 停在上一版，`ops/.env` 也没同步。
+      判据已写进 DEPLOY.md §4：唯一可靠的是产物，不是退出码

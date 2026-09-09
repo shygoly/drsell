@@ -88,7 +88,13 @@ Next 在**构建时**把本地 `apps/<app>/.env` 复制进 `.next/standalone/`�
 - **验产物指纹**比任何退出码都硬：首页取 `/_next/static/chunks/app/layout-<hash>.js`，
   哈希没变就是没部署上去。
 
-额外一条（本文件独有）：
+额外两条（本文件独有）：
+
+- **复合命令的退出码不是部署脚本的。** `bash deploy.sh > log; RC=$?; echo ...; curl ...`
+  作为一条后台命令跑，整体退出码是**最后那个 `curl`** 的。2026-09-09 一次
+  `exit=255` 的失败部署（rsync 中途 ssh 断连）差点被当成成功——`DEPLOY_EXIT` 打在
+  中间，而我只看了输出末尾。**唯一可靠的判据是产物**：运营台 `/deploy` 上的
+  commit 是不是你刚提交的那个。
 
 - **别用裸 `curl` 判 `/api/auth` 健康。** `@shopify/shopify-api` 的 `auth.begin()`
   开头有 `isbot(userAgent)`，命中就返 410 且不设 `Location`，路由随即 500。
