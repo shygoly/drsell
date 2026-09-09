@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "0b36b70772220b71b2fe296b3deba914"
-name = "Dr Sell"
+name = "Drsell"
 # 根路径 = apps/storefront，商家在 admin 里看到的就是它（完整仪表盘 UI）。
 # 它已用 App Bridge idToken 换发会话；此前会出现第三方登录页，是 AuthGuard
 # 在异步换发完成前就重定向到 /login（见 apps/storefront 的 auth-guard.tsx）。
