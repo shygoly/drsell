@@ -18,6 +18,7 @@
 | UI 反模式与设计规范 | `DESIGN.md` |
 | 进行中变更的行为需求 | `openspec/changes/<id>/`（`openspec list` 看有哪些） |
 | 最近一次发布的实况 | `docs/RELEASE-2026-09-02.md` |
+| 部署与运行时配置实况 | [`DEPLOY.md`](DEPLOY.md)（配置改哪里才生效、密钥实况、DEP-n） |
 
 代码或文档里出现的 `INV-n`/`ADR-n`/`B-n` **必须在 `DECISIONS.md` 里**，否则 `pnpm spec` 红。
 

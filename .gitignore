@@ -77,3 +77,7 @@ _tmp_*
 # obsolete/ — 已作废的旧实现（旧 Remix app、两个 Java Spring Boot 服务、Coze 联调脚本）。
 # 这些目录从未进过 git，移到此处只为不干扰活代码与 agent 判断。见 obsolete/README.md。
 obsolete/
+
+# .env 的时间戳备份也绝不入库（2026-09-09 被 GitHub 推送保护拦过一次）
+apps/*/.env.bak.*
+apps/*/.env.*.bak

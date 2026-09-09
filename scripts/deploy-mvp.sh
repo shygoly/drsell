@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Drsell MVP: local build → rsync → pm2 on wjclaw (no remote Docker build)
 set -euo pipefail
+
+# 配置改哪里才生效、密钥实况、验证方法 —— 见 DEPLOY.md，改配置前先读。
+echo "==> 先读 DEPLOY.md（配置生效链路与密钥实况）"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 HOST="${DEPLOY_HOST:-wjclaw}"
 REMOTE="${REMOTE_DIR:-/opt/drsell-run}"

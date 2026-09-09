@@ -14,7 +14,6 @@ const METALANG_FILES = ['DECISIONS.md'];
 const WHITELIST = new Map([
   ['DOMAIN.md', '子项目 4'],
   ['FLOWS.md', '子项目 4'],
-  ['DEPLOY.md', '子项目 4'],
 ]);
 
 const LINK_RE = /\[[^\]]*\]\(([^)]+)\)/g;
