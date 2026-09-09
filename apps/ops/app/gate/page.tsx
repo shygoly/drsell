@@ -51,6 +51,8 @@ const fmt = (iso: string | null) => (iso ? iso.replace('T', ' ').slice(0, 16) : 
 type SecretView = {
   previousSecretConfigured: boolean;
   safeToDelete: boolean;
+  reason: string;
+  observedForDays: number | null;
   quietDays: number;
   lastPreviousAt: string | null;
   quietForDays: number | null;
@@ -228,9 +230,14 @@ function SecretCard({ v }: { v: SecretView }) {
               旧密钥已静默 {v.quietForDays} 天 / 需 {v.quietDays} 天
             </Badge>
           ) : (
-            <Badge variant="outline">尚无观测</Badge>
+            <Badge variant="outline">旧密钥尚无观测</Badge>
           )}
+          <Badge variant="outline">
+            已观测 {v.observedForDays ?? 0} 天 / 需 {v.quietDays} 天
+          </Badge>
         </div>
+        {/* 结论必须带理由：光看「尚不能删除」没人知道还缺什么、要等什么 */}
+        <p className="mb-3 text-[13.5px] text-muted-foreground">{v.reason}</p>
         {v.stillOnPreviousTopics.length ? (
           <p className="mb-3 text-[13.5px] text-muted-foreground">
             以下 topic 只在旧密钥下出现过，现在删会让它们全部 401：

@@ -18,6 +18,7 @@ import {
   tokenRows,
   type DeployManifest,
 } from './deploy-status';
+import { decideSecretDeletion } from './webhook-secret-decision';
 
 const TERMINAL = new Set(['DECLINED', 'EXPIRED', 'CANCELLED']);
 
@@ -359,38 +360,23 @@ export class OpsService {
     const rows = await this.prisma.webhookSecretUse.findMany({
       orderBy: [{ generation: 'asc' }, { topic: 'asc' }],
     });
-    const previous = rows.filter((r) => r.generation === 'previous');
-    const currentTopics = new Set(
-      rows.filter((r) => r.generation === 'current').map((r) => r.topic),
-    );
-
-    const lastPreviousAt = previous.reduce<Date | null>(
-      (acc, r) => (!acc || r.lastSeenAt > acc ? r.lastSeenAt : acc),
-      null,
-    );
-    // 还在用旧密钥、且没有在新密钥下出现过的 topic —— 删掉旧密钥它们就全挂
-    const stillOnPrevious = previous
-      .filter((r) => !currentTopics.has(r.topic))
-      .map((r) => r.topic);
-    const quietFor = lastPreviousAt
-      ? Math.floor((now.getTime() - lastPreviousAt.getTime()) / 86400000)
-      : null;
-
-    const configured = Boolean(process.env.SHOPIFY_API_SECRET_PREVIOUS);
-    const safeToDelete =
-      configured &&
-      // 从没观测到过任何 webhook 就不能下结论——那只说明还没人发过
-      rows.length > 0 &&
-      stillOnPrevious.length === 0 &&
-      (quietFor === null || quietFor >= quietDays);
+    const decision = decideSecretDeletion({
+      rows,
+      configured: Boolean(process.env.SHOPIFY_API_SECRET_PREVIOUS),
+      quietDays,
+      now,
+    });
 
     return {
-      previousSecretConfigured: configured,
-      safeToDelete,
+      previousSecretConfigured: Boolean(process.env.SHOPIFY_API_SECRET_PREVIOUS),
+      safeToDelete: decision.safeToDelete,
+      reason: decision.reason,
       quietDays,
-      lastPreviousAt: lastPreviousAt?.toISOString() ?? null,
-      quietForDays: quietFor,
-      stillOnPreviousTopics: stillOnPrevious,
+      observedForDays: decision.observedForDays,
+      lastPreviousAt: decision.lastPreviousAt,
+      quietForDays: decision.quietForDays,
+      stillOnPreviousTopics: decision.stillOnPreviousTopics,
+      topicsSeenOnCurrent: decision.topicsSeenOnCurrent,
       observations: rows.map((r) => ({
         generation: r.generation,
         topic: r.topic,
