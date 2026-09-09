@@ -8,7 +8,13 @@
 - [ ] 0.1 收尾密钥：确认 Shopify 何时切到新密钥签 webhook，切换后删除 `SHOPIFY_API_SECRET_PREVIOUS`
 - [x] 0.2 定试用期额度：`@drsell/shared` 的 `PLANS` 目前没有试用档，D2 的实现依赖它 —— 已定：按 basic 档给（2026-09-09）
 - [x] 0.3 定按天触发方案（D4 的 a / b / c），b 应排除——没人访问就不提醒，而临近到期的店恰恰可能没人访问 —— 已定：方案 a；但 @nestjs/schedule@12 是 ESM-only（无 CJS 产物）而本应用编译成 CommonJS，装上生产启动即崩，改用 setInterval 自实现
-- [ ] 0.4 核实生产上每个店的订阅镜像是否已与 Shopify 一致（`chatbotdomaintest` 的 `currentPeriodEnd` 仍停在 2025-08-25）
+- [x] 0.4 核实生产上每个店的订阅镜像是否已与 Shopify 一致 —— 2026-09-09 用一条真实签名的
+      `app_subscriptions/update` 触发 `syncFromShopify` 实时回查：生产仅一个店
+      `chatbotdomaintest`，镜像与 Shopify **完全一致**（`basic ACTIVE until 2025-08-25`）。
+      滞后假设不成立；真因是 `test: true`（测试扣款不续期），见 0.5
+
+- [x] 0.5 测试订阅豁免周期判定（D7）：镜像 `AppSubscription.test`，`test=true` 一律可服务。
+      不做这条就会在恢复上架的审核里停掉 Shopify 审核员的开发店
 
 ## 1. 可服务状态的判定（纯函数先行）
 
@@ -29,7 +35,9 @@
 
 - [x] 3.1 闸门判定结果只记录不拦截：记下「若开闸会拦谁、原因、订阅快照」
 - [ ] 3.2 运营台能看到这份清单，便于人工核对是否误判（当前只有 `subscription gate OBSERVE` 日志）
-- [ ] 3.3 观察期结束、确认无误判后，把 `SUBSCRIPTION_GATE_ENFORCE=true` 打开
+- [ ] 3.3 观察期结束、确认无误判后，把 `SUBSCRIPTION_GATE_ENFORCE=true` 打开。
+      **前置**：0.5 已落地且生产上 `isTest` 已由一次 `syncFromShopify` 写入权威值——
+      迁移默认 `false`，在同步跑过之前开闸会停掉测试店
 
 ## 4. 开闸（`AdpService`）
 

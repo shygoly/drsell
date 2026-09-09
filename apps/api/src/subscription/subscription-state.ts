@@ -24,10 +24,13 @@ export type SubscriptionSnapshot = {
   status: string | null;
   trialEnds: Date | null;
   currentPeriodEnd: Date | null;
+  /** Shopify AppSubscription.test。缺省视为真实订阅。 */
+  isTest?: boolean | null;
 };
 
 export type ServiceabilityReason =
   | 'active'
+  | 'test'
   | 'trial'
   | 'grace'
   | 'no-subscription'
@@ -70,7 +73,20 @@ export function evaluateServiceability(
     return { serviceable: false, reason: 'no-subscription', graceEndsAt: null };
   }
 
-  // 试用优先于一切：试用期内不看状态也不看周期。
+  // 测试订阅优先于一切判定，因为「周期已过」对它没有意义：Shopify 的测试扣款
+  // 永不续期，currentPeriodEnd 冻在第一期终点，status 却一直是 ACTIVE
+  // （生产实测 chatbotdomaintest：test=true, createdAt 2025-07-19,
+  //   currentPeriodEnd 2025-08-25, status ACTIVE）。
+  //
+  // 这不是宽容，是必需：**Shopify 的应用审核员就是在开发店上用测试扣款验计费的**。
+  // 把它按「周期已过」停掉，等于在决定能否重新上架的那次审核里给审核员看
+  // 「服务已暂停」。滥用面很小——测试扣款只存在于开发店/Plus 沙盒店，
+  // 那些店本来就不能做真实生意。
+  if (sub.isTest) {
+    return { serviceable: true, reason: 'test', graceEndsAt: null };
+  }
+
+  // 试用优先于其余判定：试用期内不看状态也不看周期。
   if (isInTrial(sub, now)) {
     return { serviceable: true, reason: 'trial', graceEndsAt: null };
   }

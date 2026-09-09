@@ -30,6 +30,31 @@ AI 回答。
 
 ---
 
+### Requirement: 测试订阅不受周期判定约束
+
+对 `test = true` 的 Shopify 订阅，系统 SHALL 视为可服务，不论其 `currentPeriodEnd`
+是否已过、状态为何。SHALL NOT 对测试订阅套用「周期已过」或「状态不可服务」的停服判定。
+
+理由是事实而非宽容：Shopify 的测试扣款**永不续期**，`currentPeriodEnd` 会永远
+停在第一期终点而 `status` 保持 `ACTIVE`。这正是 Shopify **应用审核员**验证计费时
+所处的形态（他们在开发店上用测试扣款）。按周期判定停掉它，等于在决定能否重新
+上架的那次审核里给审核员看「服务已暂停」。
+
+滥用面有限：测试扣款只能存在于开发店与 Plus 沙盒店，这些店本就不能做真实生意。
+
+#### Scenario: 开发店的测试订阅周期早已过
+
+- **WHEN** 某店订阅 `test = true`、`status = ACTIVE`、`currentPeriodEnd` 停在一年前
+- **THEN** 闸门放行，判定原因记为 `test`
+- **AND** 不产生停服提示，也不进入到期提醒
+
+#### Scenario: 真实订阅不因此被放行
+
+- **WHEN** 某店订阅 `test = false`（或字段缺失）且已过宽限
+- **THEN** 仍按停服处理，测试订阅的例外不适用
+
+---
+
 ### Requirement: 套餐档位只取自有效订阅
 
 `planCodeFor` SHALL 只考虑处于可服务状态的订阅。

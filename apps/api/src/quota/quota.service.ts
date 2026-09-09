@@ -53,6 +53,7 @@ export class QuotaService {
         planCode: true,
         trialEnds: true,
         currentPeriodEnd: true,
+        isTest: true,
       },
     });
   }

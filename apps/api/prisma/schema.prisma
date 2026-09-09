@@ -145,6 +145,10 @@ model Subscription {
   currentPeriodEnd DateTime?
   /// 组内唯一收全额的店；其余店建 $0 charge
   isBillingShop  Boolean @default(false)
+  /// Shopify AppSubscription.test：开发店/审核用的测试扣款。测试订阅永不续期，
+  /// currentPeriodEnd 会永远停在第一期终点而 status 保持 ACTIVE——不单独标记
+  /// 就会被闸门判成「周期已过」，把 Shopify 审核员也一起停掉。
+  isTest         Boolean @default(false)
   shopifyChargeId String?
   seats          Int     @default(1)
   createdAt DateTime @default(now())

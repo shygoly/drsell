@@ -13,7 +13,8 @@ const sub = (
   status: SubscriptionStatus | null,
   currentPeriodEnd: Date | null,
   trialEnds: Date | null = null,
-) => ({ status, currentPeriodEnd, trialEnds });
+  isTest = false,
+) => ({ status, currentPeriodEnd, trialEnds, isTest });
 
 const ALL: SubscriptionStatus[] = [
   'PENDING',
@@ -60,6 +61,47 @@ describe('可服务判定', () => {
     const r = evaluateServiceability(sub('ACTIVE', new Date('2025-08-25')), NOW);
     expect(r.serviceable).toBe(false);
     expect(r.reason).toBe('period-ended');
+  });
+});
+
+describe('测试订阅（开发店 / Shopify 审核）', () => {
+  it('生产上那条的真实形态：test=true 且周期停在一年前 → 仍服务', () => {
+    // 2026-09-09 实测 Shopify 返回：test=true, createdAt 2025-07-19,
+    // currentPeriodEnd 2025-08-25, status ACTIVE。测试扣款永不续期。
+    const r = evaluateServiceability(
+      sub('ACTIVE', new Date('2025-08-25T15:58:04Z'), null, true),
+      NOW,
+    );
+    expect(r.serviceable).toBe(true);
+    expect(r.reason).toBe('test');
+  });
+
+  it('审核员的开发店不会被停：六个状态都放行', () => {
+    // Shopify 审核就是在开发店上用测试扣款验计费的。把它按「周期已过」停掉，
+    // 等于在决定能否重新上架的那次审核里给审核员看「服务已暂停」。
+    for (const s of ALL) {
+      expect(evaluateServiceability(sub(s, day(-400), null, true), NOW)).toMatchObject({
+        serviceable: true,
+        reason: 'test',
+      });
+    }
+  });
+
+  it('isTest 缺省/为 null 时按真实订阅处理，不放行', () => {
+    expect(
+      evaluateServiceability({ status: 'ACTIVE', currentPeriodEnd: day(-400), trialEnds: null }, NOW)
+        .serviceable,
+    ).toBe(false);
+    expect(evaluateServiceability(sub('ACTIVE', day(-400), null, false), NOW).serviceable).toBe(
+      false,
+    );
+  });
+
+  it('真实订阅不会因为同店存在过测试订阅而被放行', () => {
+    // 判定是纯函数，只看传进来的这一条；选哪条是 latestSubscription 的责任
+    expect(evaluateServiceability(sub('CANCELLED', day(-30), null, false), NOW).serviceable).toBe(
+      false,
+    );
   });
 });
 

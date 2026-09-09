@@ -305,6 +305,7 @@ export class BillingService {
             id: string;
             name?: string | null;
             status?: string | null;
+            test?: boolean | null;
             currentPeriodEnd?: string | null;
           }> | null;
         } | null;
@@ -315,7 +316,7 @@ export class BillingService {
       query: `
         {
           currentAppInstallation {
-            activeSubscriptions { id name status currentPeriodEnd }
+            activeSubscriptions { id name status test currentPeriodEnd }
           }
         }
       `,
@@ -353,6 +354,9 @@ export class BillingService {
       status: (active.status || 'ACTIVE').toUpperCase(),
       shopifyChargeId: active.id,
       currentPeriodEnd: active.currentPeriodEnd ? new Date(active.currentPeriodEnd) : null,
+      // 测试扣款不续期，周期终点会永远停在第一期——必须记下来，否则可服务
+      // 判定会把开发店（含 Shopify 审核员用的店）判成「周期已过」而停服。
+      isTest: active.test === true,
       isBillingShop: true,
       ...(mapped ? { planCode: mapped } : {}),
     };
@@ -369,7 +373,7 @@ export class BillingService {
       shop.tenantId,
       'sync',
       `${shopDomain}: ${mapped ?? existing?.planCode ?? DEFAULT_PLAN} ${data.status} ` +
-        `until ${data.currentPeriodEnd?.toISOString() ?? '-'}`,
+        `until ${data.currentPeriodEnd?.toISOString() ?? '-'}${data.isTest ? ' [test]' : ''}`,
     );
     return sub;
   }
