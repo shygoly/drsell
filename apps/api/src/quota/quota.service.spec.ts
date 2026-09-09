@@ -44,10 +44,13 @@ function makePrisma(opts: {
   };
 }
 
+/** 补同步是 fire-and-forget，测里只需要它可被调用且不抛。 */
+const fakeBilling = () => ({ syncFromShopify: jest.fn().mockResolvedValue(null) });
+
 describe('QuotaService', () => {
   it('无订阅时回落自然月，并按 basic 档给额度', async () => {
     const { client } = makePrisma({ sub: null, answers: 10 });
-    const svc = new QuotaService(client as never);
+    const svc = new QuotaService(client as never, fakeBilling() as never);
     const u = await svc.usage('a.myshopify.com');
 
     expect(u.planCode).toBe('basic');
@@ -61,7 +64,7 @@ describe('QuotaService', () => {
   it('周期起点由订阅当期结束倒推 30 天，而不是自然月', async () => {
     const end = new Date('2026-09-20T00:00:00.000Z');
     const { client } = makePrisma({ sub: { planCode: 'pro', currentPeriodEnd: end } });
-    const svc = new QuotaService(client as never);
+    const svc = new QuotaService(client as never, fakeBilling() as never);
     const start = await svc.periodStart('shop_1');
 
     expect(start.toISOString()).toBe('2026-08-21T00:00:00.000Z');
@@ -77,7 +80,7 @@ describe('QuotaService', () => {
     const { client } = makePrisma({
       sub: { planCode: 'basic', currentPeriodEnd: stale, status: 'ACTIVE' },
     });
-    const svc = new QuotaService(client as never);
+    const svc = new QuotaService(client as never, fakeBilling() as never);
     const start = await svc.periodStart('shop_1');
 
     // 锚点原地不动：没有被推进到当期
@@ -92,7 +95,7 @@ describe('QuotaService', () => {
     const { client } = makePrisma({
       sub: { planCode: 'basic', currentPeriodEnd: null, trialEnds, status: 'ACTIVE' },
     });
-    const svc = new QuotaService(client as never);
+    const svc = new QuotaService(client as never, fakeBilling() as never);
     const start = await svc.periodStart('shop_1');
 
     const expected = new Date(trialEnds);
@@ -103,7 +106,7 @@ describe('QuotaService', () => {
   it('周期锚点在未来时保持不变（正常续费中的订阅）', async () => {
     const future = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
     const { client } = makePrisma({ sub: { planCode: 'pro', currentPeriodEnd: future } });
-    const svc = new QuotaService(client as never);
+    const svc = new QuotaService(client as never, fakeBilling() as never);
     const start = await svc.periodStart('shop_1');
     const expected = new Date(future);
     expected.setUTCDate(expected.getUTCDate() - 30);
@@ -123,7 +126,7 @@ describe('QuotaService', () => {
       sub: { planCode: 'basic', currentPeriodEnd: new Date('2026-09-20T00:00:00.000Z') },
       answers: PLANS.basic.answersPerPeriod,
     });
-    const svc = new QuotaService(client as never);
+    const svc = new QuotaService(client as never, fakeBilling() as never);
     const u = await svc.usage('a.myshopify.com');
 
     expect(u.exhausted).toBe(true);
@@ -138,7 +141,7 @@ describe('QuotaService', () => {
       sub: { planCode: 'basic', currentPeriodEnd: new Date('2026-09-20T00:00:00.000Z') },
       answers: PLANS.basic.answersPerPeriod - 1,
     });
-    const svc = new QuotaService(client as never);
+    const svc = new QuotaService(client as never, fakeBilling() as never);
     await expect(svc.assertWithinQuota('a.myshopify.com')).resolves.toMatchObject({
       remaining: 1,
       exhausted: false,
@@ -149,7 +152,7 @@ describe('QuotaService', () => {
     const { client, upserts } = makePrisma({
       sub: { planCode: 'pro', currentPeriodEnd: new Date('2026-09-20T00:00:00.000Z') },
     });
-    const svc = new QuotaService(client as never);
+    const svc = new QuotaService(client as never, fakeBilling() as never);
     await svc.recordAnswer('a.myshopify.com');
 
     expect(upserts).toHaveLength(1);
@@ -162,13 +165,13 @@ describe('QuotaService', () => {
   it('计数失败不抛错——回答已经给到顾客了，不能因记账失败而报错', async () => {
     const { client } = makePrisma({ sub: null });
     client.aiUsage.upsert = jest.fn().mockRejectedValue(new Error('db down'));
-    const svc = new QuotaService(client as never);
+    const svc = new QuotaService(client as never, fakeBilling() as never);
     await expect(svc.recordAnswer('a.myshopify.com')).resolves.toBeUndefined();
   });
 
   it('店铺记录不存在时不写计数，且不抛错', async () => {
     const { client, upserts } = makePrisma({ shop: null, sub: null });
-    const svc = new QuotaService(client as never);
+    const svc = new QuotaService(client as never, fakeBilling() as never);
     await expect(svc.recordAnswer('ghost.myshopify.com')).resolves.toBeUndefined();
     expect(upserts).toHaveLength(0);
   });
@@ -178,7 +181,7 @@ describe('QuotaService', () => {
       sub: { planCode: 'enterprise-typo', currentPeriodEnd: new Date('2026-09-20T00:00:00.000Z') },
       answers: 0,
     });
-    const svc = new QuotaService(client as never);
+    const svc = new QuotaService(client as never, fakeBilling() as never);
     const u = await svc.usage('a.myshopify.com');
     expect(u.planCode).toBe('basic');
     expect(u.limit).toBe(PLANS.basic.answersPerPeriod);

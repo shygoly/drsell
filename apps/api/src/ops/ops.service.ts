@@ -225,6 +225,7 @@ export class OpsService {
       select: {
         id: true,
         shopDomain: true,
+        installedAt: true,
         subscriptions: {
           orderBy: { updatedAt: 'desc' },
           take: 1,
@@ -250,7 +251,9 @@ export class OpsService {
 
     const rows = shops.map((shop) => {
       const sub = shop.subscriptions[0] ?? null;
-      const verdict = evaluateServiceability(sub, now);
+      // 必须带上 installedAt：闸门会给「安装后未选套餐」宽限，
+      // 这里不带就会把同一个店显示成「会被拦」，控制台与闸门说两套话。
+      const verdict = evaluateServiceability(sub, now, { installedAt: shop.installedAt });
       return {
         shopDomain: shop.shopDomain,
         serviceable: verdict.serviceable,

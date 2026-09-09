@@ -98,6 +98,33 @@ export class ShopifyController {
     return this.shopify.loginWithAppBridgeSessionToken(body.sessionToken);
   }
 
+  /**
+   * 立即回查并更新本店的订阅镜像。
+   *
+   * 商家在 Shopify 的套餐选择页选定套餐后会被重定向回应用（带 `plan_handle`），
+   * 那是**唯一一个「刚刚发生了变化」的确定信号**——`app_subscriptions/update`
+   * 自 2026-04-28 起已不再由 Shopify 发送（Shopify App Pricing 文档）。
+   * 商家端在回跳落地时调这里，否则刚选完套餐仍会显示「没有有效套餐」；
+   * 审核员遇到这一幕，审核当场失败。
+   *
+   * 不读回跳参数：`plan_handle` 只说明「变了」，档位与周期终点仍以 API 回查为准。
+   */
+  @Auth()
+  @Post('subscription/sync')
+  async syncSubscription(
+    @CurrentUser() user: JwtPayload,
+    @Query('shop') shop: string,
+  ) {
+    const domain = await this.scope.resolveShopDomain(user, shop);
+    const sub = await this.billing.syncFromShopify(domain);
+    return {
+      ok: true,
+      planCode: sub?.planCode ?? null,
+      status: sub?.status ?? null,
+      currentPeriodEnd: sub?.currentPeriodEnd?.toISOString() ?? null,
+    };
+  }
+
   @Auth()
   @Get('botSettings/shop/:shopDomain')
   async getBot(

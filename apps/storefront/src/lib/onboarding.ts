@@ -89,6 +89,20 @@ export function openEmbedDeepLink(
   return "top-navigation";
 }
 
+/**
+ * 立即回查订阅镜像。商家从 Shopify 套餐页选完套餐回跳时调用。
+ *
+ * `app_subscriptions/update` 自 2026-04-28 起已不再由 Shopify 发送，回跳是唯一
+ * 「刚刚变了」的确定信号。不调这里，刚选完套餐的商家仍会看到「没有有效套餐」。
+ */
+export function syncSubscription(shop: string, token: string) {
+  return merchantFetch<{ ok: boolean; planCode: string | null; status: string | null }>(
+    `/shopify/subscription/sync?shop=${encodeURIComponent(shop)}`,
+    token,
+    { method: "POST" },
+  );
+}
+
 export function fetchOnboarding(shop: string, token: string) {
   return merchantFetch<OnboardingState>(
     `/shopify/onboarding?shop=${encodeURIComponent(shop)}`,

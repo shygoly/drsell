@@ -76,11 +76,11 @@ export class StorefrontDashboardService {
   async getSubscriptionState(shopDomain: string) {
     const shop = await this.prisma.shop.findFirst({
       where: { shopDomain },
-      select: { id: true },
+      select: { id: true, installedAt: true },
     });
     const sub = await this.quota.latestSubscription(shop?.id ?? null);
     const now = new Date();
-    const verdict = evaluateServiceability(sub, now);
+    const verdict = evaluateServiceability(sub, now, { installedAt: shop?.installedAt ?? null });
     return {
       status: sub?.status ?? null,
       planCode: sub?.planCode ?? null,

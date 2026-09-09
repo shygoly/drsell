@@ -15,8 +15,20 @@ export type SubscriptionStatus =
   | 'EXPIRED'
   | 'CANCELLED';
 
-/** 到期后的宽限天数。给商家反应时间，也给 app_subscriptions/update 的迟到留余地。 */
+/** 到期后的宽限天数。给商家反应时间，也给订阅镜像的滞后留余地。 */
 export const GRACE_PERIOD_DAYS = 2;
+
+/**
+ * 安装后、尚未选套餐的宽限天数。
+ *
+ * 托管计费（Shopify App Pricing）下安装与选套餐是**两个独立动作**，中间必然存在
+ * 一段没有订阅的时间。把这段判成「没有订阅 → 停服」，会让每一个新装的店在选套餐
+ * 之前都处于停服状态——**包括 Shopify 审核员的店**，而这正是决定能否重新上架的
+ * 那次安装。
+ *
+ * 7 天：够审核员从容测完，也不至于让人长期白用。
+ */
+export const INSTALL_GRACE_DAYS = 7;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -28,10 +40,14 @@ export type SubscriptionSnapshot = {
   isTest?: boolean | null;
 };
 
+/** 判定所需的店铺上下文。缺省时「安装后宽限」不生效——不知道装机时间就不给宽限。 */
+export type ShopContext = { installedAt?: Date | null };
+
 export type ServiceabilityReason =
   | 'active'
   | 'test'
   | 'trial'
+  | 'install-grace'
   | 'grace'
   | 'no-subscription'
   | 'status-not-serviceable'
@@ -65,12 +81,24 @@ function statusAllows(status: string | null): boolean {
   return status === 'ACTIVE';
 }
 
+/** 安装后宽限的截止时刻；不知道装机时间则为 null。 */
+export function installGraceEndsAt(installedAt: Date | null | undefined): Date | null {
+  if (!installedAt) return null;
+  return new Date(installedAt.getTime() + INSTALL_GRACE_DAYS * DAY_MS);
+}
+
 export function evaluateServiceability(
   sub: SubscriptionSnapshot | null,
   now: Date = new Date(),
+  shop: ShopContext = {},
 ): Serviceability {
   if (!sub) {
-    return { serviceable: false, reason: 'no-subscription', graceEndsAt: null };
+    // 刚装上、还没来得及选套餐——这是托管计费的固有空窗，不是「订阅失效」。
+    const graceEnds = installGraceEndsAt(shop.installedAt);
+    if (graceEnds && graceEnds.getTime() > now.getTime()) {
+      return { serviceable: true, reason: 'install-grace', graceEndsAt: graceEnds };
+    }
+    return { serviceable: false, reason: 'no-subscription', graceEndsAt: graceEnds };
   }
 
   // 测试订阅优先于一切判定，因为「周期已过」对它没有意义：Shopify 的测试扣款

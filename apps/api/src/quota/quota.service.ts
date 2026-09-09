@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AiQuotaUsage, PlanCode, planOf } from '@drsell/shared';
 import { PrismaService } from '../prisma/prisma.service';
+import { BillingService } from '../subscription/billing.service';
 import {
   evaluateServiceability,
   isInTrial,
@@ -37,7 +38,44 @@ export class QuotaExceededError extends Error {
 export class QuotaService {
   private readonly logger = new Logger(QuotaService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly billing: BillingService,
+  ) {}
+
+  /** 镜像超过这个时长未更新就补一次同步。 */
+  private static readonly MIRROR_STALE_AFTER_MS = 6 * 60 * 60 * 1000;
+  /** 同店两次补同步之间的最短间隔。也顺带覆盖「上一次还在飞」的情形。 */
+  private static readonly REFRESH_COOLDOWN_MS = 5 * 60 * 1000;
+  private readonly lastRefreshAttempt = new Map<string, number>();
+
+  /**
+   * 镜像陈旧时补一次同步——**发出去就不管，绝不等待**。
+   *
+   * 为什么必须有：`app_subscriptions/update` 自 2026-04-28 起已不再由 Shopify 发送
+   * （Shopify App Pricing 文档），而它曾是 `syncFromShopify` 的唯一调用方。
+   * 没有这条路径，镜像永远停在最后一次人工同步——生产上就这样停了一整年。
+   * 商家取消或冻结订阅**不产生任何回跳**，只能靠这里收敛。
+   *
+   * 为什么不等：这条路径在顾客对话里。一次 Admin API 往返（可能还含令牌换发）
+   * 挂在顾客发消息与 AI 回复之间，是拿顾客体验换一点新鲜度。而 2 天宽限窗口
+   * （`ADR-18`）本就容得下分钟级滞后——本次判定用旧值，之后就是新的，
+   * 且误判方向是继续服务而非误停。
+   */
+  private refreshIfStale(shopDomain: string, mirrorUpdatedAt: Date | null, now: Date) {
+    const stale =
+      !mirrorUpdatedAt ||
+      now.getTime() - mirrorUpdatedAt.getTime() > QuotaService.MIRROR_STALE_AFTER_MS;
+    if (!stale) return;
+    const last = this.lastRefreshAttempt.get(shopDomain) ?? 0;
+    if (now.getTime() - last < QuotaService.REFRESH_COOLDOWN_MS) return;
+    // 先记时间再发起：失败也算一次尝试，否则上游一直报错会让每条消息都重试
+    this.lastRefreshAttempt.set(shopDomain, now.getTime());
+    void this.billing.syncFromShopify(shopDomain).catch((e) => {
+      // 失败不影响判定，但必须留痕——静默失效等于回到没有数据源的状态
+      this.logger.warn(`subscription mirror refresh failed for ${shopDomain}: ${String(e)}`);
+    });
+  }
 
   /**
    * 拿到本店订阅的最新一条（含状态、试用与周期），供周期计算与闸门共用。
@@ -54,6 +92,7 @@ export class QuotaService {
         trialEnds: true,
         currentPeriodEnd: true,
         isTest: true,
+        updatedAt: true,
       },
     });
   }
@@ -120,11 +159,21 @@ export class QuotaService {
 
   /** 域名 → shopId。店铺不存在时返回 null，配额按 DEFAULT_PLAN 的自然月处理。 */
   private async shopIdOf(shopDomain: string): Promise<string | null> {
+    return (await this.shopContext(shopDomain)).id;
+  }
+
+  /**
+   * 判定所需的店铺上下文。`installedAt` 用于「安装后宽限」——托管计费下安装与
+   * 选套餐是两个独立动作，中间的空窗不该被判成订阅失效。
+   */
+  private async shopContext(
+    shopDomain: string,
+  ): Promise<{ id: string | null; installedAt: Date | null }> {
     const shop = await this.prisma.shop.findFirst({
       where: { shopDomain },
-      select: { id: true },
+      select: { id: true, installedAt: true },
     });
-    return shop?.id ?? null;
+    return { id: shop?.id ?? null, installedAt: shop?.installedAt ?? null };
   }
 
   /** 当前用量快照，供商家端展示与超额判断共用。 */
@@ -173,9 +222,11 @@ export class QuotaService {
    * 商家白用几天。先跑观测、确认无误判，再把开关打开。
    */
   async assertSubscriptionServiceable(shopDomain: string, now = new Date()) {
-    const shopId = await this.shopIdOf(shopDomain);
-    const sub = await this.latestSubscription(shopId);
-    const verdict = evaluateServiceability(sub, now);
+    const shop = await this.shopContext(shopDomain);
+    const sub = await this.latestSubscription(shop.id);
+    // 镜像太旧就补一次同步，但**不等它**——见下面 refreshIfStale 的注释。
+    this.refreshIfStale(shopDomain, sub?.updatedAt ?? null, now);
+    const verdict = evaluateServiceability(sub, now, { installedAt: shop.installedAt });
     if (verdict.serviceable) return verdict;
 
     const enforcing = process.env.SUBSCRIPTION_GATE_ENFORCE === 'true';

@@ -9,10 +9,28 @@ import { StatCard } from "@/components/business/stat-card";
 import { StatusBanner } from "@/components/business/status-banner";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useShopSession } from "@/hooks/useShopSession";
+import { useEffect, useRef } from "react";
+import { syncSubscription } from "@/lib/onboarding";
 
 export default function DashboardPage() {
   const { stats, chart, conversations, suggestion, error } = useDashboardData();
-  const { shop } = useShopSession();
+  const { shop, token } = useShopSession();
+
+  /**
+   * 商家从 Shopify 套餐页选完套餐会被重定向回这里，URL 带 `plan_handle`。
+   * 这是唯一「刚刚变了」的确定信号（`app_subscriptions/update` 自 2026-04-28 起
+   * 已停发），落地就同步一次，否则页面会告诉刚付过钱的商家「没有有效套餐」。
+   */
+  const syncedFor = useRef<string | null>(null);
+  useEffect(() => {
+    if (!shop || !token || typeof window === "undefined") return;
+    const planHandle = new URLSearchParams(window.location.search).get("plan_handle");
+    if (!planHandle || syncedFor.current === planHandle) return;
+    syncedFor.current = planHandle;
+    void syncSubscription(shop, token)
+      .then(() => window.location.reload())
+      .catch(() => undefined); // 同步失败不打断商家；陈旧度补同步会兜住
+  }, [shop, token]);
 
   return (
     <div className="flex flex-col gap-6">

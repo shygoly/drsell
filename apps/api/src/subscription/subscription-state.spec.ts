@@ -105,6 +105,44 @@ describe('测试订阅（开发店 / Shopify 审核）', () => {
   });
 });
 
+describe('安装后宽限（托管计费的固有空窗）', () => {
+  it('刚安装、还没选套餐 → 放行，原因是 install-grace', () => {
+    // 托管计费下安装与选套餐是两个独立动作。判成停服，会让每一个新装的店
+    // 在选套餐之前都处于停服状态——包括 Shopify 审核员的店。
+    const r = evaluateServiceability(null, NOW, { installedAt: day(-1) });
+    expect(r.serviceable).toBe(true);
+    expect(r.reason).toBe('install-grace');
+    expect(r.graceEndsAt?.getTime()).toBe(day(-1).getTime() + 7 * 86400000);
+  });
+
+  it('第 6 天仍放行，第 8 天停', () => {
+    expect(evaluateServiceability(null, NOW, { installedAt: day(-6) }).serviceable).toBe(true);
+    expect(evaluateServiceability(null, NOW, { installedAt: day(-8) }).serviceable).toBe(false);
+  });
+
+  it('宽限期过后仍无订阅 → no-subscription，并带上已过期的截止时刻', () => {
+    const r = evaluateServiceability(null, NOW, { installedAt: day(-30) });
+    expect(r.reason).toBe('no-subscription');
+    expect(r.graceEndsAt).not.toBeNull();
+  });
+
+  it('不知道安装时间就不给宽限——不能靠缺数据白送服务', () => {
+    expect(evaluateServiceability(null, NOW).serviceable).toBe(false);
+    expect(evaluateServiceability(null, NOW, { installedAt: null }).serviceable).toBe(false);
+  });
+
+  it('宽限期内选了套餐 → 走正常判定，不再是 install-grace', () => {
+    const r = evaluateServiceability(sub('ACTIVE', day(7)), NOW, { installedAt: day(-1) });
+    expect(r.reason).toBe('active');
+  });
+
+  it('宽限期内订阅已失效 → 按订阅判定，宽限不复活它', () => {
+    // 装机 1 天但订阅是 CANCELLED 且早过宽限：install-grace 只对「没有订阅」生效
+    const r = evaluateServiceability(sub('CANCELLED', day(-30)), NOW, { installedAt: day(-1) });
+    expect(r.serviceable).toBe(false);
+  });
+});
+
 describe('宽限窗口', () => {
   it('到期后第 1 天仍服务，第 3 天停', () => {
     expect(evaluateServiceability(sub('ACTIVE', day(-1)), NOW)).toMatchObject({
