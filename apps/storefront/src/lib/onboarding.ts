@@ -41,12 +41,34 @@ export function buildEmbedDeepLink(
   return `https://admin.shopify.com/store/${storeHandle}/themes/current/editor?context=apps&activateAppId=${clientId}/${handle}`;
 }
 
-/** Top-level navigation so the button works inside the Shopify Admin iframe. */
-export function openEmbedDeepLink(shop: string) {
-  if (!shop || typeof window === "undefined") return;
+/**
+ * 在**新标签页**打开主题编辑器深链。
+ *
+ * 原实现走 `window.top.location.assign`，等于把整个 Shopify admin 导航走——
+ * 商家丢失应用现场，也就回不来点旁边那个「我已启用」按钮，而这一步正是引导流程
+ * 的下一环。启用主题嵌入本来就是「去别处做一件事再回来」，新标签页才是对的形状。
+ *
+ * 弹窗被拦时退回顶层跳转：宁可导航走，也好过点了没反应。
+ * 返回值说明实际走了哪条路，便于测试与埋点。
+ */
+export function openEmbedDeepLink(
+  shop: string,
+  win: Pick<Window, "open"> & { top?: unknown } = typeof window === "undefined"
+    ? ({ open: () => null } as never)
+    : window,
+): "new-tab" | "top-navigation" | "noop" {
+  if (!shop) return "noop";
   const url = buildEmbedDeepLink(shop);
-  const target = window.top ?? window;
-  target.location.assign(url);
+  let opened: unknown = null;
+  try {
+    opened = win.open(url, "_blank", "noopener,noreferrer");
+  } catch {
+    opened = null; // 沙箱 iframe 未授予 allow-popups 时会抛
+  }
+  if (opened) return "new-tab";
+  const top = (win as { top?: { location?: { assign?: (u: string) => void } } }).top ?? win;
+  (top as { location?: { assign?: (u: string) => void } })?.location?.assign?.(url);
+  return "top-navigation";
 }
 
 export function fetchOnboarding(shop: string, token: string) {

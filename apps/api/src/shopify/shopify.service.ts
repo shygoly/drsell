@@ -488,9 +488,48 @@ export class ShopifyService implements OnModuleInit {
     }
   }
 
+  /**
+   * 令牌是否**仍然可用**。真正的卸载会让 Shopify 立刻作废离线令牌，
+   * 所以「还能调通 Admin API」就是「这条卸载事件不反映事实」的正面证据。
+   *
+   * 只在拿到肯定答复时返回 true。问不到（网络、限流、Shopify 故障）一律 false——
+   * 那时应当相信这条 HMAC 合法的 webhook，否则真卸载后会留着一把死令牌。
+   */
+  private async accessStillWorks(shop: { id: string; shopDomain: string }): Promise<boolean> {
+    try {
+      const token = await this.tenants.getValidAccessToken(shop as never);
+      if (!token) return false;
+      const res = await shopifyGraphql<{ data?: { shop?: { id?: string } } }>({
+        shop: shop.shopDomain,
+        accessToken: token,
+        query: '{ shop { id } }',
+      });
+      return Boolean(res?.data?.shop?.id);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * `app/uninstalled` 处理。
+   *
+   * **销毁访问权之前先要证据。** 这个动作不可逆：令牌一旦置空，只能靠商家重装恢复。
+   * 而 HMAC 合法 ≠ 事实为真——重放一条旧事件、或（2026-09-09 真实发生）为验证
+   * webhook 路由而对生产店铺发一条自签的测试事件，都会让一个正常在装的店
+   * 瞬间失去 Admin API 访问。
+   *
+   * 判据是 Shopify 自己：真卸载会立刻作废令牌，所以令牌还能用就说明没卸载。
+   */
   async handleUninstall(shopDomain: string) {
     const shop = await this.tenants.getByShopDomain(shopDomain);
     if (!shop) return { ok: true };
+    if (await this.accessStillWorks(shop)) {
+      this.logger.warn(
+        `app/uninstalled 收到但令牌仍可用，判定为不实事件，已忽略：${shopDomain}。` +
+          '（重放的旧事件，或对生产店铺发的自签测试事件）',
+      );
+      return { ok: true, ignored: 'access-still-valid' as const };
+    }
     const billingSub = await this.prisma.subscription.findFirst({
       where: { shopId: shop.id, isBillingShop: true },
     });
