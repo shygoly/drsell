@@ -292,13 +292,27 @@ describe('OpsService', () => {
       lastSeenAt,
     });
     let prev: string | undefined;
+    let prevSecret: string | undefined;
+    let prevLatest: string | undefined;
     beforeEach(() => {
       prev = process.env.SHOPIFY_API_SECRET_PREVIOUS;
+      prevSecret = process.env.SHOPIFY_API_SECRET;
+      prevLatest = process.env.SHOPIFY_API_SECRET_LATEST_FP;
       process.env.SHOPIFY_API_SECRET_PREVIOUS = 'old';
+      process.env.SHOPIFY_API_SECRET = 'new';
+      // 判据要求知道 Partner 后台最新那把落在哪个槽位——轮换期后台会同时列出两把，
+      // 若最新那把在 _PREVIOUS 里，删它就会在切换时全挂。这里模拟「轮换已收尾」：
+      // 后台最新那把 = 当前 SHOPIFY_API_SECRET。
+      process.env.SHOPIFY_API_SECRET_LATEST_FP = '11507a0e2f5e';
     });
+    const restore = (k: string, v: string | undefined) => {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    };
     afterEach(() => {
-      if (prev === undefined) delete process.env.SHOPIFY_API_SECRET_PREVIOUS;
-      else process.env.SHOPIFY_API_SECRET_PREVIOUS = prev;
+      restore('SHOPIFY_API_SECRET_PREVIOUS', prev);
+      restore('SHOPIFY_API_SECRET', prevSecret);
+      restore('SHOPIFY_API_SECRET_LATEST_FP', prevLatest);
     });
 
     it('还有 topic 只在旧密钥下出现过 → 不能删', async () => {
@@ -322,6 +336,19 @@ describe('OpsService', () => {
       const r = await svc.webhookSecretStatus(NOW);
       expect(r.safeToDelete).toBe(true);
       expect(r.quietForDays).toBe(30);
+    });
+
+    it('后台最新那把在 _PREVIOUS 里 → 绝不放行（2026-09-09 的真实形态）', async () => {
+      // 轮换进行中：后台同时列出 old 与 new，Shopify 仍用 old 签名，
+      // 于是 _PREVIOUS 里装的是**将要接管**的新密钥。静默是它还没启用，不是可以删。
+      process.env.SHOPIFY_API_SECRET_LATEST_FP = 'cba06b5736fa';
+      prisma.webhookSecretUse.findMany.mockResolvedValue([
+        row('current', 'app/uninstalled', ago(30)),
+      ]);
+      const r = await svc.webhookSecretStatus(NOW);
+      expect(r.latestSlot).toBe('previous');
+      expect(r.safeToDelete).toBe(false);
+      expect(r.reason).toMatch(/将要接管|同时全挂/);
     });
 
     it('topic 已全部切换但旧密钥刚刚还在用 → 静默期不够，仍不能删', async () => {

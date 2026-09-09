@@ -17,6 +17,15 @@ export type SecretUseRow = {
   lastSeenAt: Date;
 };
 
+/**
+ * Partner 后台**最新**那把密钥的指纹。**判据缺了它就是瞎的。**
+ *
+ * 轮换期间 Shopify 后台会**同时列出 old 与 new 两把**，而它仍用 old 签名——
+ * 2026-09-09 实测正是这个形态：后台 old=`58e8f70fb2a5`（在用）、
+ * new=`4c3a72ece258`（未启用）。于是 `_PREVIOUS` 里装的不是「将死的旧密钥」，
+ * 而是**将要接管的新密钥**；按「静默即可删」处置，会在 Shopify 切过去那一刻
+ * 让全部 webhook 与 OAuth 同时挂掉。静默恰恰是它还没被启用的表现。
+ */
 export type SecretDecision = {
   safeToDelete: boolean;
   /** 为什么还不能删；可删时说明依据。给人看的，不是给机器解析的。 */
@@ -26,6 +35,8 @@ export type SecretDecision = {
   lastPreviousAt: string | null;
   stillOnPreviousTopics: string[];
   topicsSeenOnCurrent: string[];
+  /** 后台那把落在哪个槽位；unknown 表示没配指纹，无从判断。 */
+  latestSlot: 'current' | 'previous' | 'neither' | 'unknown';
 };
 
 export function decideSecretDeletion(args: {
@@ -33,8 +44,13 @@ export function decideSecretDeletion(args: {
   configured: boolean;
   quietDays: number;
   now: Date;
+  /** 各槽位密钥的指纹（sha256 前 12 位）。 */
+  currentFp?: string | null;
+  previousFp?: string | null;
+  /** 后台最新那把的指纹，由运维填 `SHOPIFY_API_SECRET_LATEST_FP`（轮换期填 new 那把）。 */
+  latestFp?: string | null;
 }): SecretDecision {
-  const { rows, configured, quietDays, now } = args;
+  const { rows, configured, quietDays, now, currentFp, previousFp, latestFp } = args;
   const previous = rows.filter((r) => r.generation === 'previous');
   const current = rows.filter((r) => r.generation === 'current');
   const currentTopics = new Set(current.map((r) => r.topic));
@@ -55,16 +71,55 @@ export function decideSecretDeletion(args: {
     .filter((r) => !currentTopics.has(r.topic))
     .map((r) => r.topic);
 
+  const latestSlot: SecretDecision['latestSlot'] = !latestFp
+    ? 'unknown'
+    : latestFp === currentFp
+      ? 'current'
+      : latestFp === previousFp
+        ? 'previous'
+        : 'neither';
+
   const base = {
     observedForDays,
     quietForDays,
     lastPreviousAt: lastPreviousAt?.toISOString() ?? null,
     stillOnPreviousTopics,
     topicsSeenOnCurrent: [...currentTopics].sort(),
+    latestSlot,
   };
 
   if (!configured) {
     return { ...base, safeToDelete: false, reason: 'SHOPIFY_API_SECRET_PREVIOUS 未配置，无可删' };
+  }
+  // 后台那把在 _PREVIOUS 里 = 它是**将要接管**的密钥，删了就是自断后路。
+  // 这一分支排在所有「静默」判断之前：静默恰恰是它还没被启用的表现。
+  if (latestSlot === 'previous') {
+    return {
+      ...base,
+      safeToDelete: false,
+      reason:
+        'SHOPIFY_API_SECRET_PREVIOUS 里装的正是 Partner 后台最新那把——它不是将死的旧密钥，' +
+        '而是尚未启用、将要接管的新密钥。删掉它，Shopify 切换的那一刻 webhook 与 OAuth 会同时全挂。' +
+        '正确动作是等 Shopify 切过去后把两个槽位对调，再删当时的 _PREVIOUS',
+    };
+  }
+  if (latestSlot === 'neither') {
+    return {
+      ...base,
+      safeToDelete: false,
+      reason:
+        'Partner 后台最新那把两个槽位都不匹配：配置与 Shopify 侧已经脱节，' +
+        '此时删任何一把都可能踩空。先把后台那把配进来',
+    };
+  }
+  if (latestSlot === 'unknown') {
+    return {
+      ...base,
+      safeToDelete: false,
+      reason:
+        '未配置 SHOPIFY_API_SECRET_LATEST_FP：不知道后台最新那把是哪一个，' +
+        '就无法区分「将死的旧密钥」与「尚未启用的新密钥」。2026-09-09 这两者真的反过来过',
+    };
   }
   if (rows.length === 0) {
     return {

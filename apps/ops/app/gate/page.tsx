@@ -53,6 +53,7 @@ type SecretView = {
   safeToDelete: boolean;
   reason: string;
   observedForDays: number | null;
+  latestSlot: 'current' | 'previous' | 'neither' | 'unknown';
   quietDays: number;
   lastPreviousAt: string | null;
   quietForDays: number | null;
@@ -235,6 +236,9 @@ function SecretCard({ v }: { v: SecretView }) {
           <Badge variant="outline">
             已观测 {v.observedForDays ?? 0} 天 / 需 {v.quietDays} 天
           </Badge>
+          {v.latestSlot === 'previous' ? (
+            <Badge variant="lost">后台最新密钥在 _PREVIOUS 槽位</Badge>
+          ) : null}
         </div>
         {/* 结论必须带理由：光看「尚不能删除」没人知道还缺什么、要等什么 */}
         <p className="mb-3 text-[13.5px] text-muted-foreground">{v.reason}</p>

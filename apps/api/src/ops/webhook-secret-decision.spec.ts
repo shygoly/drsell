@@ -10,8 +10,18 @@ const row = (
   last = first,
 ): SecretUseRow => ({ generation, topic, count: 1, firstSeenAt: first, lastSeenAt: last });
 
+// 默认让后台那把落在 current 槽位——即「正常轮换尾声」的形态，
+// 这样原有用例考的仍是静默/窗口逻辑。
 const decide = (rows: SecretUseRow[], configured = true, quietDays = 14) =>
-  decideSecretDeletion({ rows, configured, quietDays, now: NOW });
+  decideSecretDeletion({
+    rows,
+    configured,
+    quietDays,
+    now: NOW,
+    currentFp: 'ffffffffffff',
+    previousFp: 'aaaaaaaaaaaa',
+    latestFp: 'ffffffffffff',
+  });
 
 describe('旧密钥能不能删', () => {
   it('证据表为空 → 不能删，且措辞是「不知道」不是「安全」', () => {
@@ -89,5 +99,52 @@ describe('旧密钥能不能删', () => {
     ]);
     expect(d.observedForDays).toBe(30);
     expect(d.topicsSeenOnCurrent).toEqual(['a', 'b']);
+  });
+});
+
+describe('后台最新那把在哪个槽位（2026-09-09 的真实形态）', () => {
+  const rows = [row('current', 'app/uninstalled', daysAgo(30), daysAgo(1))];
+  const at = (latestFp: string | null) =>
+    decideSecretDeletion({
+      rows,
+      configured: true,
+      quietDays: 14,
+      now: NOW,
+      currentFp: '58e8f70fb2a5',
+      previousFp: '4c3a72ece258',
+      latestFp,
+    });
+
+  it('后台那把在 _PREVIOUS 里 → 绝不能删，即使它一直静默', () => {
+    // 真实数据：后台同时列出 old=58e8f70fb2a5（在用）与 new=4c3a72ece258（未启用）。
+    // _PREVIOUS 里装的是**将要接管**的新密钥；静默恰恰是它还没启用的表现。
+    const d = at('4c3a72ece258');
+    expect(d.latestSlot).toBe('previous');
+    expect(d.safeToDelete).toBe(false);
+    expect(d.reason).toMatch(/将要接管|自断后路|同时全挂/);
+  });
+
+  it('静默 30 天也不放行——窗口够长不能盖过槽位错配', () => {
+    expect(at('4c3a72ece258').safeToDelete).toBe(false);
+  });
+
+  it('后台那把在 SHOPIFY_API_SECRET 里 → 回到正常的静默判断', () => {
+    const d = at('58e8f70fb2a5');
+    expect(d.latestSlot).toBe('current');
+    expect(d.safeToDelete).toBe(true);
+  });
+
+  it('后台那把两个槽位都不匹配 → 配置已脱节，不放行', () => {
+    const d = at('deadbeef0000');
+    expect(d.latestSlot).toBe('neither');
+    expect(d.safeToDelete).toBe(false);
+    expect(d.reason).toMatch(/脱节/);
+  });
+
+  it('没配后台指纹 → 不放行，并说清为什么这不是小事', () => {
+    const d = at(null);
+    expect(d.latestSlot).toBe('unknown');
+    expect(d.safeToDelete).toBe(false);
+    expect(d.reason).toMatch(/无法区分|反过来/);
   });
 });

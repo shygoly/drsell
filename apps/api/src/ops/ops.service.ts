@@ -19,6 +19,7 @@ import {
   type DeployManifest,
 } from './deploy-status';
 import { decideSecretDeletion } from './webhook-secret-decision';
+import { createHash } from 'node:crypto';
 
 const TERMINAL = new Set(['DECLINED', 'EXPIRED', 'CANCELLED']);
 
@@ -360,11 +361,16 @@ export class OpsService {
     const rows = await this.prisma.webhookSecretUse.findMany({
       orderBy: [{ generation: 'asc' }, { topic: 'asc' }],
     });
+    const fp = (v?: string | null) =>
+      v ? createHash('sha256').update(v).digest('hex').slice(0, 12) : null;
     const decision = decideSecretDeletion({
       rows,
       configured: Boolean(process.env.SHOPIFY_API_SECRET_PREVIOUS),
       quietDays,
       now,
+      currentFp: fp(process.env.SHOPIFY_API_SECRET),
+      previousFp: fp(process.env.SHOPIFY_API_SECRET_PREVIOUS),
+      latestFp: process.env.SHOPIFY_API_SECRET_LATEST_FP || null,
     });
 
     return {
@@ -377,6 +383,7 @@ export class OpsService {
       quietForDays: decision.quietForDays,
       stillOnPreviousTopics: decision.stillOnPreviousTopics,
       topicsSeenOnCurrent: decision.topicsSeenOnCurrent,
+      latestSlot: decision.latestSlot,
       observations: rows.map((r) => ({
         generation: r.generation,
         topic: r.topic,

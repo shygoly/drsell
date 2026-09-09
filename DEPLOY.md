@@ -130,9 +130,29 @@ session token 换发记录，商家端跑的是 localStorage 里缓存的本站 
 **结论**：`_PREVIOUS` 才是当前密钥，两者已对调（2026-09-09）。此前「等 Shopify
 切到新密钥再删 `_PREVIOUS`」的判断方向是错的——Shopify 从未切换过。
 
-对调后 `_PREVIOUS` 持有的 `4c3a72ece258` 是一把 Shopify 侧从未使用的密钥。
-留着只是为了万一需要回滚；**确认 OAuth 与 webhook 都稳定后应当删除**，
-届时 `WebhookSecretUse` 表里应当只剩 `current` 一代。
+**更正（同日，晚些时候）**：上一段曾写「`4c3a72ece258` 是 Shopify 侧从未使用的密钥，
+应当删除」——**错，而且删了会出事**。
+
+对照 Partner 后台后真相是：轮换进行中，后台**同时列出两把**，而 Shopify 仍用 old 签名。
+
+| 后台 | 指纹 | 我们的槽位 | Shopify 是否用它签名 |
+|---|---|---|---|
+| old | `58e8f70fb2a5` | `SHOPIFY_API_SECRET` | 是 |
+| new | `4c3a72ece258` | `SHOPIFY_API_SECRET_PREVIOUS` | 尚未 |
+
+所以 `_PREVIOUS` 里装的不是将死的旧密钥，而是**将要接管的新密钥**。
+它一直静默恰恰是「还没启用」的表现，不是「可以删」的证据。删掉它，
+Shopify 切过去那一刻 webhook 与 OAuth 会同时全挂。
+
+**当前状态是正确的，不需要改配置**：两把都配着，切换发生时无缝。
+
+⚠ **变量名在这段窗口里是反的**——`SHOPIFY_API_SECRET_PREVIOUS` 持有的是**新**密钥。
+不能为了让名字好看而对调：`SHOPIFY_API_SECRET` 是库用来验 session token、
+签 OAuth state cookie 的那把，必须等于 Shopify 当下实际使用的密钥。
+等 Shopify 切到 new 之后，再把两个槽位对调，那时 `_PREVIOUS` 才是可删的。
+
+判据已把这条固化：`SHOPIFY_API_SECRET_LATEST_FP` 填后台**最新**那把的指纹，
+运营台 `/gate` 据此拒绝在 `_PREVIOUS` 持有新密钥时建议删除。
 
 ### DEP-2：`.env` 只有一条生效链路（2026-09-09）
 
