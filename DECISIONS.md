@@ -16,7 +16,7 @@
 | 前缀 | 含义 | 出处（论证在此） | 数量 |
 |---|---|---|---|
 | `INV-n` | **不变量**：任何实现都不得违反的硬约束 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 3 |
-| `ADR-n` | **架构决策**：工程层不可逆选择 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 17 |
+| `ADR-n` | **架构决策**：工程层不可逆选择 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 18 |
 | `B-n` | **边界规矩**：模块/包之间的硬边界 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 5 |
 | `DS-n` | **UI 反模式**：呈现层禁止事项 | [`DESIGN.md`](DESIGN.md) | 10 |
 
@@ -56,6 +56,7 @@
 | `ADR-15` | 模型主备：primary `deepseek-v4/deepseek-v4-flash`，fallbacks `zhipu/glm-4.5-flash`；余额不足（`billing`）自动切换。换任何一端前必须先验证它支持 tool calling；主备同 key 换型号解决不了欠费 | `infra/openclaw/drsell/openclaw.json.example` + `setup-wjclaw.sh` | 已守护 |
 | `ADR-16` | 会话状态是数据库枚举 `ChatThreadStatus`（`ai`/`pending`/`human`/`closed`），迁移统一经 `ConversationService` | `apps/api/prisma/schema.prisma` + `apps/api/src/adp/adp.service.spec.ts` | 已守护 |
 | `ADR-17` | 会话上下文由本地 `ChatMessage` 组装为完整 `messages`，system prompt 走 system 角色；网关会话键只作日志关联 | `packages/openclaw/src/index.ts` + `apps/api/src/adp/adp.service.spec.ts` | 已守护 |
+| `ADR-18` | 订阅状态是服务前置条件：`ACTIVE`/试用中/到期后 2 天宽限内才服务，闸门在配额之前；默认只观测不拦截（`SUBSCRIPTION_GATE_ENFORCE`），确认无误判再开 | `apps/api/src/subscription/subscription-state.ts` + `subscription-state.spec.ts` | 已守护 |
 
 ---
 

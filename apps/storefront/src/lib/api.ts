@@ -25,6 +25,15 @@ export const EMPTY_STATS: DashboardStats = {
   avgFirstResponseSec: null,
   pendingTakeover: 0,
   windowDays: 30,
+  subscription: {
+    status: null,
+    planCode: null,
+    serviceable: true,
+    reason: "active",
+    trialEndsAt: null,
+    periodEndsAt: null,
+    graceEndsAt: null,
+  },
 };
 
 /**

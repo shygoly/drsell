@@ -200,6 +200,26 @@ system prompt 以独立 `system` 角色发出；网关侧会话键仅用于日�
 `scripts/deploy-mvp.sh` 每次部署同步 `SOUL.md`/`SKILL.md`（此前只有重建服务器才推，
 导致提示词与代码失配）。
 
+### `ADR-18`
+
+订阅状态是服务的前置条件：只有 `ACTIVE`、试用期内、或到期后 2 天宽限窗口内的
+店铺才得到 AI 回答；闸门位于配额检查之前。
+**为什么**：此前服务链路只看回答次数，从不看订阅状态——对
+`apps/api/src/{quota,adp,public-storefront}` 搜 `frozenAt`/`FROZEN`/`CANCELLED`
+零命中，`planCodeFor` 取订阅时也不筛状态、取不到就回落默认档。生产上
+`chatbotdomaintest` 的 `currentPeriodEnd` 停在 2025-08-25，一年多未续仍在正常
+服务；`periodStart` 那段「推进到包含现在的那一期」更让它每 30 天白拿一次额度。
+闸门放在配额**之前**是因为两者语义一致：被拦下的对话不该产生上游成本，
+更不该扣商家额度。
+**宽限 2 天不是宽容，是安全垫**：`app_subscriptions/update` 是「付款解冻」唯一的
+知情渠道，webhook 迟到时宽限窗口给同步留出时间——该 webhook 2026-09-09 前因
+密钥错误全线 401，镜像滞后了一年，这个教训直接决定了宽限的存在。
+**默认只观测不拦截**（`SUBSCRIPTION_GATE_ENFORCE`）：镜像刚从一年滞后中恢复，
+直接开闸会误停可能只是没同步的真实付费商家。误停一个付费商家的代价，
+远大于多让失效商家白用几天。确认无误判后再打开开关。
+**守护**：`apps/api/src/subscription/subscription-state.spec.ts`（六个状态 ×
+试用内外 × 宽限内外）+ `adp.service.spec.ts` 断言闸门早于配额且零上游调用。
+
 ## 3. B — 边界规矩论证
 
 ### `B-1`

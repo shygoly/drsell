@@ -7,7 +7,12 @@ import { QuotaExceededError, QuotaService } from './quota.service';
  */
 function makePrisma(opts: {
   shop?: { id: string } | null;
-  sub?: { planCode?: string; currentPeriodEnd?: Date | null } | null;
+  sub?: {
+    planCode?: string;
+    currentPeriodEnd?: Date | null;
+    trialEnds?: Date | null;
+    status?: string;
+  } | null;
   answers?: number;
 }) {
   const upserts: Array<Record<string, unknown>> = [];
@@ -62,21 +67,37 @@ describe('QuotaService', () => {
     expect(start.toISOString()).toBe('2026-08-21T00:00:00.000Z');
   });
 
-  it('周期锚点已过期时按整周期推进到当期，而不是钉死在陈旧周期', async () => {
-    // 生产上真有这种数据：一条历史订阅的 currentPeriodEnd 停在一年前。
-    // 若直接倒推，配额窗口永远落在过去，用满一次就永久被拦。
+  it('失效订阅的周期不再自动推进——不靠时间流逝白拿额度', async () => {
+    // 生产上真有这种数据：chatbotdomaintest 的 currentPeriodEnd 停在 2025-08-25。
+    // 原实现会把周期「推进到包含现在的那一期」，那是为修「陈旧锚点把额度永久
+    // 钉死」而加的；副作用是让过期订阅每 30 天自动获得一次免费额度，
+    // 该店因此白用了一年。现在只有**可服务**的订阅才推进；失效订阅由闸门拦下，
+    // 压根不需要算周期。
     const stale = new Date('2025-08-25T00:00:00.000Z');
-    const { client } = makePrisma({ sub: { planCode: 'basic', currentPeriodEnd: stale } });
+    const { client } = makePrisma({
+      sub: { planCode: 'basic', currentPeriodEnd: stale, status: 'ACTIVE' },
+    });
     const svc = new QuotaService(client as never);
     const start = await svc.periodStart('shop_1');
 
-    const now = Date.now();
-    const periodMs = 30 * 24 * 60 * 60 * 1000;
-    expect(start.getTime()).toBeLessThanOrEqual(now);
-    expect(start.getTime() + periodMs).toBeGreaterThan(now);
-    // 仍与扣费日对齐：与原锚点的间隔是整周期数
-    const deltaDays = Math.round((start.getTime() - stale.getTime()) / 86400000);
-    expect(deltaDays % 30).toBe(0);
+    // 锚点原地不动：没有被推进到当期
+    expect(start.getTime()).toBeLessThan(stale.getTime());
+    expect(start.getTime() + 30 * 86400000).toBeLessThanOrEqual(
+      stale.getTime() + 86400000,
+    );
+  });
+
+  it('试用期内周期不开始——锚点是 trialEnds，试用多长都只算一段', async () => {
+    const trialEnds = new Date(Date.now() + 5 * 86400000);
+    const { client } = makePrisma({
+      sub: { planCode: 'basic', currentPeriodEnd: null, trialEnds, status: 'ACTIVE' },
+    });
+    const svc = new QuotaService(client as never);
+    const start = await svc.periodStart('shop_1');
+
+    const expected = new Date(trialEnds);
+    expected.setUTCHours(0, 0, 0, 0);
+    expect(start.toISOString()).toBe(expected.toISOString());
   });
 
   it('周期锚点在未来时保持不变（正常续费中的订阅）', async () => {

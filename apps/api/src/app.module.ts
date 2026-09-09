@@ -10,6 +10,7 @@ import { StorefrontDashboardModule } from './storefront-dashboard/storefront-das
 import { MembershipModule } from './membership/membership.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { OpsModule } from './ops/ops.module';
+import { ExpiryNoticeModule } from './subscription/expiry-notice.module';
 import { HealthController } from './health.controller';
 
 /** MVP: Subscription / Mail / Admin deferred — see docs/MVP_SCOPE.md */
@@ -26,6 +27,7 @@ import { HealthController } from './health.controller';
     MembershipModule,
     SubscriptionModule,
     OpsModule,
+    ExpiryNoticeModule,
   ],
   controllers: [HealthController],
 })

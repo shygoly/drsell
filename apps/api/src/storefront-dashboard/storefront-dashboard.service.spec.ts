@@ -62,11 +62,20 @@ function makePrisma(opts: {
         return Promise.resolve({});
       }),
     },
+    shop: { findFirst: jest.fn().mockResolvedValue({ id: 'shop_1' }) },
     $transaction: jest.fn().mockImplementation((ops: unknown[]) => Promise.all(ops)),
   };
 
   const conversations = new ConversationService(client as never);
-  const svc = new StorefrontDashboardService(client as never, conversations);
+  // 闸门只观测不影响这些用例；订阅侧单独在 subscription-state.spec.ts 里测。
+  const quota = {
+    latestSubscription: jest.fn().mockResolvedValue(null),
+  };
+  const svc = new StorefrontDashboardService(
+    client as never,
+    conversations,
+    quota as never,
+  );
   return { svc, client, threadUpdates, statUpserts, created, conversations };
 }
 

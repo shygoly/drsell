@@ -15,6 +15,27 @@ export interface DashboardStats {
   pendingTakeover: number;
   /** 上面两个比率的统计窗口天数 */
   windowDays: number;
+  subscription: SubscriptionState;
+}
+
+/**
+ * 订阅状态。顾客侧被拦下时只看到一句得体的话（不暴露商家的套餐与欠费），
+ * 商家自己必须能看出是订阅问题还是额度问题——两者的处置动作完全不同。
+ */
+export interface SubscriptionState {
+  status: string | null;
+  planCode: string | null;
+  serviceable: boolean;
+  reason:
+    | "active"
+    | "trial"
+    | "grace"
+    | "no-subscription"
+    | "status-not-serviceable"
+    | "period-ended";
+  trialEndsAt: string | null;
+  periodEndsAt: string | null;
+  graceEndsAt: string | null;
 }
 
 export interface ChartPoint {

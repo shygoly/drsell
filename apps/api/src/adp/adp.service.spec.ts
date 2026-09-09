@@ -9,7 +9,7 @@ jest.mock('@drsell/openclaw', () => ({
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import { AdpService } from './adp.service';
 import { ConversationService } from '../conversation/conversation.service';
-import { QuotaExceededError } from '../quota/quota.service';
+import { QuotaExceededError, SubscriptionInactiveError } from '../quota/quota.service';
 
 const SHOP = 'a.myshopify.com';
 const VISITOR = 'v1';
@@ -107,12 +107,26 @@ function makeQuota(exhausted = false) {
       return Promise.resolve();
     }),
     recordAnswer: jest.fn().mockResolvedValue(undefined),
+    // 订阅闸门默认只观测不拦截；这些用例只关心配额与应答分支，
+    // 订阅侧单独在 subscription-state.spec.ts 里测。
+    assertSubscriptionServiceable: jest
+      .fn()
+      .mockResolvedValue({ serviceable: true, reason: 'active', graceEndsAt: null }),
   };
 }
 
-function build(seed: ThreadSeed | null, exhausted = false) {
+function build(seed: ThreadSeed | null, exhausted = false, subInactive = false) {
   const p = makePrisma(seed);
   const quota = makeQuota(exhausted);
+  if (subInactive) {
+    quota.assertSubscriptionServiceable = jest.fn().mockRejectedValue(
+      new SubscriptionInactiveError({
+        serviceable: false,
+        reason: 'period-ended',
+        graceEndsAt: null,
+      }),
+    );
+  }
   const conversations = new ConversationService(p.client as never);
   const svc = new AdpService(p.client as never, quota as never, conversations);
   return { svc, quota, ...p };
@@ -241,5 +255,39 @@ describe('AdpService 上下文所有权', () => {
     const arg = chatStream.mock.calls[0][0];
     expect(arg.systemPrompt).toBe(`SYSTEM for ${SHOP}`);
     expect(arg.shopDomain).toBe(SHOP);
+  });
+});
+
+describe('AdpService 订阅闸门', () => {
+  it('订阅失效时不调上游、不扣配额，会话转 pending', async () => {
+    const { svc, quota, threadUpdates, messages } = build(
+      { status: ChatThreadStatus.ai },
+      false,
+      true,
+    );
+
+    await send(svc);
+
+    expect(chatStream).not.toHaveBeenCalled();
+    expect(quota.recordAnswer).not.toHaveBeenCalled();
+    expect(
+      threadUpdates.some((u) =>
+        JSON.stringify(u).includes(`"status":"${ChatThreadStatus.pending}"`),
+      ),
+    ).toBe(true);
+    expect(messages.map((m) => m.role)).toEqual([
+      ChatMessageRole.user,
+      ChatMessageRole.assistant,
+    ]);
+  });
+
+  it('闸门早于配额：订阅失效 + 额度也耗尽时，配额检查根本没被调用', async () => {
+    const { svc, quota } = build({ status: ChatThreadStatus.ai }, true, true);
+
+    await send(svc);
+
+    // 拦截原因是订阅失效，不是额度——配额检查在闸门之后，压根没跑到
+    expect(quota.assertWithinQuota).not.toHaveBeenCalled();
+    expect(chatStream).not.toHaveBeenCalled();
   });
 });

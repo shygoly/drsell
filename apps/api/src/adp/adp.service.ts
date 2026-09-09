@@ -3,7 +3,11 @@ import { ChatMessageRole, ChatThread, ChatThreadStatus } from '@prisma/client';
 import { buildSupportSystemPrompt, createOpenClawClient } from '@drsell/openclaw';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConversationService } from '../conversation/conversation.service';
-import { QuotaExceededError, QuotaService } from '../quota/quota.service';
+import {
+  QuotaExceededError,
+  QuotaService,
+  SubscriptionInactiveError,
+} from '../quota/quota.service';
 
 /**
  * 额度用尽时给顾客看的话。要点：说明白当前答不了、不怪顾客、给一条出路，
@@ -13,6 +17,14 @@ import { QuotaExceededError, QuotaService } from '../quota/quota.service';
  */
 const QUOTA_EXHAUSTED_REPLY =
   "I'm not able to answer right now. Please leave your question here and the store team will follow up.";
+
+/**
+ * 订阅失效时给顾客看的话。
+ *
+ * 与额度耗尽用同一句：顾客不需要、也不该知道差别在哪——套餐、欠费、用量
+ * 都是商家的商业信息。差别只体现在商家端（那里要能看出是订阅问题还是额度问题）。
+ */
+const SUBSCRIPTION_INACTIVE_REPLY = QUOTA_EXHAUSTED_REPLY;
 
 function preview(text: string): string {
   return text.length > 120 ? `${text.slice(0, 117)}...` : text;
@@ -114,17 +126,26 @@ export class AdpService {
       });
     }
 
+    // 订阅闸门在配额之前：被订阅状态拦下的对话不该消耗商家额度，
+    // 也不该产生上游推理成本。默认只观测不拦截，见 QuotaService 的说明。
     try {
+      await this.quota.assertSubscriptionServiceable(params.shopDomain, now);
       await this.quota.assertWithinQuota(params.shopDomain);
     } catch (e) {
-      if (!(e instanceof QuotaExceededError)) throw e;
-      params.onChunk(QUOTA_EXHAUSTED_REPLY);
+      if (!(e instanceof QuotaExceededError) && !(e instanceof SubscriptionInactiveError)) {
+        throw e;
+      }
+      const reply =
+        e instanceof SubscriptionInactiveError
+          ? SUBSCRIPTION_INACTIVE_REPLY
+          : QUOTA_EXHAUSTED_REPLY;
+      params.onChunk(reply);
       await this.prisma.$transaction([
         this.prisma.chatMessage.create({
           data: {
             threadId: thread.id,
             role: ChatMessageRole.assistant,
-            content: QUOTA_EXHAUSTED_REPLY,
+            content: reply,
           },
         }),
         // 转成待人工接管：额度用尽的会话必须让商家看得见，否则顾客石沉大海。
@@ -132,7 +153,7 @@ export class AdpService {
           where: { id: thread.id },
           data: {
             status: ChatThreadStatus.pending,
-            lastMessage: preview(QUOTA_EXHAUSTED_REPLY),
+            lastMessage: preview(reply),
             unread: { increment: 1 },
             updatedAt: now,
           },

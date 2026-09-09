@@ -2,6 +2,11 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ChatMessageRole, ChatThreadStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConversationService, startOfUtcDay } from '../conversation/conversation.service';
+import { QuotaService } from '../quota/quota.service';
+import {
+  evaluateServiceability,
+  graceEndsAt,
+} from '../subscription/subscription-state';
 
 /** 分流率与首响时长的统计窗口。没有窗口的"历史全量"会把去年的会话算进今天的业绩。 */
 const WINDOW_DAYS = 30;
@@ -58,7 +63,34 @@ export class StorefrontDashboardService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly conversations: ConversationService,
+    private readonly quota: QuotaService,
   ) {}
+
+  /**
+   * 订阅状态给商家端。
+   *
+   * 顾客侧被拦下时只看到一句得体的话（不暴露商家的套餐与欠费），
+   * 但商家自己必须能看出是订阅问题还是额度问题——两者的处置动作完全不同。
+   * 没有这个，商家只会以为产品坏了。
+   */
+  async getSubscriptionState(shopDomain: string) {
+    const shop = await this.prisma.shop.findFirst({
+      where: { shopDomain },
+      select: { id: true },
+    });
+    const sub = await this.quota.latestSubscription(shop?.id ?? null);
+    const now = new Date();
+    const verdict = evaluateServiceability(sub, now);
+    return {
+      status: sub?.status ?? null,
+      planCode: sub?.planCode ?? null,
+      serviceable: verdict.serviceable,
+      reason: verdict.reason,
+      trialEndsAt: sub?.trialEnds?.toISOString() ?? null,
+      periodEndsAt: sub?.currentPeriodEnd?.toISOString() ?? null,
+      graceEndsAt: graceEndsAt(sub?.currentPeriodEnd ?? null)?.toISOString() ?? null,
+    };
+  }
 
   async getStats(shopDomain: string) {
     const now = new Date();
@@ -84,6 +116,8 @@ export class StorefrontDashboardService {
         }),
         this.avgFirstResponseSec(shopDomain, since),
       ]);
+
+    const subscription = await this.getSubscriptionState(shopDomain);
 
     // 会话数，不是消息数——字段名叫 conversations，就得数会话。
     const conversationsToday = todayStat?.threadCount ?? 0;
@@ -111,6 +145,7 @@ export class StorefrontDashboardService {
       pendingTakeover,
       // 真实可统计的天数——变更日刚过时它小于 30，标签要如实说 "7d" 而不是 "30d"。
       windowDays: windowLength(since, now),
+      subscription,
     };
   }
 

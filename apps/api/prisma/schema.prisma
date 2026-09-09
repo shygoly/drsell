@@ -35,6 +35,7 @@ model Shop {
   installedAt           DateTime  @default(now())
   uninstalledAt         DateTime?
   botSetting            BotSetting?
+  expiryNotices         ExpiryNotice[]
   inboxUsers            InboxUser[]
   sessions              Session[]
   subscriptions         Subscription[]
@@ -235,6 +236,29 @@ model AiUsage {
 
   @@unique([shopId, periodStart])
   @@index([shopId, periodStart])
+}
+
+/// 到期提醒的去重记录。
+///
+/// 键是「店 + 周期 + 档位」：同一店、同一计费周期、同一档（D-3/D-2/D-1）
+/// 最多发一次。必须持久化——进程内记忆挡不住重启和多实例，那会重复打扰商家。
+/// 新周期重新计数，靠 periodEnd 作为键的一部分自然实现。
+model ExpiryNotice {
+  id         String   @id @default(cuid())
+  shopId     String
+  shop       Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  /// 该次提醒针对的计费周期结束时刻
+  periodEnd  DateTime
+  /// 到期前第几天：3 / 2 / 1
+  dayOffset  Int
+  /// 出站是否真的送达。sendDunning 曾经只排队给一个不存在的 worker，
+  /// 结果催缴从未发出——这里必须记下真实结果，失败要能被发现。
+  delivered  Boolean  @default(false)
+  error      String?
+  createdAt  DateTime @default(now())
+
+  @@unique([shopId, periodEnd, dayOffset])
+  @@index([shopId, periodEnd])
 }
 
 /// 访客会话线程 — storefront inbox / dashboard

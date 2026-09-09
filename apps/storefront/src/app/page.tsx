@@ -1,6 +1,7 @@
 "use client";
 
 import { Headset, MessagesSquare, Timer, Bot } from "lucide-react";
+import { SubscriptionBanner } from "@/components/business/subscription-banner";
 import { ConversationChart } from "@/components/business/conversation-chart";
 import { KnowledgeBaseCard } from "@/components/business/knowledge-base-card";
 import { LiveConversations } from "@/components/business/live-conversations";
@@ -36,6 +37,8 @@ export default function DashboardPage() {
           <option>Last 30 days</option>
         </select>
       </div>
+
+      <SubscriptionBanner state={stats.subscription} />
 
       {/* 4 指标卡 */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
