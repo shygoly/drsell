@@ -226,6 +226,14 @@ export class ShopifyController {
   ) {
     const raw = req.rawBody ?? Buffer.from(JSON.stringify(req.body ?? {}));
     if (!this.shopify.verifyWebhook(raw, hmac)) {
+      // 验签失败必须留下「是谁、什么主题」——2026-09-09 生产上 12 次真实 webhook
+      // 全部 401，而用本地密钥自签三条路径全过，光看 nginx 日志分不出是密钥错
+      // 还是这些 webhook 根本属于另一个 app。只记非敏感元信息，不记 body 与签名。
+      this.logger.warn(
+        `webhook hmac rejected: topic=${topic ?? '-'} shop=${shop ?? '-'} ` +
+          `rawBody=${req.rawBody ? 'yes' : 'MISSING'} bytes=${raw.length} ` +
+          `hmacLen=${hmac?.length ?? 0}`,
+      );
       throw new UnauthorizedException('invalid webhook hmac');
     }
     if (topic === 'app/uninstalled' && shop) {
