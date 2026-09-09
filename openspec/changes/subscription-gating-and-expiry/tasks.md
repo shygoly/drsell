@@ -48,6 +48,10 @@
 - [x] 3.2 运营台 `/gate`：逐店显示判定/原因/订阅快照/镜像最后同步时间，并显示 enforce 开关状态。
       取数与闸门同款（`orderBy updatedAt desc` + `take 1`），单测锁死——控制台撒谎比没有清单更糟
 - [ ] 3.3 观察期结束、确认无误判后，把 `SUBSCRIPTION_GATE_ENFORCE=true` 打开。
+      ⛔ **阻断**：`subscription-mirror-without-webhooks` 未完成前不得开闸。
+      2026-09-09 查证：`app_subscriptions/update` 自 2026-04-28 起已不再由 Shopify
+      发送（Shopify App Pricing 文档），而它是 `syncFromShopify` 的唯一调用方——
+      镜像四个月来没有任何数据源。按这份快照停服，拦到谁都是随机的。
       **前置**：0.5 已落地且生产上 `isTest` 已由一次 `syncFromShopify` 写入权威值——
       迁移默认 `false`，在同步跑过之前开闸会停掉测试店
 
