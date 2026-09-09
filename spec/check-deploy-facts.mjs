@@ -54,4 +54,10 @@ for (const [, id, title] of deps) {
   else r.fail(`${id} 缺日期——配置决策必须可判断是否已过期`);
 }
 
+// 6. .env 的时间戳备份必须被忽略。2026-09-09 `git add -A` 把 .env.bak.* 扫进提交，
+//    靠 GitHub 推送保护才拦下——不能指望远端替我们守 AGENTS.md 陷阱 6。
+const ignore = read('.gitignore') ?? '';
+if (/apps\/\*\/\.env\.bak\.\*/.test(ignore)) r.pass('.gitignore 忽略 .env 的时间戳备份');
+else r.fail('.gitignore 未忽略 apps/*/.env.bak.* —— 备份文件会被 git add -A 扫进提交');
+
 r.done();
