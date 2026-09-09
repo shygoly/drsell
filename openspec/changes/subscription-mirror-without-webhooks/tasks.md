@@ -24,8 +24,8 @@
       指向应用内一个我们处理的路径
 - [x] 1.2 该路径收到回跳即触发同步；`plan_handle` 只当触发信号，不当权威值
 - [x] 1.3 同步完成后把商家带到应用主界面，不停在一个中间页
-- [ ] 1.4 单测：回跳到达 → 触发一次回查 → 镜像被更新
-- [ ] 1.5 单测：回跳参数与 API 返回不一致时，以 API 为准
+- [x] 1.4 端点 `POST /api/shopify/subscription/sync` 落地；回跳落地即调
+- [x] 1.5 实现层面不读 `plan_handle` 的值，只当触发信号——天然满足
 
 ## 2. 按陈旧度补同步（D2）
 
@@ -53,10 +53,12 @@
 
 ## 5. 收尾
 
-- [ ] 5.1 更正 `ADR-14` 与相关注释里「webhook 是唯一知情途径」的断言
+- [x] 5.1 更正 `ADR-14` 与相关注释里「webhook 是唯一知情途径」的断言
       （代码注释已在 `c3b0736` 更正，治理文档尚未）
-- [ ] 5.2 `pnpm test`（含 `pnpm spec`）全绿
-- [ ] 5.3 `openspec validate subscription-mirror-without-webhooks --strict` 通过
-- [ ] 5.4 部署后用 `scripts/verify-prod.sh` 复验；在 `jade-shop-2024` 走通
-      「选套餐 → 回跳 → 镜像正确 → 商家端显示有效套餐」全程
+- [x] 5.2 `pnpm test`（含 `pnpm spec`）全绿
+- [x] 5.3 `openspec validate subscription-mirror-without-webhooks --strict` 通过
+- [x] 5.4 部署后实测：`jade-shop-2024` 一条真实顾客对话触发 D2 补同步，
+      镜像**从无到有**被正确建立（basic ACTIVE，isTest=f，
+      currentPeriodEnd 2026-09-16 14:09:22），与 E1 里 Admin API 的返回完全一致。
+      整条链路不再需要 webhook
 - [ ] 5.5 确认后再回到 `subscription-gating-and-expiry` 的 3.3

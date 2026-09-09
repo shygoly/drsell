@@ -52,7 +52,7 @@
 | `ADR-11` | 运营台是独立应用 `apps/ops`，独立 `server_name` `ops.szchada.top`；商家端不得存在 `/admin` 或 `/ops` 路由 | `infra/nginx/ops.szchada.top.conf` + `spec/check-ops-entry.mjs` | 已守护 |
 | `ADR-12` | 运营台第三套设计令牌（`apps/ops/app/tokens.css` → `globals.css` shadcn 映射），经 `stitch-to-shadcn-pro` + Tailwind v4 + shadcn/ui 落地；禁止 Polaris | `apps/ops/app/globals.css` + `.stitch/` + `spec/check-design.mjs` | 已守护 |
 | `ADR-13` | 本地订阅状态只镜像 Shopify `AppSubscriptionStatus` 的六个取值，不自造状态词 | `apps/api/prisma/schema.prisma` + `spec/check-ops-status.mjs` | 已守护 |
-| `ADR-14` | 套餐只有两档，价格与 AI 回答额度定义在 `@drsell/shared` 的 `PLANS`（basic $15/1500、pro $30/5000）；走 Shopify 托管计费，plan handle 即 `PlanCode`，靠 `app_subscriptions/update` 同步 | `packages/shared/src/index.ts` + `spec/check-pricing.mjs` | 已守护 |
+| `ADR-14` | 套餐只有两档，价格与 AI 回答额度定义在 `@drsell/shared` 的 `PLANS`（basic $15/1500、pro $30/5000）；走 Shopify 托管计费，plan handle 即 `PlanCode`；镜像靠回跳即查 + 陈旧度补查（`app_subscriptions/update` 自 2026-04-28 起已停发，见 ARCHITECTURE 的更正） | `packages/shared/src/index.ts` + `spec/check-pricing.mjs` | 已守护 |
 | `ADR-15` | 模型主备：primary `deepseek-v4/deepseek-v4-flash`，fallbacks `zhipu/glm-4.5-flash`；余额不足（`billing`）自动切换。换任何一端前必须先验证它支持 tool calling；主备同 key 换型号解决不了欠费 | `infra/openclaw/drsell/openclaw.json.example` + `setup-wjclaw.sh` | 已守护 |
 | `ADR-16` | 会话状态是数据库枚举 `ChatThreadStatus`（`ai`/`pending`/`human`/`closed`），迁移统一经 `ConversationService` | `apps/api/prisma/schema.prisma` + `apps/api/src/adp/adp.service.spec.ts` | 已守护 |
 | `ADR-17` | 会话上下文由本地 `ChatMessage` 组装为完整 `messages`，system prompt 走 system 角色；网关会话键只作日志关联 | `packages/openclaw/src/index.ts` + `apps/api/src/adp/adp.service.spec.ts` | 已守护 |

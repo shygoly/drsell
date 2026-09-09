@@ -135,10 +135,22 @@ $9.90，而 listing 打算写两档——**在 Shopify 上宣传做不到的计�
 两档在 Partner 后台以 Shopify **托管计费（App Pricing）** 方案存在，
 plan name 与 internal handle 刻意对齐 `PLANS`（`Basic`/`basic`、`Pro`/`pro`）。
 托管计费下商家是在 **Shopify 自己的界面**选套餐的，不经过 `createCharge`——
-所以 `app_subscriptions/update` webhook 是我们唯一能知道他选了哪一档的途径。
-不接这个 webhook，付 $30 的 Pro 商家会被 `QuotaService` 当成 basic 只给 1500 次额度：
-收了钱不给货，且全程无报错。套餐名对不上时**不动 `planCode`**，宁可保持原样，
-也不把付费商家悄悄降级。
+我们必须有独立途径知道他选了哪一档。知道不了，付 $30 的 Pro 商家会被
+`QuotaService` 当成 basic 只给 1500 次额度：收了钱不给货，且全程无报错。
+套餐名对不上时**不动 `planCode`**，宁可保持原样，也不把付费商家悄悄降级。
+
+**2026-09-09 更正**：本条原文写「`app_subscriptions/update` webhook 是我们唯一能
+知道他选了哪一档的途径」——**该 webhook 已不存在**。Shopify 文档：
+「After April 28, 2026, Shopify App Pricing no longer sends webhooks for
+subscription changes.」而它曾是 `syncFromShopify` 的唯一调用方，于是镜像四个月
+没有任何数据源：生产上 `chatbotdomaintest` 的 `currentPeriodEnd` 因此停在
+2025-08-25 整整一年。
+
+现在的途径有两条，都不依赖 webhook（见
+`openspec/changes/subscription-mirror-without-webhooks`）：商家选完套餐回跳时
+立即回查；闸门判定发现镜像陈旧时异步补查。取数仍走 Admin API 的
+`currentAppInstallation.activeSubscriptions`——2026-09-09 实测它读得到新体系下
+创建的订阅，故不需要 Partner API，也就不需要多一份凭据。
 **守护**：`packages/shared/src/index.ts` + `spec/check-pricing.mjs`
 + `apps/api/src/subscription/billing.service.spec.ts`。
 
