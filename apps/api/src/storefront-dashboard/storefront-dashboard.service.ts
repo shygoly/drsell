@@ -1,12 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ChatMessageRole, ChatThreadStatus } from '@prisma/client';
+import { planOf } from '@drsell/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConversationService, startOfUtcDay } from '../conversation/conversation.service';
 import { QuotaService } from '../quota/quota.service';
-import {
-  evaluateServiceability,
-  graceEndsAt,
-} from '../subscription/subscription-state';
+import { evaluateServiceability, graceEndsAt, installGraceEndsAt } from '../subscription/subscription-state';
 
 /** 分流率与首响时长的统计窗口。没有窗口的"历史全量"会把去年的会话算进今天的业绩。 */
 const WINDOW_DAYS = 30;
@@ -81,14 +79,23 @@ export class StorefrontDashboardService {
     const sub = await this.quota.latestSubscription(shop?.id ?? null);
     const now = new Date();
     const verdict = evaluateServiceability(sub, now, { installedAt: shop?.installedAt ?? null });
+    // 价格与额度由服务端给，不让前端再抄一份：`ADR-14` 把它们收进 PLANS 常量，
+    // 就是为了让「表单写的」和「实际收的」不可能分叉。前端硬编码等于制造第二份。
+    const plan = sub?.planCode ? planOf(sub.planCode) : null;
     return {
       status: sub?.status ?? null,
       planCode: sub?.planCode ?? null,
+      planName: plan?.name ?? null,
+      priceUsd: plan?.price ?? null,
+      answersPerPeriod: plan?.answersPerPeriod ?? null,
       serviceable: verdict.serviceable,
       reason: verdict.reason,
       trialEndsAt: sub?.trialEnds?.toISOString() ?? null,
       periodEndsAt: sub?.currentPeriodEnd?.toISOString() ?? null,
       graceEndsAt: graceEndsAt(sub?.currentPeriodEnd ?? null)?.toISOString() ?? null,
+      installGraceEndsAt: installGraceEndsAt(shop?.installedAt ?? null)?.toISOString() ?? null,
+      /** 镜像最后一次与 Shopify 对齐的时刻；null = 从未同步 */
+      mirrorUpdatedAt: sub?.updatedAt?.toISOString() ?? null,
     };
   }
 

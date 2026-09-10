@@ -25,17 +25,28 @@ export interface DashboardStats {
 export interface SubscriptionState {
   status: string | null;
   planCode: string | null;
+  /** 档位显示名与价格由服务端给——`ADR-14` 要求价格只有一份来源 */
+  planName: string | null;
+  priceUsd: number | null;
+  answersPerPeriod: number | null;
   serviceable: boolean;
   reason:
     | "active"
+    | "test"
     | "trial"
     | "grace"
+    | "install-grace"
     | "no-subscription"
     | "status-not-serviceable"
     | "period-ended";
   trialEndsAt: string | null;
+  /** 当前计费周期终点，即「租期」 */
   periodEndsAt: string | null;
   graceEndsAt: string | null;
+  /** 安装后宽限的截止时刻（尚未选套餐时有意义） */
+  installGraceEndsAt: string | null;
+  /** 镜像最后一次与 Shopify 对齐的时刻；null = 从未同步 */
+  mirrorUpdatedAt: string | null;
 }
 
 export interface ChartPoint {

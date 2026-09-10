@@ -28,11 +28,16 @@ export const EMPTY_STATS: DashboardStats = {
   subscription: {
     status: null,
     planCode: null,
+    planName: null,
+    priceUsd: null,
+    answersPerPeriod: null,
     serviceable: true,
     reason: "active",
     trialEndsAt: null,
     periodEndsAt: null,
     graceEndsAt: null,
+    installGraceEndsAt: null,
+    mirrorUpdatedAt: null,
   },
 };
 

@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { BadgeCheck, Loader2, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useShopSession } from "@/hooks/useShopSession";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { PlanCard } from "@/components/business/plan-card";
 
 type BillingRow = {
   role: string;
@@ -23,7 +25,8 @@ type BillingRow = {
 };
 
 export default function SettingsPage() {
-  const { shop, userToken, bridge, embedded, switchShop } = useShopSession();
+  const { shop, userToken, embedded, switchShop } = useShopSession();
+  const { stats } = useDashboardData();
   const [rows, setRows] = useState<BillingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -194,28 +197,10 @@ export default function SettingsPage() {
         )}
       </section>
 
-      {bridge ? (
-        <section className="bg-card rounded-lg border p-5">
-          <h2 className="mb-1 text-lg font-semibold">Plan</h2>
-          <p className="text-muted-foreground mb-3 text-sm">
-            {rows.find((r) => r.shop.shopDomain === shop)?.subscription
-              ? `Current plan: ${
-                  rows.find((r) => r.shop.shopDomain === shop)?.subscription
-                    ?.planCode
-                }`
-              : "No active plan."}
-          </p>
-          <Button size="sm" asChild>
-            <a
-              href={`https://admin.shopify.com/store/${storeHandle}/billing/plans`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Change plan
-            </a>
-          </Button>
-        </section>
-      ) : null}
+      {/* 不再用 `bridge ?` 包住：App Bridge 在本站起不来，那等于永远不渲染。
+          数据也不再取自需要平台用户会话的 rows——嵌入态下那个会话不存在，
+          于是商家刚付过钱也只看到 "No active plan."。 */}
+      <PlanCard shop={shop} subscription={stats.subscription} />
     </div>
   );
 }
