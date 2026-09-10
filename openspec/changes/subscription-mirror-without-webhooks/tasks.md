@@ -20,8 +20,20 @@
 
 ## 1. 回跳即同步（D1）
 
-- [ ] 1.1 在 Partner Dashboard 为每个套餐配置 redirection URL / welcome link，
-      指向应用内一个我们处理的路径
+- [x] 1.1 **无需配置，默认已生效**。2026-09-09 实测：商家选完套餐后 Shopify 直接
+      重定向到应用根路径并附上参数
+      （`/apps/drseller-alpha/?plan_handle=basic&charge_id=32657047769`），
+      而我们的处理器正好在根路径。只有想让商家落到专门的欢迎页时才需要配。
+
+      配置位置备查（**不在 Dev Dashboard**，文档原文：「You configure Shopify App
+      Pricing in the Partner Dashboard, not the Dev Dashboard…your Shopify App Store
+      listing and its pricing stay in the Partner Dashboard」）：
+      Partner Dashboard → App distribution → All apps → 应用 → Distribution →
+      Manage listing → Published languages 的 Edit → Pricing content → Manage →
+      Settings，welcome link 按套餐逐个配。
+
+      ⚠ 切勿改 app settings 页的 "Allowed redirection URL(s)"——那是 OAuth 回调白名单
+      （对应 toml 的 `[auth] redirect_urls`），且 `shopify app deploy` 会覆盖它
 - [x] 1.2 该路径收到回跳即触发同步；`plan_handle` 只当触发信号，不当权威值
 - [x] 1.3 同步完成后把商家带到应用主界面，不停在一个中间页
 - [x] 1.4 端点 `POST /api/shopify/subscription/sync` 落地；回跳落地即调
@@ -50,6 +62,18 @@
 
 - [ ] 4.1 验收 `c3b0736` 已落地的套餐页链接在真实店铺可点、可达
 - [ ] 4.2 「已安装未选套餐」状态下横幅文案与链接措辞正确
+
+## 4.5 与文档的两处偏离（已知，暂不处置）
+
+- [x] 4.5.1 文档说 App Pricing 的订阅状态应查 **Partner API** 的 `activeSubscription`，
+      「与 Billing API 不同，后者从 GraphQL Admin API 取」。而 E1 实测 Admin API
+      **确实读得到**新体系创建的订阅，故当前实现走 Admin API（零新凭据）。
+      风险：这是文档不鼓励的路径，若 Shopify 日后停止在 Admin API 暴露 App Pricing
+      订阅，本链路会静默失效——届时按 design 的 D3 备选方案切 Partner API。
+      `verify-prod.sh` 里的「镜像从未同步」告警可以较早发现这种失效。
+- [x] 4.5.2 文档说 2026-04-28 后不再附加 `charge_id`，但实测回跳里仍有它。
+      我们的实现不读 `charge_id`（只用作 sessionStorage 去重键的一部分），
+      因此它消失也不影响。
 
 ## 5. 收尾
 
