@@ -8,7 +8,7 @@
       按顾客过滤订单/售后；匿名会话不回敏感字段
 - [x] 0.3 独立站订阅/额度归属（D9/S1）：**已定**——无 plan，豁免订阅/额度闸门（始终可服务），
       仍记 AiUsage 供观测
-- [ ] 0.4 wjclaw 上 Redis 与 Medusa PG 库落位（容器/端口/备份）
+- [x] 0.4 wjclaw 上 Redis 与 Medusa PG 库落位（容器/端口/备份）
 
 ## 1. Medusa 引擎（apps/shop）
 - [ ] 1.1 scaffold Medusa v2 + Postgres(独立库) + Redis event bus/workflow
