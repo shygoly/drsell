@@ -16,19 +16,20 @@
 - [ ] 1.3 Admin 可管商品/订单/退货；导入样例商品
 
 ## 2. drsell schema（apps/api）
-- [ ] 2.1 迁移：`products/orders/customers` 加 `source @default('shopify')` + 版本/updatedAt 承载（S5）
-- [ ] 2.2 迁移：新增 `after_sales` 表（D2）；`Order.itemsJson` 轻量行项目（S4）
-- [ ] 2.3 现有 Shopify 写入路径显式写 `source='shopify'`（回归不变）；`prisma generate`
+- [x] 2.1 迁移：`products/orders/customers` 加 `source @default('shopify')` + 版本/updatedAt 承载（S5）
+- [x] 2.2 迁移：新增 `after_sales` 表（D2）；`Order.itemsJson` 轻量行项目（S4）
+- [x] 2.3 靠列默认 `source='shopify'`（迁移 ADD COLUMN DEFAULT 回填存量行 + 新插入默认），
+      未改 Shopify 写入代码即保证回归不变；`prisma generate` 已更新 client
 
 ## 3. 摄取端点（apps/api）
-- [ ] 3.1 `POST /api/ingest/{products,orders,after-sales,inventory}`：store 密钥鉴权
-- [ ] 3.2 幂等 upsert：产品/订单/顾客走 `tenantId_shopify*Id`（B3）；售后走 `tenantId,source,externalId`；
+- [x] 3.1 `POST /api/ingest/{products,orders,after-sales,inventory}`：store 密钥鉴权
+- [x] 3.2 幂等 upsert：产品/订单/顾客走 `tenantId_shopify*Id`（B3）；售后走 `tenantId,source,externalId`；
       **始终 set `shopId`**（S9）；`Order.customerId`=Medusa 顾客 id（S6）；display_id 入 `shopifyOrderId`（B4）
-- [ ] 3.3 版本化写入：拒绝比已存更旧的版本（S5）
-- [ ] 3.4 单测：鉴权、幂等、版本拒旧、字段映射、始终带 shopId、坏数据拒绝
+- [x] 3.3 版本化写入：拒绝比已存更旧的版本（S5）
+- [x] 3.4 单测：鉴权、幂等、版本拒旧、字段映射、始终带 shopId、坏数据拒绝
 
 ## 4. 连接器（packages/drsell-connector + apps/shop subscriber）
-- [ ] 4.1 纯映射（事件载荷 → 摄取 DTO）在 package，单测无网络
+- [x] 4.1 纯映射（事件载荷 → 摄取 DTO）在 package，单测无网络
 - [ ] 4.2 subscriber 在 `apps/shop/src/subscribers/*` 调映射+HTTP；**outbox/工作流**保证可靠投递（S7）
 - [ ] 4.3 删除/下架/取消 → 软删 status（S2）；inventory 事件 → 更新 stock（S3）
 - [ ] 4.4 本地端到端：Medusa 改动 → drsell PG 出现该店数据（含软删、库存、售后）

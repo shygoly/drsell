@@ -17,6 +17,7 @@ model Tenant {
   products  Product[]
   orders    Order[]
   customers Customer[]
+  afterSales AfterSales[]
 }
 
 model Shop {
@@ -43,6 +44,7 @@ model Shop {
   products              Product[]
   orders                Order[]
   customers             Customer[]
+  afterSales            AfterSales[]
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
   aiUsage               AiUsage[]
@@ -359,6 +361,11 @@ model Product {
   variantsJson     String?  @map("variants_json") @db.Text
   imagesJson       String?  @map("images_json") @db.Text
   publishedAt      DateTime? @map("published_at")
+  // 来源判别（drsell 现在可摄取非 Shopify 来源，如 Medusa 独立站）；externalId 复用
+  // shopify_product_id 列（见 openspec change dtc-store-medusa）。
+  source           String    @default("shopify")
+  // 来源侧的最后更新时间，用于乱序/重投时按版本拒绝更旧的写（S5）。
+  sourceUpdatedAt  DateTime? @map("source_updated_at")
   syncedAt         DateTime @default(now()) @map("synced_at")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
@@ -385,6 +392,10 @@ model Order {
   billingAddress     String?  @map("billing_address") @db.Text
   shippingAddress    String?  @map("shipping_address") @db.Text
   shopifyCreatedAt   DateTime? @map("shopify_created_at")
+  source             String   @default("shopify")
+  sourceUpdatedAt    DateTime? @map("source_updated_at")
+  // 轻量行项目（Medusa 售后是 item 级；现有 Order 无行项目模型）。JSON: [{title,qty,...}]
+  itemsJson          String?  @map("items_json") @db.Text
   syncedAt           DateTime @default(now()) @map("synced_at")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
@@ -405,6 +416,8 @@ model Customer {
   displayName        String?  @map("display_name")
   email              String?
   phone              String?
+  source             String   @default("shopify")
+  sourceUpdatedAt    DateTime? @map("source_updated_at")
   syncedAt           DateTime @default(now()) @map("synced_at")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
@@ -412,6 +425,33 @@ model Customer {
   @@unique([tenantId, shopifyCustomerId])
   @@index([tenantId])
   @@map("customers")
+}
+
+/// 售后（退货/换货/理赔）。net-new：现有 Order 无对应模型。
+/// 目前来源为 Medusa 独立站（order.* 事件）；预留 source 以便将来其他来源。
+model AfterSales {
+  id              String    @id @default(cuid())
+  tenantId        String    @map("tenant_id")
+  tenant          Tenant    @relation(fields: [tenantId], references: [id])
+  shopId          String?   @map("shop_id")
+  shop            Shop?     @relation(fields: [shopId], references: [id])
+  source          String    @default("medusa")
+  externalId      String    @map("external_id")
+  /// 顾客可见的订单号（Medusa display_id，如 #1234）——与 orders.shopify_order_id 对齐可查
+  orderExternalId String?   @map("order_external_id")
+  type            String    // return | exchange | claim
+  status          String?
+  reason          String?   @db.Text
+  amount          Decimal?  @db.Decimal(10, 2)
+  currency        String?
+  sourceUpdatedAt DateTime? @map("source_updated_at")
+  syncedAt        DateTime  @default(now()) @map("synced_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@unique([tenantId, source, externalId])
+  @@index([tenantId, orderExternalId])
+  @@map("after_sales")
 }
 
 /// Shopify 强制合规 webhook 留痕（customers/data_request、customers/redact、shop/redact）

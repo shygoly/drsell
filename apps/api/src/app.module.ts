@@ -11,6 +11,7 @@ import { MembershipModule } from './membership/membership.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { OpsModule } from './ops/ops.module';
 import { ExpiryNoticeModule } from './subscription/expiry-notice.module';
+import { IngestModule } from './ingest/ingest.module';
 import { HealthController } from './health.controller';
 
 /** MVP: Subscription / Mail / Admin deferred — see docs/MVP_SCOPE.md */
@@ -28,6 +29,7 @@ import { HealthController } from './health.controller';
     SubscriptionModule,
     OpsModule,
     ExpiryNoticeModule,
+    IngestModule,
   ],
   controllers: [HealthController],
 })
