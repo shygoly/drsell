@@ -98,17 +98,17 @@ Medusa Stripe 模块，v1 用 Stripe 测试模式跑通 加购→结算→支付
 
 现状：`/public/chat` 无顾客鉴权，`adp_get_order` 按 shop 返回**任意**订单，`after_sales`
 含 `amount/reason`。若挂件只带匿名 `visitorId`，任何人猜到订单号即可读他人退款——隐私漏洞。
-方案（v1 择一并写死）：
-- **首选**：登录顾客在店面拿一枚签名的 Medusa 顾客令牌，挂件换 drsell 会话时带上；reader
-  的订单/售后查询按顾客 id 过滤（依赖 D2 的 S6 关联）。
-- 兜底：售后工具只回非敏感状态（不含金额/原因），并明确登记按订单号 shop-scoped 的威胁。
-金额涉敏，**此项在 build 前解决**。
+**决议（已定 D8）**：采用首选——登录顾客在店面拿一枚**签名的 Medusa 顾客令牌**，挂件换
+drsell 会话时带上；订单/售后查询按顾客 id 过滤（依赖 D2 的 S6 关联）。匿名会话不返回
+金额/原因等敏感字段。兜底方案不采用。
 
 ## D9 独立站的订阅/额度归属（S1）
 
 `/public/chat` 会跑 `assertSubscriptionServiceable` + `assertWithinQuota`，`AiUsage` 按
-`shopId` 计。独立站没有 Shopify `Subscription`。v1 须明确：给该 shop 一条合成订阅/豁免档，
-或专设计费口径——否则 AI 对话会被静默拦或不计量。设计选定后写进 tasks。
+`shopId` 计。独立站没有 Shopify `Subscription`。**决议（已定 D9）**：独立站**无 plan**——
+豁免订阅/额度闸门（视为始终可服务），但**仍记 `AiUsage`** 供观测/成本核算。实现须让对话
+路径对该 shop（按 `source='medusa'` 或专属 tenant 判定）跳过 `assertSubscriptionServiceable`
+与 `assertWithinQuota`。
 
 ## 组件边界
 

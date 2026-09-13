@@ -3,9 +3,10 @@
 ## 0. 前置探针 + 定死待解项（决定后续实现）
 - [ ] 0.1 Medusa v2 事件覆盖：确认 product/order/fulfillment/payment/**inventory** 及
       return/exchange/claim 的**事件名与载荷字段**（决定连接器映射，D2/N3）
-- [ ] 0.2 顾客身份换发通路（D8/B5）：定死方案——签名 Medusa 顾客令牌 → drsell 会话 →
-      按顾客过滤订单/售后。**build 前必须定**（金额涉敏）
-- [ ] 0.3 独立站订阅/额度归属（D9/S1）：合成订阅 vs 豁免 vs 独立计费，选定
+- [x] 0.2 顾客身份换发通路（D8/B5）：**已定**——签名 Medusa 顾客令牌 → drsell 会话 →
+      按顾客过滤订单/售后；匿名会话不回敏感字段
+- [x] 0.3 独立站订阅/额度归属（D9/S1）：**已定**——无 plan，豁免订阅/额度闸门（始终可服务），
+      仍记 AiUsage 供观测
 - [ ] 0.4 wjclaw 上 Redis 与 Medusa PG 库落位（容器/端口/备份）
 
 ## 1. Medusa 引擎（apps/shop）
