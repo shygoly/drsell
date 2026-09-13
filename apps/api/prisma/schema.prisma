@@ -87,6 +87,13 @@ model BotSetting {
   syncProductsEnabled   Boolean   @default(true)
   syncOrdersEnabled     Boolean   @default(true)
   syncCustomersEnabled  Boolean   @default(true)
+  // AI Assistant 人设（商家可配置，护栏仍由服务端注入且不可覆盖，见 @drsell/openclaw
+  // buildSupportSystemPrompt）。aiEnabled=false 时不自动应答、转人工。
+  aiEnabled             Boolean   @default(true)
+  aiPersonaName         String?
+  aiTone                String?
+  aiLanguage            String?   // "auto" | "en" | "zh-Hans" | "es"
+  aiSystemPrompt        String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 }

@@ -31,6 +31,20 @@ export type BotSettingRecord = {
   widgetVisible: boolean | null;
   widgetQuickReplies: string[] | null;
   welcomeMessage: string | null;
+  aiEnabled: boolean | null;
+  aiPersonaName: string | null;
+  aiTone: string | null;
+  aiLanguage: string | null;
+  aiSystemPrompt: string | null;
+};
+
+/** AI Assistant 人设草稿，用于保存与沙盒预览。language 为 "auto"|"en"|"zh-Hans"|"es"。 */
+export type AiPersonaDraft = {
+  aiEnabled?: boolean;
+  aiPersonaName?: string;
+  aiTone?: string;
+  aiLanguage?: string;
+  aiSystemPrompt?: string;
 };
 
 export async function fetchBotSettings(shop: string, token: string) {
@@ -53,11 +67,23 @@ export async function saveBotSettings(
     widgetVisible?: boolean;
     widgetQuickReplies?: string[];
     welcomeMessage?: string;
-  },
+  } & AiPersonaDraft,
 ) {
   return merchantFetch<BotSettingRecord>(
     `/shopify/botSettings/shop/${encodeURIComponent(shop)}`,
     token,
     { method: "PUT", body: JSON.stringify(data) },
   );
+}
+
+/** AI Assistant 沙盒：用草稿人设试聊一次。店铺域由服务端按会话校验，这里带上仅作请求作用域。 */
+export async function previewAi(
+  shop: string,
+  token: string,
+  draft: AiPersonaDraft & { message: string },
+) {
+  return merchantFetch<{ reply: string }>(`/shopify/ai/preview`, token, {
+    method: "POST",
+    body: JSON.stringify({ shopDomain: shop, ...draft }),
+  });
 }

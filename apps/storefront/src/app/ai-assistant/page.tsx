@@ -1,17 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Bot,
-  FlaskConical,
-  RefreshCw,
-  Send,
-  ShieldCheck,
-  Tag,
-  User,
-} from "lucide-react";
+import { Bot, FlaskConical, RefreshCw, Send, User } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,82 +14,73 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useShopSession } from "@/hooks/useShopSession";
+import {
+  fetchBotSettings,
+  previewAi,
+  saveBotSettings,
+  type AiPersonaDraft,
+} from "@/lib/merchant-api";
+import { useEffect, useState } from "react";
 
 const TONES = ["Friendly & Helpful", "Professional & Formal", "Casual & Energetic"];
-const LANGUAGES = [
-  "Auto-detect (Recommended)",
-  "English",
-  "Chinese (Simplified)",
-  "Spanish",
+const LANGUAGE_OPTIONS: { label: string; code: string }[] = [
+  { label: "Auto-detect (Recommended)", code: "auto" },
+  { label: "English", code: "en" },
+  { label: "Chinese (Simplified)", code: "zh-Hans" },
+  { label: "Spanish", code: "es" },
 ];
 
-const HANDOFF_RULES = [
-  {
-    label: "Customer explicitly asks for human",
-    description: 'e.g., "Speak to a real person", "agent"',
-    defaultChecked: true,
-  },
-  {
-    label: "Complaint detected",
-    description: 'Negative sentiment or keywords like "angry", "terrible"',
-    defaultChecked: true,
-  },
-  {
-    label: "High-value order query",
-    description: "Orders over $500",
-    defaultChecked: false,
-  },
-];
+const DEFAULT_SYSTEM_PROMPT =
+  "You are Ava, the AI assistant for this Shopify store. Always stay polite, concise and never promise delivery dates you cannot verify.";
 
-const PERMISSIONS = [
-  {
-    icon: ShieldCheck,
-    label: "View Orders / Track Shipping",
-    enabled: true,
-  },
-  {
-    icon: Tag,
-    label: "Issue Discounts",
-    enabled: false,
-  },
-  {
-    icon: RefreshCw,
-    label: "Process Refunds",
-    enabled: false,
-  },
-];
+// 转人工规则与工具权限（Issue Discounts / Process Refunds）v1 不做：前者需要转人工
+// 触发逻辑，后者是目前不存在的写操作工具、风险高。功能落地前不摆出死开关（沿用
+// 「不暴露未完成功能」的约定）。
 
-function TestAIPanel() {
+type ChatBubble = { role: "assistant" | "user"; content: string };
+
+function TestAIPanel({
+  draft,
+  shop,
+  token,
+  connected,
+}: {
+  draft: AiPersonaDraft;
+  shop: string;
+  token: string;
+  connected: boolean;
+}) {
+  const greeting = `Hi there! I'm ${
+    draft.aiPersonaName?.trim() || "Ava"
+  }. How can I help you with your order today?`;
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant" as const,
-      content: "Hi there! I'm Ava. How can I help you with your order today?",
-    },
-    {
-      role: "user" as const,
-      content: "Where is my package? The tracking hasn't updated.",
-    },
+  const [messages, setMessages] = useState<ChatBubble[]>([
+    { role: "assistant", content: greeting },
   ]);
   const [typing, setTyping] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleSend() {
+  async function handleSend() {
     const text = message.trim();
-    if (!text) return;
+    if (!text || typing) return;
+    if (!connected) {
+      setError("Connect your Shopify store to test the assistant.");
+      return;
+    }
+    setError("");
     setMessages((prev) => [...prev, { role: "user", content: text }]);
     setMessage("");
     setTyping(true);
-    window.setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "Thanks! I've noted that. In the sandbox I can simulate a reply using your current persona settings.",
-        },
-      ]);
+    try {
+      // 用当前（未保存的）草稿设置试聊，商家保存前就能看到效果。
+      const { reply } = await previewAi(shop, token, { ...draft, message: text });
+      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Preview failed");
+    } finally {
       setTyping(false);
-    }, 900);
+    }
   }
 
   return (
@@ -115,13 +96,9 @@ function TestAIPanel() {
           className="text-muted-foreground h-8 w-8"
           aria-label="Reset test conversation"
           onClick={() => {
-            setMessages([
-              {
-                role: "assistant",
-                content: "Hi there! I'm Ava. How can I help you with your order today?",
-              },
-            ]);
+            setMessages([{ role: "assistant", content: greeting }]);
             setTyping(false);
+            setError("");
           }}
         >
           <RefreshCw className="h-4 w-4" aria-hidden="true" />
@@ -129,11 +106,6 @@ function TestAIPanel() {
       </CardHeader>
 
       <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-background p-4">
-        <div className="text-center">
-          <span className="text-muted-foreground text-[10px] tracking-wider uppercase">
-            Today, 10:42 AM
-          </span>
-        </div>
         {messages.map((m, i) =>
           m.role === "assistant" ? (
             <div key={i} className="flex max-w-[85%] items-end gap-2">
@@ -142,7 +114,7 @@ function TestAIPanel() {
                   <Bot className="h-3.5 w-3.5" aria-hidden="true" />
                 </AvatarFallback>
               </Avatar>
-              <div className="bg-muted text-card-foreground rounded-2xl rounded-bl-sm px-3 py-2 text-sm">
+              <div className="bg-muted text-card-foreground rounded-2xl rounded-bl-sm px-3 py-2 text-sm whitespace-pre-wrap">
                 {m.content}
               </div>
             </div>
@@ -151,7 +123,7 @@ function TestAIPanel() {
               key={i}
               className="bg-primary text-primary-foreground ml-auto flex max-w-[85%] items-end gap-2 self-end"
             >
-              <div className="rounded-2xl rounded-br-sm px-3 py-2 text-sm">
+              <div className="rounded-2xl rounded-br-sm px-3 py-2 text-sm whitespace-pre-wrap">
                 {m.content}
               </div>
               <Avatar className="bg-border text-muted-foreground h-6 w-6">
@@ -183,19 +155,23 @@ function TestAIPanel() {
       </CardContent>
 
       <div className="shrink-0 border-t p-3">
+        {error ? (
+          <p className="text-destructive mb-2 text-center text-xs">{error}</p>
+        ) : null}
         <div className="flex items-center gap-2">
           <Input
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") handleSend();
+              if (e.key === "Enter") void handleSend();
             }}
             placeholder="Type a message to test..."
             className="rounded-full bg-background"
           />
           <Button
             size="icon"
-            onClick={handleSend}
+            onClick={() => void handleSend()}
+            disabled={typing}
             className="h-9 w-9 shrink-0 rounded-full"
             aria-label="Send test message"
           >
@@ -203,7 +179,7 @@ function TestAIPanel() {
           </Button>
         </div>
         <p className="text-muted-foreground mt-2 text-center text-[10px]">
-          Sandbox environment • Analytics disabled
+          Sandbox — uses your unsaved settings, not shown to customers
         </p>
       </div>
     </Card>
@@ -211,16 +187,55 @@ function TestAIPanel() {
 }
 
 export default function AiAssistantPage() {
+  const { shop, token, ready } = useShopSession();
+  const connected = Boolean(shop && token);
+
   const [enabled, setEnabled] = useState(true);
   const [personaName, setPersonaName] = useState("Ava");
   const [tone, setTone] = useState(TONES[0]);
-  const [language, setLanguage] = useState(LANGUAGES[0]);
-  const [handoff, setHandoff] = useState<boolean[]>(
-    HANDOFF_RULES.map((r) => r.defaultChecked),
-  );
-  const [permissions, setPermissions] = useState<boolean[]>(
-    PERMISSIONS.map((p) => p.enabled),
-  );
+  const [language, setLanguage] = useState("auto");
+  const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT);
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState("");
+
+  // 挂载时拉取已保存设置回填。拉不到（未连接/离线）就用默认值，不报错阻断页面。
+  useEffect(() => {
+    if (!ready || !connected) return;
+    void fetchBotSettings(shop, token)
+      .then((s) => {
+        if (typeof s.aiEnabled === "boolean") setEnabled(s.aiEnabled);
+        if (s.aiPersonaName) setPersonaName(s.aiPersonaName);
+        if (s.aiTone) setTone(s.aiTone);
+        if (s.aiLanguage) setLanguage(s.aiLanguage);
+        if (s.aiSystemPrompt) setSystemPrompt(s.aiSystemPrompt);
+      })
+      .catch(() => setStatus("Couldn't load saved settings — showing defaults."));
+  }, [ready, connected, shop, token]);
+
+  const draft: AiPersonaDraft = {
+    aiEnabled: enabled,
+    aiPersonaName: personaName,
+    aiTone: tone,
+    aiLanguage: language,
+    aiSystemPrompt: systemPrompt,
+  };
+
+  async function handleSave() {
+    if (!connected) {
+      setStatus("Connect your Shopify store to save settings.");
+      return;
+    }
+    setSaving(true);
+    setStatus("");
+    try {
+      await saveBotSettings(shop, token, draft);
+      setStatus("Saved.");
+    } catch (e) {
+      setStatus(e instanceof Error ? e.message : "Save failed");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
@@ -240,7 +255,8 @@ export default function AiAssistantPage() {
             <div>
               <CardTitle className="text-base">AI Status</CardTitle>
               <CardDescription>
-                Enable or disable the AI assistant globally.
+                When off, the AI stops auto-replying and new chats wait for your
+                team.
               </CardDescription>
             </div>
             <Switch
@@ -261,18 +277,16 @@ export default function AiAssistantPage() {
               <div className="flex items-center gap-4">
                 <Avatar className="bg-primary/10 text-primary h-16 w-16">
                   <AvatarFallback className="text-lg font-bold">
-                    {personaName.slice(0, 2).toUpperCase()}
+                    {(personaName || "AI").slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <Button variant="outline" size="sm">
-                  Change Avatar
-                </Button>
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="ai-name">AI Name</Label>
                 <Input
                   id="ai-name"
                   value={personaName}
+                  maxLength={40}
                   onChange={(e) => setPersonaName(e.target.value)}
                 />
               </div>
@@ -299,8 +313,10 @@ export default function AiAssistantPage() {
                   onChange={(e) => setLanguage(e.target.value)}
                   className="border-input bg-card focus:border-ring focus:ring-ring/20 h-10 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
                 >
-                  {LANGUAGES.map((l) => (
-                    <option key={l}>{l}</option>
+                  {LANGUAGE_OPTIONS.map((l) => (
+                    <option key={l.code} value={l.code}>
+                      {l.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -308,121 +324,34 @@ export default function AiAssistantPage() {
           </CardContent>
         </Card>
 
-        {/* Behavior & Handoff */}
-        <Card className="rounded-lg">
-          <CardHeader>
-            <CardTitle className="text-base">Behavior &amp; Handoff</CardTitle>
-            <CardDescription>
-              Define when the AI should escalate the conversation to a human
-              agent.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            {HANDOFF_RULES.map((rule, i) => (
-              <label
-                key={rule.label}
-                className="flex cursor-pointer items-start gap-3"
-              >
-                <input
-                  type="checkbox"
-                  checked={handoff[i]}
-                  onChange={(e) =>
-                    setHandoff((prev) =>
-                      prev.map((v, idx) => (idx === i ? e.target.checked : v)),
-                    )
-                  }
-                  className="border-input mt-1 h-4 w-4 rounded"
-                  style={{ accentColor: "var(--primary)" }}
-                />
-                <div>
-                  <span className="text-sm font-medium">{rule.label}</span>
-                  <p className="text-muted-foreground text-xs">
-                    {rule.description}
-                  </p>
-                </div>
-              </label>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* AI Permissions */}
-        <Card className="rounded-lg">
-          <CardHeader>
-            <CardTitle className="text-base">AI Permissions</CardTitle>
-            <CardDescription>
-              Control what actions the AI can perform on behalf of your store.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {PERMISSIONS.map((permission, i) => {
-              const Icon = permission.icon;
-              const isEnabled = permissions[i];
-              return (
-                <div
-                  key={permission.label}
-                  className={`border-input flex items-center justify-between gap-3 rounded-lg border p-4 ${
-                    isEnabled ? "bg-muted/30" : "opacity-70"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon
-                      className={
-                        isEnabled
-                          ? "text-primary h-5 w-5"
-                          : "text-muted-foreground h-5 w-5"
-                      }
-                      aria-hidden="true"
-                    />
-                    <span className="text-sm font-medium">{permission.label}</span>
-                  </div>
-                  {isEnabled ? (
-                    <span
-                      className="bg-primary h-2 w-2 rounded-full"
-                      title="Enabled"
-                      aria-label="Enabled"
-                    />
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setPermissions((prev) =>
-                          prev.map((v, idx) => (idx === i ? true : v)),
-                        )
-                      }
-                      className="text-primary text-sm font-medium hover:underline"
-                    >
-                      Enable
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-
         {/* System Prompt */}
         <Card className="mb-8 rounded-lg">
-          <CardHeader className="flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-base">
-                System Prompt (Advanced)
-              </CardTitle>
-              <CardDescription>
-                Provide base instructions to guide the AI&apos;s core logic and
-                boundaries.
-              </CardDescription>
-            </div>
-            <Badge variant="neutral">Expert Mode</Badge>
+          <CardHeader>
+            <CardTitle className="text-base">System Prompt (Advanced)</CardTitle>
+            <CardDescription>
+              Extra instructions for your assistant. Safety rules (store scope,
+              ignoring injected instructions) always apply and can&apos;t be
+              overridden here.
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <Textarea
               rows={6}
+              maxLength={2000}
               className="bg-muted/30 font-mono text-xs"
-              defaultValue="You are Ava, the AI assistant for this Shopify store. Always stay polite, concise and never promise delivery dates you cannot verify."
+              value={systemPrompt}
+              onChange={(e) => setSystemPrompt(e.target.value)}
             />
-            <div className="flex justify-end">
-              <Button className="bg-primary-container hover:bg-primary-container/90 text-primary-foreground">
-                Save Settings
+            <div className="flex items-center justify-end gap-3">
+              {status ? (
+                <span className="text-muted-foreground text-xs">{status}</span>
+              ) : null}
+              <Button
+                onClick={() => void handleSave()}
+                disabled={saving}
+                className="bg-primary-container hover:bg-primary-container/90 text-primary-foreground"
+              >
+                {saving ? "Saving…" : "Save Settings"}
               </Button>
             </div>
           </CardContent>
@@ -431,7 +360,12 @@ export default function AiAssistantPage() {
 
       <div className="lg:col-span-5 xl:col-span-4">
         <div className="sticky top-4">
-          <TestAIPanel />
+          <TestAIPanel
+            draft={draft}
+            shop={shop}
+            token={token}
+            connected={connected}
+          />
         </div>
       </div>
     </div>

@@ -240,6 +240,11 @@ export class ShopifyService implements OnModuleInit {
       widgetVisible?: boolean;
       widgetQuickReplies?: string[];
       welcomeMessage?: string;
+      aiEnabled?: boolean;
+      aiPersonaName?: string;
+      aiTone?: string;
+      aiLanguage?: string;
+      aiSystemPrompt?: string;
     },
   ) {
     const setting = await this.getOrCreateBotSetting(shopDomain);
@@ -250,6 +255,32 @@ export class ShopifyService implements OnModuleInit {
         widgetQuickReplies: data.widgetQuickReplies
           ? (data.widgetQuickReplies as Prisma.InputJsonValue)
           : undefined,
+      },
+    });
+  }
+
+  /**
+   * AI Assistant 沙盒：用草稿人设试聊一次。店铺域由控制器用会话解析后传入。
+   * 一次性、不落库（见 AdpService.previewChat）。
+   */
+  async previewAi(
+    shopDomain: string,
+    dto: {
+      message: string;
+      aiPersonaName?: string;
+      aiTone?: string;
+      aiLanguage?: string;
+      aiSystemPrompt?: string;
+    },
+  ) {
+    return this.adp.previewChat({
+      shopDomain,
+      message: dto.message,
+      persona: {
+        name: dto.aiPersonaName,
+        tone: dto.aiTone,
+        language: dto.aiLanguage,
+        customInstructions: dto.aiSystemPrompt,
       },
     });
   }

@@ -12,7 +12,7 @@ import {
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
-import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsIn, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
 import type { JwtPayload } from '../auth/auth.service';
@@ -65,6 +65,21 @@ class BotSettingDto {
   @IsOptional() @IsBoolean() widgetVisible?: boolean;
   @IsOptional() @IsArray() @IsString({ each: true }) widgetQuickReplies?: string[];
   @IsOptional() @IsString() welcomeMessage?: string;
+  // AI Assistant 人设。语言白名单，其余字段限长，防止把气泡与成本撑爆（design D4）。
+  @IsOptional() @IsBoolean() aiEnabled?: boolean;
+  @IsOptional() @IsString() @MaxLength(40) aiPersonaName?: string;
+  @IsOptional() @IsString() @MaxLength(40) aiTone?: string;
+  @IsOptional() @IsIn(['auto', 'en', 'zh-Hans', 'es']) aiLanguage?: string;
+  @IsOptional() @IsString() @MaxLength(2000) aiSystemPrompt?: string;
+}
+
+class AiPreviewDto {
+  @IsString() shopDomain!: string;
+  @IsString() @MinLength(1) @MaxLength(500) message!: string;
+  @IsOptional() @IsString() @MaxLength(40) aiPersonaName?: string;
+  @IsOptional() @IsString() @MaxLength(40) aiTone?: string;
+  @IsOptional() @IsIn(['auto', 'en', 'zh-Hans', 'es']) aiLanguage?: string;
+  @IsOptional() @IsString() @MaxLength(2000) aiSystemPrompt?: string;
 }
 
 @Controller('shopify')
@@ -147,6 +162,14 @@ export class ShopifyController {
       await this.scope.resolveShopDomain(user, shopDomain),
       body,
     );
+  }
+
+  // AI Assistant 沙盒：商家保存前用草稿人设试聊一次。店铺域由会话解析，不信前端正文。
+  @Auth()
+  @Post('ai/preview')
+  async aiPreview(@CurrentUser() user: JwtPayload, @Body() body: AiPreviewDto) {
+    const shopDomain = await this.scope.resolveShopDomain(user, body.shopDomain);
+    return this.shopify.previewAi(shopDomain, body);
   }
 
   @Auth()

@@ -1,9 +1,10 @@
 import { ChatMessageRole, ChatThreadStatus } from '@prisma/client';
 
 const chatStream = jest.fn().mockResolvedValue('');
+const buildPrompt = jest.fn((shop: string) => `SYSTEM for ${shop}`);
 jest.mock('@drsell/openclaw', () => ({
   createOpenClawClient: () => ({ chatStream }),
-  buildSupportSystemPrompt: (shop: string) => `SYSTEM for ${shop}`,
+  buildSupportSystemPrompt: buildPrompt,
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -20,11 +21,27 @@ type ThreadSeed = {
   handedOverAt?: Date | null;
 };
 
+type BotSettingSeed = {
+  aiEnabled: boolean;
+  aiPersonaName: string | null;
+  aiTone: string | null;
+  aiLanguage: string | null;
+  aiSystemPrompt: string | null;
+};
+
+const DEFAULT_BOT_SETTING: BotSettingSeed = {
+  aiEnabled: true,
+  aiPersonaName: null,
+  aiTone: null,
+  aiLanguage: null,
+  aiSystemPrompt: null,
+};
+
 /**
  * 假 prisma：记录每一次写，好断言「什么没有发生」。
  * 这些用例的重点多半是否定式——AI 不该应答、配额不该扣、上游不该被调用。
  */
-function makePrisma(seed: ThreadSeed | null) {
+function makePrisma(seed: ThreadSeed | null, botSetting: BotSettingSeed = DEFAULT_BOT_SETTING) {
   const threadUpdates: Array<Record<string, unknown>> = [];
   const messages: Array<{ role: ChatMessageRole; content: string }> = [];
   const statUpserts: Array<Record<string, unknown>> = [];
@@ -84,6 +101,9 @@ function makePrisma(seed: ThreadSeed | null) {
         return Promise.resolve({});
       }),
     },
+    botSetting: {
+      findFirst: jest.fn().mockResolvedValue(botSetting),
+    },
     $transaction: jest.fn().mockImplementation((ops: unknown[]) => Promise.all(ops)),
   };
 
@@ -115,8 +135,13 @@ function makeQuota(exhausted = false) {
   };
 }
 
-function build(seed: ThreadSeed | null, exhausted = false, subInactive = false) {
-  const p = makePrisma(seed);
+function build(
+  seed: ThreadSeed | null,
+  exhausted = false,
+  subInactive = false,
+  botSetting: BotSettingSeed = DEFAULT_BOT_SETTING,
+) {
+  const p = makePrisma(seed, botSetting);
   const quota = makeQuota(exhausted);
   if (subInactive) {
     quota.assertSubscriptionServiceable = jest.fn().mockRejectedValue(
@@ -134,6 +159,7 @@ function build(seed: ThreadSeed | null, exhausted = false, subInactive = false) 
 
 beforeEach(() => {
   chatStream.mockClear();
+  buildPrompt.mockClear();
   chatStream.mockImplementation(async (params: { onChunk: (s: string) => void }) => {
     params.onChunk('AI 的回答');
     return 'AI 的回答';
@@ -255,6 +281,85 @@ describe('AdpService 上下文所有权', () => {
     const arg = chatStream.mock.calls[0][0];
     expect(arg.systemPrompt).toBe(`SYSTEM for ${SHOP}`);
     expect(arg.shopDomain).toBe(SHOP);
+  });
+});
+
+describe('AdpService AI 开关与人设', () => {
+  it('AI 关闭时不调上游、转 pending，并给顾客一句人工跟进', async () => {
+    const { svc, threadUpdates, messages } = build(
+      { status: ChatThreadStatus.ai },
+      false,
+      false,
+      { ...DEFAULT_BOT_SETTING, aiEnabled: false },
+    );
+
+    await send(svc);
+
+    expect(chatStream).not.toHaveBeenCalled();
+    expect(
+      threadUpdates.some((u) =>
+        JSON.stringify(u).includes(`"status":"${ChatThreadStatus.pending}"`),
+      ),
+    ).toBe(true);
+    // 顾客拿到一句人工跟进并落库，否则关掉 AI 后顾客石沉大海。
+    expect(messages.map((m) => m.role)).toEqual([
+      ChatMessageRole.user,
+      ChatMessageRole.assistant,
+    ]);
+  });
+
+  it('把店铺人设传给 buildSupportSystemPrompt', async () => {
+    const { svc } = build({ status: ChatThreadStatus.ai }, false, false, {
+      aiEnabled: true,
+      aiPersonaName: 'Ava',
+      aiTone: 'friendly',
+      aiLanguage: 'en',
+      aiSystemPrompt: 'Be nice.',
+    });
+
+    await send(svc);
+
+    expect(buildPrompt).toHaveBeenCalledWith(SHOP, {
+      name: 'Ava',
+      tone: 'friendly',
+      language: 'en',
+      customInstructions: 'Be nice.',
+    });
+  });
+
+  it('沙盒预览：用草稿人设一次性试聊，不落库、不影响真实会话', async () => {
+    const { svc, messages, threadUpdates } = build({ status: ChatThreadStatus.ai });
+    chatStream.mockImplementation(async (p: { onChunk: (s: string) => void }) => {
+      p.onChunk('预览回复');
+      return '预览回复';
+    });
+
+    const out = await svc.previewChat({
+      shopDomain: SHOP,
+      message: '你们发顺丰吗？',
+      persona: {
+        name: 'Ava',
+        tone: 'friendly',
+        language: 'zh-Hans',
+        customInstructions: '多推荐配套商品。',
+      },
+    });
+
+    expect(out.reply).toBe('预览回复');
+    // 草稿人设进入 prompt 组装
+    expect(buildPrompt).toHaveBeenCalledWith(SHOP, {
+      name: 'Ava',
+      tone: 'friendly',
+      language: 'zh-Hans',
+      customInstructions: '多推荐配套商品。',
+    });
+    // 只发一条 user 消息，店铺域来自入参（控制器用会话解析后传入）
+    const arg = chatStream.mock.calls[0][0];
+    expect(arg.messages).toEqual([{ role: 'user', content: '你们发顺丰吗？' }]);
+    expect(arg.shopDomain).toBe(SHOP);
+    // 不落库：没有写任何 chatMessage / chatThread
+    expect(messages).toEqual([]);
+    expect(threadUpdates).toEqual([]);
   });
 });
 
