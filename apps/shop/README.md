@@ -32,6 +32,13 @@ npx medusa develop                                  # :9000（in-memory event bu
 `INGEST_STORE_KEY`（与 drsell `apps/api/.env` 的同名值一致）。drsell 侧对应
 `INGEST_STORE_KEY` + `INGEST_STORE_DOMAIN`，摄取端点在 `apps/api/src/ingest/`。
 
+## 店面（apps/shop-web）
+
+面向顾客的店面 + AI 挂件在同仓 **`apps/shop-web/`**（无构建静态页，独立于本 Medusa monorepo）。
+线上 **https://medusa.szchada.top/**：展示 Medusa 商品 + 右下角 drsell 智能客服，已端到端验证可对话。
+nginx 在 `medusa.szchada.top` 分流：`/`→店面 :5020（pm2 `drsell-shop-web`）、
+`/app /admin /store /auth /health`→本 backend :9000。
+
 ## 已验证（2026-09-12）
 
 Medusa 里改一个商品 → subscriber 触发 → `/api/ingest/products`（401 无 key、200 带 key）→

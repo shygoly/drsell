@@ -5,3 +5,6 @@ packages:
   # 它独立构建/运行（见 apps/shop/README.md），不并入 drsell 的 pnpm workspace，
   # 否则 drsell 的 install 会去拉 Medusa 整棵依赖树、且嵌套 workspace 会打架。
   - "!apps/shop"
+  # apps/shop-web 是 DTC 店面（无构建的静态页 + 极简 node 静态服务器，无 package.json）。
+  # 由 pm2 直接跑 server.mjs、nginx 反代（见 apps/shop-web/README.md），不入 workspace。
+  - "!apps/shop-web"

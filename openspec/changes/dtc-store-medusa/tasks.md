@@ -52,19 +52,28 @@
 - [ ] 5.4 **隔离环境验 tool calling（含 GLM 兜底）** → 公网复验（陷阱 1）
 
 ## 6. 店面（apps/shop-web）
-- [ ] 6.1 目录/详情/购物车（Medusa Store API + JS SDK）
+- [~] 6.1 **目录展示已做**（静态页 client-side 调 Medusa Store API `/store/products` 同源渲染，
+      见 apps/shop-web）；**购物车/详情页未做**（GOAL 只需能对话，YAGNI 推迟）
 - [ ] 6.2 Stripe 结算 → 下单
 - [ ] 6.3 顾客登录 + account/orders 订单与物流追踪；售后申请入口
-- [ ] 6.4 shadcn/Tailwind 主题层，SSR/性能对齐 Commerce 范式
+- [~] 6.4 采用**无构建静态页**（非 Next/shadcn）：GOAL 是「页面能正常客服对话」，取最短路径；
+      SSR/shadcn 升级留待需要时
 
 ## 7. 店内 AI 挂件
-- [ ] 7.1 嵌入 `drsell-chat.js`，注入 store 的 shop 标识 + 登录顾客令牌（D8）
-- [ ] 7.2 线上试聊：能查本店产品/订单/售后，且**只**返回该顾客的数据
+- [x] 7.1 嵌入 `drsell-chat.js`（`data-shop=drsell-shop.szchada.top` = INGEST_STORE_DOMAIN，
+      `DRSELL_API_BASE=https://drsell.szchada.top/api`）。**AI 链路零改动**：chat 路径无 Shopify 耦合，
+      `adp_search_products` 按 shopDomain→tenant 过滤、不看 source，故直接命中 medusa 商品
+- [~] 7.2 **线上试聊已验（2026-09-13）**：medusa.szchada.top 打开店面 → 挂件问「有哪些商品/T恤多少钱」→
+      AI 用真实 4 款 medusa 商品+价格作答（curl + 浏览器双验，过陷阱 1 tool-calling）。
+      **按顾客隔离（D8）未做**：当前匿名会话查商品可用，订单/售后按顾客过滤需接签名顾客令牌
 
 ## 8. 部署与基建
-- [ ] 8.1 Redis + Medusa PG 上 wjclaw；`.env`（不入库）
-- [ ] 8.2 pm2 进程（shop / shop-web）纳入部署脚本
-- [ ] 8.3 nginx 店铺 vhost + Admin 保护 + 公网内容断言（陷阱 3）
+- [x] 8.1 Redis + Medusa PG 已在 wjclaw（`drsell_shop` 库；REDIS_URL 已配）；`.env` 不入库
+- [~] 8.2 pm2：`drsell-shop-web`（店面静态服务 :5020）已 `pm2 start`+`pm2 save`；
+      **Medusa backend 仍 `medusa develop` 手工运行**（未 prod build、未纳入 pm2）——Phase 8 剩余
+- [~] 8.3 nginx `medusa.szchada.top` vhost 已上（`/`→店面 :5020、`/app /admin /store /auth /health`→
+      Medusa :9000）+ 自签证书 + 公网内容断言（title/商品/挂件标识）；**后台仍暴露 Vite dev 服务器**，
+      正式化（prod build + Admin 保护）待做
 
 ## 9. 治理与验收
 - [ ] 9.1 `DECISIONS.md` 登记 ADR（复用 shopify*Id 列 + 推迟改名）与 DEP（Redis）（S8）
