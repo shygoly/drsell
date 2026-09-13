@@ -11,9 +11,15 @@
 - [x] 0.4 wjclaw 上 Redis 与 Medusa PG 库落位（容器/端口/备份）
 
 ## 1. Medusa 引擎（apps/shop）
-- [ ] 1.1 scaffold Medusa v2 + Postgres(独立库) + Redis event bus/workflow
-- [ ] 1.2 Stripe 支付模块（测试模式）+ 单一 region/currency（N2）
-- [ ] 1.3 Admin 可管商品/订单/退货；导入样例商品
+- [x] 1.1 scaffold Medusa v2.21（wjclaw `/root/drsell-shop-build/shop`）+ 迁移/seed 到独立库
+      drsell_shop + 运行于 :9000。**Redis 现为 in-memory event bus**（wire-up 够用；生产可靠
+      投递用 Redis event bus 留 4.2）。源码见 apps/shop/README.md（生成产物暂运行于 wjclaw）
+- [ ] 1.2 Stripe 支付模块（测试模式）+ 单一 region/currency（N2）——seed 已建默认 region，Stripe 待配
+- [~] 1.3 Admin 已建、初始 seed 含样例商品/库存；管退货 UI 待验
+
+## 1b. drsell 侧摄取上线（Phase 3 部署）
+- [x] 部署 drsell-api（迁移 20260912140000 已应用生产）+ `INGEST_STORE_KEY/DOMAIN` 入 apps/api/.env；
+      `/api/ingest/*` 公网 401（live+guarded）
 
 ## 2. drsell schema（apps/api）
 - [x] 2.1 迁移：`products/orders/customers` 加 `source @default('shopify')` + 版本/updatedAt 承载（S5）
@@ -30,9 +36,12 @@
 
 ## 4. 连接器（packages/drsell-connector + apps/shop subscriber）
 - [x] 4.1 纯映射（事件载荷 → 摄取 DTO）在 package，单测无网络
-- [ ] 4.2 subscriber 在 `apps/shop/src/subscribers/*` 调映射+HTTP；**outbox/工作流**保证可靠投递（S7）
-- [ ] 4.3 删除/下架/取消 → 软删 status（S2）；inventory 事件 → 更新 stock（S3）
-- [ ] 4.4 本地端到端：Medusa 改动 → drsell PG 出现该店数据（含软删、库存、售后）
+- [~] 4.2 subscriber（product/order/customer/after-sales）已写并**在生产触发验证**（Medusa 事件→
+      映射→POST /api/ingest）；**outbox/Redis 可靠投递待续**（S7，现为 in-memory bus、失败仅记日志）
+- [~] 4.3 after-sales subscriber 已写（best-effort，待真实退货事件校验 entity/字段）；
+      inventory 软删/库存 subscriber 待补（S2/S3）
+- [x] 4.4 **端到端已验（2026-09-12）**：Medusa 改商品 → drsell PG `products` 出现 `source='medusa'` 行。
+      订单/售后/库存同机制，待各自事件触发验证
 
 ## 5. AI 读取（生产 reader 改动，须过 trap-1）
 - [ ] 5.1 `adp-reader.sql` 新增 `adp_get_after_sales` SECURITY DEFINER 函数 + GRANT；

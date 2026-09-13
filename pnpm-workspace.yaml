@@ -1,3 +1,7 @@
 packages:
   - "apps/*"
   - "packages/*"
+  # apps/shop 是独立站的 Medusa v2 引擎（自身是 turbo monorepo，含 @medusajs/* 重依赖）。
+  # 它独立构建/运行（见 apps/shop/README.md），不并入 drsell 的 pnpm workspace，
+  # 否则 drsell 的 install 会去拉 Medusa 整棵依赖树、且嵌套 workspace 会打架。
+  - "!apps/shop"
