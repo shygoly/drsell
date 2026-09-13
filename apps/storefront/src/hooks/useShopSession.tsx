@@ -175,9 +175,11 @@ function useShopSessionState() {
   );
 
   const startGoogleLogin = useCallback(() => {
-    const api =
-      process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
-    window.location.href = `${api}/auth/google`;
+    // Google OAuth 的 GET 入口在 apps/web（/api/auth/google，由 nginx `^~ /api/auth`
+    // 转发到 5012），不在 NestJS 后端。NEXT_PUBLIC_API_URL 指向 /api/backend（→ NestJS，
+    // 只有 POST google/exchange），拿它拼 GET 入口必然 404。redirect_uri 也钉死在
+    // /api/auth/google/callback，故这里用同源绝对路径直达 apps/web，别再拼 API base。
+    window.location.href = "/api/auth/google";
   }, []);
 
   const logout = useCallback(() => {
