@@ -31,7 +31,9 @@ return/exchange/claim=售后、payment via Stripe、Admin UI）。Node/TS/Postgr
   set `shopId`**，避免 `shop_id IS NULL` 造成跨店泄漏。
 - 连接器订阅并映射（**事件名以 task 0.1 探针为准，此处非权威，N3**）：
   product → `/api/ingest/products`；order/fulfillment/payment → `/api/ingest/orders`；
-  return/exchange/claim → `/api/ingest/after-sales`；**inventory 事件 → 更新 stock（S3）**
+  **售后=`order.*` 事件**（已确认 Medusa 2.x：`order.return_requested/received`、
+  `order.claim_created`、`order.exchange_created`）→ `/api/ingest/after-sales`；
+  **inventory 模块事件 → 更新 stock（S3）**
   （stock 在 Medusa Inventory 模块，不随 product 事件变，否则 AI 报错库存）。
 - 摄取端点用 **store 专属密钥**鉴权（服务端到服务端，非商家 JWT）。
 - **幂等键（B3，对齐真实唯一约束）**：`products/orders/customers` 的 upsert 走

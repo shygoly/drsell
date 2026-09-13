@@ -1,8 +1,9 @@
 # Tasks
 
 ## 0. 前置探针 + 定死待解项（决定后续实现）
-- [ ] 0.1 Medusa v2 事件覆盖：确认 product/order/fulfillment/payment/**inventory** 及
-      return/exchange/claim 的**事件名与载荷字段**（决定连接器映射，D2/N3）
+- [~] 0.1 Medusa v2 事件覆盖：**已确认命名空间**——售后=`order.*`
+      （`order.return_requested/received`、`order.claim_created`、`order.exchange_created`）、
+      product=`product.*`、库存走 inventory 模块事件。剩：对钉定版本核对完整 payload 字段（scaffold 后）
 - [x] 0.2 顾客身份换发通路（D8/B5）：**已定**——签名 Medusa 顾客令牌 → drsell 会话 →
       按顾客过滤订单/售后；匿名会话不回敏感字段
 - [x] 0.3 独立站订阅/额度归属（D9/S1）：**已定**——无 plan，豁免订阅/额度闸门（始终可服务），
