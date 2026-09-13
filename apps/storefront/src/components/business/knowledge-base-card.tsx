@@ -1,5 +1,4 @@
 import { Lightbulb } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { KnowledgeBaseSuggestion } from "@/lib/types";
 
@@ -36,15 +35,8 @@ export function KnowledgeBaseCard({
         <p className="text-muted-foreground text-sm leading-relaxed">
           {suggestion.description}
         </p>
-        <div className="mt-1">
-          {/* 稿中此按钮用 primary-container 令牌，比 primary 浅 */}
-          <Button
-            size="sm"
-            className="bg-primary-container hover:bg-primary-container/90"
-          >
-            Add now
-          </Button>
-        </div>
+        {/* 稿中此处有「Add now」按钮：目前没有「把建议落地进知识库」的动作，
+            暂移除以免出现死控件；知识库编辑功能落地后再放回。 */}
       </div>
     </Card>
   );

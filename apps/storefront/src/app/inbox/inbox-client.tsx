@@ -7,11 +7,8 @@ import {
   Clock,
   Globe,
   Hand,
-  Paperclip,
   Search,
   Send,
-  Smile,
-  Zap,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -377,18 +374,8 @@ export function InboxClient({ initialConversations }: InboxClientProps) {
                     placeholder="Type a message or use '/' for shortcuts..."
                     className="w-full resize-none bg-transparent p-3 text-sm outline-none"
                   />
-                  <div className="flex items-center justify-between border-t px-3 py-2">
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Add attachment">
-                        <Paperclip className="h-4 w-4" aria-hidden="true" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Insert snippet">
-                        <Zap className="h-4 w-4" aria-hidden="true" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Insert emoji">
-                        <Smile className="h-4 w-4" aria-hidden="true" />
-                      </Button>
-                    </div>
+                  {/* 附件/片段/表情为 Stitch 稿占位，功能未实现，暂移除；发送与 Enter 发送是好的。 */}
+                  <div className="flex items-center justify-end border-t px-3 py-2">
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground hidden text-xs xl:inline">
                         Press Enter to send

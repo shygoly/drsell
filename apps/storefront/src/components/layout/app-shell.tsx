@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, HelpCircle, Search } from "lucide-react";
 import { SidebarNav } from "./sidebar-nav";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -43,17 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <header className="bg-card flex h-14 w-full shrink-0 items-center justify-between border-b px-5">
           <div className="flex h-full items-center gap-6">
             <div className="text-primary font-semibold md:hidden">Dr Sell</div>
-            <div className="relative hidden md:block">
-              <Search
-                className="text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2"
-                aria-hidden="true"
-              />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="bg-card border-input focus:border-ring focus:ring-ring/20 w-64 rounded-lg border py-1.5 pr-3 pl-8 text-sm outline-none focus:ring-2"
-              />
-            </div>
+            {/* 稿中此处为全局搜索框：目前无搜索后端，暂移除以免出现点了没反应的死控件。 */}
             <nav
               aria-label="Section navigation"
               className="hidden h-full items-center gap-4 md:flex"
@@ -81,28 +70,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-4">
             {!bridge && userToken ? <StoreSwitcher /> : null}
-            <Button variant="outline" size="sm" className="hidden md:inline-flex">
-              Quick Settings
+            <Button variant="outline" size="sm" asChild className="hidden md:inline-flex">
+              <Link href="/settings">Quick Settings</Link>
             </Button>
-            <Button size="sm" className="hidden md:inline-flex">
-              Test Widget
+            <Button size="sm" asChild className="hidden md:inline-flex">
+              <Link href="/widget-config">Test Widget</Link>
             </Button>
-            <div className="text-muted-foreground flex items-center gap-2">
-              <button
-                type="button"
-                aria-label="Notifications"
-                className="hover:bg-muted rounded-full p-1 transition-colors"
-              >
-                <Bell className="h-5 w-5" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                aria-label="Help"
-                className="hover:bg-muted rounded-full p-1 transition-colors"
-              >
-                <HelpCircle className="h-5 w-5" aria-hidden="true" />
-              </button>
-            </div>
+            {/* 通知铃铛/帮助图标原为 Stitch 稿占位：无通知系统，帮助只指向 ComingSoon 页。
+                按「不暴露未完成功能」原则（见 sidebar-nav 注释）先移除，等有功能再放回。 */}
             {/* 稿中此处为外链头像图；改用首字母头像，避免依赖外部图片资源 */}
             {userEmail ? (
               <div className="flex items-center gap-2">

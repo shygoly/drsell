@@ -9,7 +9,6 @@ import {
   HelpCircle,
   Home,
   MessageSquare,
-  Plus,
   Puzzle,
   Settings,
   Users,
@@ -80,15 +79,8 @@ export function SidebarNav() {
         </div>
       </div>
 
-      <div className="px-4 pb-4">
-        <button
-          type="button"
-          className="bg-primary-container text-primary-foreground flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90"
-        >
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          New Automation
-        </button>
-      </div>
+      {/* New Automation：自动化是计划中的核心功能，但尚未实现（无路由/无 API）。
+          按「不暴露未完成功能」原则先移除按钮，功能落地后再放回。 */}
 
       <div className="flex-1 overflow-y-auto py-2">
         <ul className="space-y-1 px-4">{MAIN_ITEMS.map(renderItem)}</ul>

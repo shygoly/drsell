@@ -466,9 +466,7 @@ function WidgetConfigInner() {
                   <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-full text-base font-bold">
                     {widgetName.slice(0, 2).toUpperCase()}
                   </div>
-                  <Button variant="outline" size="sm">
-                    Change Avatar
-                  </Button>
+                  {/* 「Change Avatar」占位：无头像上传功能，暂移除。 */}
                 </div>
               </div>
               <Separator />

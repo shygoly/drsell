@@ -9,12 +9,14 @@ import { StatCard } from "@/components/business/stat-card";
 import { StatusBanner } from "@/components/business/status-banner";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useShopSession } from "@/hooks/useShopSession";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { syncSubscription } from "@/lib/onboarding";
 
 export default function DashboardPage() {
   const { stats, chart, conversations, suggestion, error } = useDashboardData();
   const { shop, token } = useShopSession();
+  const router = useRouter();
 
   /**
    * 商家从 Shopify 套餐页选完套餐会被重定向回这里，URL 带 `plan_handle` 与
@@ -128,7 +130,12 @@ export default function DashboardPage() {
         </div>
         <div className="space-y-6">
           {suggestion ? <KnowledgeBaseCard suggestion={suggestion} /> : null}
-          <LiveConversations conversations={conversations} />
+          {/* 空状态的「Start a conversation」→ Widget Config 的 Live Preview，
+              商家可在那里用挂件跟机器人试聊；对话本身由顾客发起，无法在此凭空创建。 */}
+          <LiveConversations
+            conversations={conversations}
+            onNewConversation={() => router.push("/widget-config")}
+          />
         </div>
       </div>
     </div>
