@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>南大生物医药校友企业官网体检报告</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1a1d21; --ink-2:#4a5158; --ink-3:#868e96;
+    --line:#e3e6ea; --line-2:#eef1f4;
+    --red:#c92a2a; --red-bg:#fff5f5;
+    --amber:#b3670a; --amber-bg:#fff9ed;
+    --green:#2b8a3e; --green-bg:#f0fbf2;
+    --blue:#1864ab; --blue-bg:#f1f7fd;
+    --accent:#1864ab;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:48px 28px 80px}
+
+  header{border-bottom:2px solid var(--ink);padding-bottom:24px;margin-bottom:40px}
+  .kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+  h1{font-size:31px;line-height:1.25;margin:10px 0 12px;letter-spacing:-.02em}
+  .meta{font-size:13.5px;color:var(--ink-2)}
+  .meta b{color:var(--ink)}
+
+  h2{font-size:20px;margin:52px 0 8px;letter-spacing:-.01em;display:flex;align-items:baseline;gap:10px}
+  h2 .n{font-size:12px;font-weight:700;color:var(--accent);background:var(--blue-bg);
+        border:1px solid #d6e6f7;border-radius:5px;padding:2px 7px;letter-spacing:.02em}
+  .sub{font-size:13.5px;color:var(--ink-2);margin-bottom:18px}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:32px 0 8px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 18px}
+  .stat .v{font-size:34px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+  .stat .v.red{color:var(--red)}
+  .stat .v.amber{color:var(--amber)}
+  .stat .v.green{color:var(--green)}
+  .stat .l{font-size:12.5px;color:var(--ink-2);margin-top:8px}
+
+  table{width:100%;border-collapse:collapse;background:var(--card);
+        border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px}
+  thead th{background:#f2f4f7;text-align:left;padding:11px 13px;font-weight:650;
+           font-size:12.5px;color:var(--ink-2);border-bottom:1px solid var(--line);white-space:nowrap}
+  tbody td{padding:11px 13px;border-bottom:1px solid var(--line-2);vertical-align:top}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#fafbfc}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+       background:#f1f3f6;padding:1.5px 5px;border-radius:4px;color:#2b3138}
+
+  .tag{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
+  .t-red{background:var(--red-bg);color:var(--red);border:1px solid #ffd5d5}
+  .t-amber{background:var(--amber-bg);color:var(--amber);border:1px solid #ffe6bd}
+  .t-green{background:var(--green-bg);color:var(--green);border:1px solid #cdf0d5}
+  .t-gray{background:#f1f3f6;color:var(--ink-2);border:1px solid var(--line)}
+
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h3{font-size:14.5px;margin-bottom:8px}
+  .card p{font-size:13px;color:var(--ink-2)}
+  .card .badge{font-size:11.5px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:5px;display:inline-block;margin-bottom:10px}
+
+  blockquote{background:var(--blue-bg);border-left:3px solid var(--accent);
+             padding:14px 18px;border-radius:0 10px 10px 0;font-size:13.5px;color:var(--ink-2);margin:16px 0}
+  blockquote b{color:var(--ink)}
+
+  .bars{margin-top:6px}
+  .bar{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px}
+  .bar .nm{width:118px;color:var(--ink-2);flex:none;text-align:right}
+  .bar .tr{flex:1;height:9px;background:#eef1f4;border-radius:5px;overflow:hidden;position:relative}
+  .bar .tr i{position:absolute;left:0;top:0;bottom:0;background:#c7ced6;border-radius:5px}
+  .bar .tr i.on{background:var(--accent)}
+  .bar .vl{width:56px;font-variant-numeric:tabular-nums;color:var(--ink-2);flex:none;font-size:12.5px}
+
+  .dots{letter-spacing:2px;font-size:13px;white-space:nowrap}
+  .dots .f{color:var(--green)}
+  .dots .e{color:#d3d8de}
+  .dots .n{color:var(--ink-3)}
+
+  footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);
+         font-size:12.5px;color:var(--ink-3)}
+  @media(max-width:900px){.stats,.cards{grid-template-columns:1fr 1fr}}
+  @media(max-width:640px){.stats,.cards{grid-template-columns:1fr}h1{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Site Audit &amp; Value Assessment</div>
+  <h1>南大生物医药校友企业官网体检<br>与 Medusa + drsell 价值评估</h1>
+  <div class="meta">
+    对象：南大生物医药校友会名录（飞书 Base「yocsef合作管理」第 18 张表，44 条）去重后 <b>20 个企业域名</b><br>
+    日期：<b>2026-09-13</b>　·　口径：<b>只记录实测可复现的证据，不打分、不外推</b>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="v red">0 / 12</div><div class="l">部署了在线客服挂件<br>（实测 18 种主流挂件签名）</div></div>
+  <div class="stat"><div class="v red">0 / 12</div><div class="l">输出了商品结构化数据<br>（schema.org Product / Offer）</div></div>
+  <div class="stat"><div class="v amber">12</div><div class="l">条客观硬伤<br>（域名 / 证书 / 可达性）</div></div>
+  <div class="stat"><div class="v green">5 / 20</div><div class="l">真正具备标准化目录产品<br>（电商化适用对象）</div></div>
+</div>
+
+<blockquote>
+  <b>三句话结论：</b>① 这批企业 90% 不是 DTC 电商客户，给它们推电商是错配；② 真正的空白在<b>服务层</b>不在交易层——交互模型清一色「400 电话 + 表单 + 微信二维码」；③ Medusa + drsell 的正确定位是「<b>把已经写好但没人读得到的产品知识，变成可自助的售前售后通道</b>」。
+</blockquote>
+
+<h2><span class="n">§1</span>硬伤清单</h2>
+<div class="sub">均为 TLS / DNS 层证据，绕过应用层 WAF，与「地域拦截」无关。</div>
+<table>
+  <thead><tr><th>企业</th><th>域名</th><th>实测现象</th><th>证据</th><th>定性</th></tr></thead>
+  <tbody>
+    <tr><td>艾码生物</td><td><code>exornabio.com</code></td><td>HTTPS 完全无法建立</td><td>TLS <code>UNEXPECTED_EOF</code>；HTTP:80 却返 200</td><td><span class="tag t-red">硬伤</span></td></tr>
+    <tr><td>三江资本</td><td><code>tririvercapital.com</code></td><td>HTTPS 完全无法建立</td><td>apex 与 www 双双握手失败</td><td><span class="tag t-red">硬伤</span></td></tr>
+    <tr><td>药捷安康</td><td><code>transtherabio.com</code></td><td>裸域无 DNS；www 的 HTTPS 握手失败、HTTP 重定向死循环</td><td>apex <code>gaierror</code>；<code>Maximum (50) redirects</code>；<code>transthera.com</code> 同样</td><td><span class="tag t-red">硬伤</span></td></tr>
+    <tr><td>嘉逸医药</td><td><code>joyglory.com</code></td><td>证书链不完整 + HTTPS 空响应</td><td><code>unable to get local issuer certificate</code></td><td><span class="tag t-red">硬伤</span></td></tr>
+    <tr><td>康宁杰瑞</td><td><code>alphamabonc.com</code></td><td>裸域 HTTPS 无法建立；www 返 403</td><td>apex 握手失败；www 走阿里云 WAF</td><td><span class="tag t-red">硬伤</span></td></tr>
+    <tr><td>和誉医药</td><td><code>abbisko.com</code></td><td>证书链不完整（缺中间证书）</td><td><code>unable to get local issuer certificate</code></td><td><span class="tag t-amber">中危</span></td></tr>
+    <tr><td>明捷医药</td><td><code>mstonepharma.com</code></td><td>裸域证书主机名不匹配</td><td><code>Hostname mismatch</code>（www 正常）</td><td><span class="tag t-amber">中危</span></td></tr>
+    <tr><td>集萃药康</td><td><code>gempharmatech.com</code></td><td>裸域无 A 记录</td><td>apex NXDOMAIN，仅 www 解析</td><td><span class="tag t-amber">中危</span></td></tr>
+    <tr><td>汉欣医药</td><td><code>hanxinpharm.com</code></td><td>裸域无 A 记录；robots 404；无 sitemap</td><td>JSP 老式 CMS，产品区仅 2 个链接</td><td><span class="tag t-amber">中危</span></td></tr>
+    <tr><td>南京鼓楼医院</td><td><code>njglyy.cn</code></td><td>院名域名指向 GitHub Pages 个人站</td><td><code>www.njglyy.cn → lonerabbits.github.io</code></td><td><span class="tag t-amber">品牌风险</span></td></tr>
+    <tr><td>纳肽得</td><td><code>uwpeptide.com</code></td><td>工商登记官网域名现为体育直播站</td><td>title = <code>球帝直播</code></td><td><span class="tag t-red">资产风险</span></td></tr>
+    <tr><td>金斯瑞</td><td><code>genscript.com</code></td><td>对非浏览器 UA 返 468（SafeLine WAF）</td><td>Tengine + <code>sl-session</code> cookie</td><td><span class="tag t-gray">AI 受阻</span></td></tr>
+  </tbody>
+</table>
+<blockquote>
+  <b>口径声明（避免冤枉）：</b>康宁杰瑞 www 的 403、金斯瑞的 468，大概率是<b>地域 / WAF 拦截</b>，中国大陆真实浏览器用户可能无感 → 仅记为「机器与 AI 访问受阻」，<b>不计入网站设计缺点</b>。药捷安康的重定向循环在境外搜索服务商侧可正常取到内容 → 写作「对外部 IP 不稳定」而非「网站挂了」。第 1–5 条是 TLS 层事实，与 WAF 无关，判为真硬伤。
+</blockquote>
+
+<h2><span class="n">§2</span>AI 可读性实测</h2>
+<div class="sub">判定口径：AI 客服的上限 = 商品/服务数据的结构化程度。此节是本次调研最有商业价值的发现。</div>
+<table>
+  <thead><tr><th>站点</th><th>robots.txt</th><th>声明 sitemap</th><th>sitemap 条数</th><th>JSON-LD</th><th>Product 标记</th><th>在线客服挂件</th></tr></thead>
+  <tbody>
+    <tr><td>艾迪药业</td><td>200</td><td>有</td><td>15</td><td>0</td><td>0</td><td><span class="tag t-red">无</span></td></tr>
+    <tr><td>安图生物</td><td>200</td><td>有</td><td>94</td><td>1（非商品）</td><td>0</td><td><span class="tag t-red">无</span></td></tr>
+    <tr><td>药石科技</td><td>200</td><td>无</td><td>404</td><td>0</td><td>0</td><td><span class="tag t-red">无</span></td></tr>
+    <tr><td>集萃药康</td><td>200</td><td>有</td><td>500</td><td>0</td><td>0</td><td><span class="tag t-red">无</span></td></tr>
+    <tr><td>明捷医药</td><td>200</td><td>无</td><td>35</td><td>0</td><td>0</td><td><span class="tag t-red">无</span></td></tr>
+    <tr><td>和誉医药</td><td>404</td><td>无</td><td>404</td><td>0</td><td>0</td><td><span class="tag t-red">无</span></td></tr>
+    <tr><td>歌礼制药</td><td>404</td><td>无</td><td>404</td><td>0</td><td>0</td><td><span class="tag t-red">无</span></td></tr>
+    <tr><td>传奇生物</td><td>200</td><td>无</td><td>301</td><td>1（非商品）</td><td>0</td><td><span class="tag t-red">无</span></td></tr>
+    <tr><td>克睿基因</td><td>200</td><td>有</td><td>107</td><td>0</td><td>0</td><td><span class="tag t-red">无</span></td></tr>
+    <tr><td>汉欣医药</td><td>404</td><td>无</td><td>302</td><td>0</td><td>0</td><td><span class="tag t-red">无</span></td></tr>
+    <tr><td>南京鼓楼医院</td><td>200</td><td>无</td><td>404</td><td>0</td><td>0</td><td><span class="tag t-red">无</span></td></tr>
+    <tr><td>Baxter / Hillrom</td><td>200</td><td>有</td><td>715</td><td>0</td><td>1</td><td><span class="tag t-red">无</span></td></tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <b>这直接推出 drsell 的结构性优势：</b>通用 AI 检索依赖爬虫 + 结构化数据，而这两样恰好是这批企业最缺的。drsell 走的是「<b>直接读你的 Postgres</b>」——不依赖爬虫、不依赖 schema 标记、不依赖 WAF 放行。金斯瑞那种对机器直接返 468 的站，通用 AI 读不到，drsell 照样读得到。
+</blockquote>
+
+<h2><span class="n">§3</span>企业分档与适配度</h2>
+<div class="sub">●●● 强需求　●● 中等　○ 不适用</div>
+
+<div class="cards">
+  <div class="card">
+    <span class="badge" style="background:var(--green-bg);color:var(--green);border:1px solid #cdf0d5">A 类 · 5 家</span>
+    <h3>有标准化目录产品</h3>
+    <p>集萃药康 · 安图生物 · 药石科技 · 汉欣医药 · 纳肽得<br><br>
+    <b>电商化必要性最高。</b>集萃近 30,000 品系却没有在线检索；安图一个产品页数千字技术参数只能靠打电话问；药石砌块目录未在线化。</p>
+  </div>
+  <div class="card">
+    <span class="badge" style="background:var(--amber-bg);color:var(--amber);border:1px solid #ffe6bd">B 类 · 9 家</span>
+    <h3>无目录产品的创新药企</h3>
+    <p>艾迪 · 和誉 · 歌礼 · 传奇 · 克睿 · 艾码 · 康宁杰瑞 · 药捷安康 · 嘉逸<br><br>
+    <b>Medusa 基本用不上。</b>可兑现的只有 IR/BD 智能接待、招聘答疑、患者教育问答。应卖「AI 接待台」，不该卖独立站。</p>
+  </div>
+  <div class="card">
+    <span class="badge" style="background:#f1f3f6;color:var(--ink-2);border:1px solid var(--line)">C 类 · 3 家</span>
+    <h3>特殊主体</h3>
+    <p>南京鼓楼医院 · 广发证券 · Baxter/Hillrom<br><br>
+    医院要挂号导诊、券商受金融监管、Baxter 已有成熟全球电商栈。<b>均不适用。</b></p>
+  </div>
+</div>
+
+<h3 style="margin:34px 0 4px;font-size:15px">适配度矩阵</h3>
+<table>
+  <thead><tr><th>企业</th><th>L1 售前技术问答</th><th>L2 询报价在线化</th><th>L3 售后自助</th><th>L4 在线交易</th><th>建议</th></tr></thead>
+  <tbody>
+    <tr><td>集萃药康</td><td><span class="dots"><span class="f">●●●</span></span></td><td><span class="dots"><span class="f">●●●</span></span></td><td><span class="dots"><span class="f">●●</span><span class="e">●</span></span></td><td><span class="dots"><span class="f">●●</span><span class="e">●</span></span></td><td><b>首选标杆客户</b>（品系库越大收益越大）</td></tr>
+    <tr><td>安图生物</td><td><span class="dots"><span class="f">●●●</span></span></td><td><span class="dots"><span class="f">●●●</span></span></td><td><span class="dots"><span class="f">●●●</span></span></td><td><span class="dots"><span class="n">○</span></span></td><td>强需求，交易需渠道政策确认</td></tr>
+    <tr><td>药石科技</td><td><span class="dots"><span class="f">●●●</span></span></td><td><span class="dots"><span class="f">●●●</span></span></td><td><span class="dots"><span class="f">●●</span><span class="e">●</span></span></td><td><span class="dots"><span class="f">●●</span><span class="e">●</span></span></td><td>全球 700 家客户，目录在线化收益直接</td></tr>
+    <tr><td>汉欣医药</td><td><span class="dots"><span class="f">●●</span><span class="e">●</span></span></td><td><span class="dots"><span class="f">●●●</span></span></td><td><span class="dots"><span class="f">●●</span><span class="e">●</span></span></td><td><span class="dots"><span class="f">●●</span><span class="e">●</span></span></td><td>站点最弱，改造空间最大</td></tr>
+    <tr><td>明捷医药</td><td><span class="dots"><span class="f">●●●</span></span></td><td><span class="dots"><span class="f">●●●</span></span></td><td><span class="dots"><span class="f">●●</span><span class="e">●</span></span></td><td><span class="dots"><span class="n">○</span></span></td><td>CRO 服务询价，无实物商品</td></tr>
+    <tr><td>纳肽得</td><td><span class="dots"><span class="n">○</span></span></td><td><span class="dots"><span class="n">○</span></span></td><td><span class="dots"><span class="n">○</span></span></td><td><span class="dots"><span class="n">○</span></span></td><td>官网失联，先解决域名</td></tr>
+    <tr><td>B 类 9 家</td><td><span class="dots"><span class="f">●</span><span class="e">●●</span></span></td><td><span class="dots"><span class="n">○</span></span></td><td><span class="dots"><span class="n">○</span></span></td><td><span class="dots"><span class="n">○</span></span></td><td><b>不要推电商</b>，只推 AI 接待台</td></tr>
+    <tr><td>C 类 3 家</td><td><span class="dots"><span class="n">○</span></span></td><td><span class="dots"><span class="n">○</span></span></td><td><span class="dots"><span class="n">○</span></span></td><td><span class="dots"><span class="n">○</span></span></td><td>不适用</td></tr>
+  </tbody>
+</table>
+
+<h2><span class="n">§4</span>价值分层</h2>
+<div class="sub">按可兑现程度排序，非按想象力排序。</div>
+<table>
+  <thead><tr><th>层级</th><th>内容</th><th>可兑现度</th><th>依赖</th></tr></thead>
+  <tbody>
+    <tr><td><b>L1 售前技术问答</b></td><td>把已写好的产品文档灌进 PG，AI 直答「A1800 与 A6000 差别」「有无 FGFR4 品系」「这个砌块的 CAS 与纯度」。替代今天只能打电话这一条路</td><td><span class="tag t-green">已上线</span></td><td>数据摄取（已通）</td></tr>
+    <tr><td><b>L2 询报价在线化</b></td><td>独立 B2B 询盘（RFQ）模块：身份分流（采购/渠道/机构）× 需求分级（采购/合作/样品/资料/售后）× 线索状态机 <code>new→qualified→quoted→won→closed</code>，带应用场景、预计用量、采购时间线；<b>刻意不含价格</b>（隐藏价 → 询价 → 人工报价）</td><td><span class="tag t-green">已上线</span></td><td>可现场演示</td></tr>
+    <tr><td><b>L3 售后自助</b></td><td>批号/效期查询、说明书与 SDS 下载、退换货状态；按登录顾客隔离，窥探他人订单被拒</td><td><span class="tag t-green">已上线并公网复验</span></td><td>残留：旧式订单函数仍共享 GRANT</td></tr>
+    <tr><td><b>L4 在线交易</b></td><td>真正的下单 + 支付（购物车 / 结算 / Stripe / 顾客登录）<b>——唯一真正未实现的一层</b></td><td><span class="tag t-red">未实现</span></td><td>渠道政策逐家确认是否要做</td></tr>
+  </tbody>
+</table>
+
+<h2><span class="n">§5</span>销售话术的事实底座</h2>
+<table>
+  <thead><tr><th>说法</th><th>支撑证据</th></tr></thead>
+  <tbody>
+    <tr><td><b>「你的产品文档已经写好了，只是没人读得到。」</b></td><td>安图单个产品页含注册证数、通量、温控精度、双备份设计等 10+ 技术维度，足够支撑 20 轮问答——而站点没有任何检索手段</td></tr>
+    <tr><td><b>「通用 AI 读不懂你的网站，我能。」</b></td><td>实测 0/12 有商品结构化数据、6/12 无 sitemap、金斯瑞直接对机器返 468。drsell 直连 PG，不受 WAF / schema / 爬虫策略影响</td></tr>
+    <tr><td><b>「非工作时间你的客户在流失，而且你看不到。」</b></td><td>0/12 有在线客服。400 热线 + 表单 = 8 小时外失联、线索散在个人微信、问答数据零沉淀</td></tr>
+    <tr><td><b>「AI 说错话的代价，我们用数据库角色锁住了。」</b></td><td><code>adp_reader</code> 零表权限（<code>INV-2</code>）——即使模型被 prompt injection 说服，也只能调 4 个只读函数。对医药行业，「合规可控」比「聪明」重要</td></tr>
+  </tbody>
+</table>
+
+<h2><span class="n">§6</span>风险与前置条件</h2>
+<div class="sub">诚实登记，避免过度承诺。<b>2026-09-13 当日复核后已更正</b>：初版「Medusa 只到 Phase 3」的判断是错的。</div>
+<table>
+  <thead><tr><th>风险</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><s>能力尚未完工</s> <b>已更正</b></td><td><s>仅到 Phase 3，店面/挂件/部署未做</s> —— <b>实测为已完成</b>：目录展示、店内挂件（含按顾客隔离）、生产部署（Redis + 独立 PG + pm2×2 + nginx vhost + 自签证书）均已上线。线上 <code>medusa.szchada.top</code> 展示 6 款真实商品，Store API 正常供给</td></tr>
+    <tr><td><b>在线交易闭环未做</b></td><td>购物车、结算、Stripe 支付、顾客登录 + 售后入口均未实现。当前商品价格为 0，属展示态</td></tr>
+    <tr><td><b>可靠投递未做</b></td><td>subscriber 现为 in-memory event bus，失败仅记日志；outbox / Redis 可靠投递与库存、软删的真实事件校验待补</td></tr>
+    <tr><td><b>治理验收未做</b></td><td><code>DECISIONS.md</code> <b>未登记</b> Medusa 的 ADR（复用 <code>shopify*Id</code> 列）与 DEP（引入 Redis）；<code>pnpm spec</code> / <code>pnpm test</code> 未跑绿</td></tr>
+    <tr><td><b>Admin 后台公网可达</b></td><td><code>/app</code> 返 200（登录页），访问保护（认证 / IP 限制）未加</td></tr>
+    <tr><td><b>⚠️ 询盘模块源码未入版本库</b></td><td><code>apps/shop/apps/backend/src/{modules,api,admin}/</code> 在 <code>git status</code> 中为<b>未跟踪</b>——生产上正在运行的 B2B 询盘能力不在 git 里。该模块属手写源码，理应提交。<b>建议对外提供演示链接前先提交</b></td></tr>
+    <tr><td><b>生产 reader 残留边界</b></td><td>未验签的旧式 <code>adp_get_order</code> / <code>adp_get_after_sales</code>（按订单号、不看顾客）仍 GRANT 给共享 <code>adp_reader</code>；medusa prompt 不列它们，但结构性杜绝需为 DTC 建独立 role/agent</td></tr>
+    <tr><td><b>库存同步</b></td><td>stock 在 Medusa Inventory 模块，不随 product 事件变，不同步会导致 AI 报错库存</td></tr>
+    <tr><td><b>事件顺序</b></td><td>Redis 总线 at-least-once 且可能乱序，需按版本拒绝旧写</td></tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <b>更正说明：</b>初版把「Medusa 路径只到 Phase 3」写进了结论，该判断错误。根因是 <code>apps/shop/README.md</code> 的「待续」小节是<b>过期文本</b>（写于 Phase 6/7/8 完成之前），而它比 <code>tasks.md</code> 更醒目，被当成了事实来源。<b>两份 README 的过期段落已一并修正</b>。<br>
+  教训：凡「某事做完没有」的判断，应以 <code>openspec/changes/*/tasks.md</code> 的勾选状态 + 线上实测为准，README 叙述仅作参考。
+</blockquote>
+
+
+<footer>
+  证据可复现：<code>/tmp/probe-sites.sh</code>（可达性）· <code>/tmp/tlsprobe.py</code>（证书）· <code>/tmp/ai-ready.sh</code>（AI 可读性）<br>
+  未覆盖：移动端响应式实测、Core Web Vitals 实测、SEO 关键词排位、微信生态实际可用度。<br>
+  完整报告：<code>docs/nju-biopharma-site-audit-2026-09-13.md</code>
+</footer>
+
+</div>
+</body>
+</html>

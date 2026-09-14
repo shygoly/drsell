@@ -1,146 +1,698 @@
 <!doctype html>
-<html lang="zh-Hans">
+<html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Drsell Store — 独立站</title>
-  <meta name="description" content="Drsell DTC 独立站 · 由 Medusa 驱动，内置 AI 智能客服" />
-  <style>
-    :root {
-      --bg: #fafaf9; --surface: #ffffff; --ink: #1c1917; --muted: #78716c;
-      --line: #e7e5e4; --accent: #008060; --accent-ink: #ffffff; --radius: 14px;
-    }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; }
-    body {
-      background: var(--bg); color: var(--ink);
-      font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-    a { color: inherit; text-decoration: none; }
-    header.site {
-      position: sticky; top: 0; z-index: 10;
-      background: rgba(255,255,255,.85); backdrop-filter: saturate(180%) blur(8px);
-      border-bottom: 1px solid var(--line);
-    }
-    .bar { max-width: 1080px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; gap: 12px; }
-    .brand { font-weight: 700; letter-spacing: .12em; font-size: 18px; }
-    .brand .dot { color: var(--accent); }
-    .bar .spacer { flex: 1; }
-    .bar .nav { color: var(--muted); font-size: 13.5px; display: flex; gap: 18px; }
-    .hero { max-width: 1080px; margin: 0 auto; padding: 44px 20px 8px; }
-    .hero h1 { font-size: 30px; line-height: 1.2; margin: 0 0 8px; letter-spacing: -.01em; }
-    .hero p { color: var(--muted); margin: 0; max-width: 46ch; }
-    main { max-width: 1080px; margin: 0 auto; padding: 24px 20px 96px; }
-    .section-title { font-size: 13px; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); margin: 28px 2px 14px; }
-    .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
-    .card {
-      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
-      overflow: hidden; display: flex; flex-direction: column; transition: box-shadow .18s, transform .18s;
-    }
-    .card:hover { box-shadow: 0 8px 26px rgba(0,0,0,.07); transform: translateY(-2px); }
-    .thumb { aspect-ratio: 1 / 1; background: #f5f5f4 center/cover no-repeat; }
-    .card .body { padding: 13px 14px 16px; display: flex; flex-direction: column; gap: 6px; }
-    .card .name { font-weight: 600; font-size: 14.5px; }
-    .card .price { color: var(--ink); font-variant-numeric: tabular-nums; }
-    .card .muted { color: var(--muted); font-size: 12.5px; }
-    .state { color: var(--muted); padding: 40px 4px; }
-    .skeleton .thumb { background: linear-gradient(90deg,#f0efee,#f7f6f5,#f0efee); background-size: 200% 100%; animation: sh 1.2s infinite; }
-    @keyframes sh { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-    footer.site { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
-    footer.site .bar { padding: 22px 20px; }
-    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; color: var(--muted); }
-    .pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
-    @media (max-width: 560px) { .hero h1 { font-size: 24px; } .bar .nav { display: none; } }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drsell 医疗科技 · 医疗器械功能涂层全产业链技术服务平台</title>
+<meta name="description" content="Drsell 医疗科技 — 医疗器械功能涂层与涂覆配套技术服务平台。提供亲水润滑、抗凝、抗菌等功能涂层、涂覆装备、检验检测与定制开发服务，支持询价对接。">
+<style>
+  :root{
+    --bg:#F4FBFA;
+    --card:#FFFFFF;
+    --primary:#2D8C87;
+    --accent:#DDF3F7;
+    --ink:#153A3C;
+    --sub:#6A8183;
+    --warn:#F3A94B;
+    --line:#DCE9E8;
+    --radius:14px;
+    --shadow:0 4px 18px rgba(21,58,60,.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+  h1,h2,h3,h4{line-height:1.3;margin:0 0 .5em}
+  p{margin:0 0 .9em}
+  a{color:var(--primary);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+  .muted{color:var(--sub);font-size:.95em}
+
+  /* top nav */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(244,251,250,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;max-width:1180px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.12em;color:var(--ink)}
+  .brand .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--primary),#3BA9A2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.85em}
+  nav.links{display:flex;gap:20px;flex-wrap:wrap;font-size:.95em}
+  nav.links a{color:var(--ink)}
+  nav.links a:hover{color:var(--primary);text-decoration:none}
+  .cta{background:var(--primary);color:#fff;padding:9px 18px;border-radius:24px;font-weight:600}
+  .cta:hover{background:#247a75;text-decoration:none;color:#fff}
+
+  /* hero */
+  .hero{background:linear-gradient(160deg,#E7F6F4,var(--accent) 60%,#F4FBFA);padding:64px 24px}
+  .hero .wrap{display:grid;grid-template-columns:1.25fr .75fr;gap:32px;align-items:center}
+  .badge{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);padding:6px 14px;border-radius:22px;font-size:.85em;color:var(--primary);margin-bottom:18px;font-weight:600}
+  .hero h1{font-size:clamp(1.7rem,3.6vw,2.7rem);letter-spacing:.5px}
+  .hero .lead{font-size:1.06rem;color:#2c4a4c;max-width:34em}
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+  .btn{display:inline-block;padding:12px 24px;border-radius:26px;font-weight:600;border:1px solid transparent}
+  .btn.solid{background:var(--primary);color:#fff}
+  .btn.solid:hover{background:#247a75;text-decoration:none;color:#fff}
+  .btn.ghost{background:#fff;color:var(--primary);border-color:var(--primary)}
+  .btn.ghost:hover{background:var(--accent);text-decoration:none}
+  .trust{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;font-size:.82em;color:var(--sub)}
+  .trust span{background:#fff;border:1px solid var(--line);padding:4px 10px;border-radius:14px}
+  .hero-note{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+  .hero-note h3{margin-bottom:6px}
+  .hero-note .muted{font-size:.86em}
+
+  section{padding:52px 24px}
+  .sec-head{max-width:760px;margin-bottom:28px}
+  .sec-head h2{font-size:clamp(1.35rem,2.6vw,1.9rem)}
+  .sec-head .kicker{color:var(--primary);font-weight:700;font-size:.85em;letter-spacing:2px;text-transform:uppercase}
+
+  /* stat bar */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;background:var(--ink);color:#EAF6F5;border-radius:var(--radius);padding:26px}
+  .stat b{display:block;font-size:1.7rem;color:#fff;line-height:1.1}
+  .stat span{font-size:.86em;color:#BFDAD9}
+
+  /* ===== B2B 产品模块（本次重新设计）=====
+     B2B 医疗器械采购的三个特征决定了这里的版式：
+       1) 采购先确认「能不能用在我的器械上」→ 应用场景 + 适用器械必须显式列出
+       2) 采购走询价不走结账 → 不标价，改为「询价」入口 + 索取资料
+       3) 采购要核实合规 → 资质/资料标签跟随产品展示
+     故每张卡片是「规格矩阵卡」而非「商品卡」：分类标签 + 名称 + 用途 +
+     规格要点 + 双动作（询价 / 索取资料）。 */
+  .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+  .filter-bar button{border:1px solid var(--line);background:#fff;border-radius:18px;padding:7px 15px;cursor:pointer;font-size:.86em;color:var(--ink);font-family:inherit}
+  .filter-bar button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+  .prod{border:1px solid var(--line);border-radius:var(--radius);padding:20px;background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}
+  .prod .tag{display:inline-block;background:var(--accent);color:var(--primary);font-weight:700;font-size:.76em;padding:3px 10px;border-radius:12px;align-self:flex-start}
+  .prod h3{margin:0;font-size:1.08rem}
+  .prod .sub{color:var(--sub);font-size:.78em;letter-spacing:.4px;text-transform:uppercase;margin:-4px 0 0}
+  .prod .desc{font-size:.9em;color:var(--sub);margin:0}
+  .spec{border-top:1px dashed var(--line);padding-top:10px;margin-top:auto}
+  .spec dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.84em}
+  .spec dt{color:var(--sub);white-space:nowrap}
+  .spec dd{margin:0;color:var(--ink)}
+  .prod-actions{display:flex;gap:8px;margin-top:12px}
+  .prod-actions button{flex:1;font-family:inherit;font-size:.86em;padding:9px 12px;border-radius:9px;cursor:pointer;border:1px solid var(--primary);background:#fff;color:var(--primary);font-weight:600}
+  .prod-actions button.primary{background:var(--primary);color:#fff}
+  .prod-actions button:hover{background:var(--accent)}
+  .prod-actions button.primary:hover{background:#247a75;color:#fff}
+  .loading-note{color:var(--sub);font-size:.9em;padding:12px 0}
+
+  /* applications */
+  .app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+  .app{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;text-align:center;font-weight:600;color:var(--ink)}
+  .app small{display:block;color:var(--sub);font-weight:400;margin-top:4px}
+
+  /* credentials */
+  .cred-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+  .cred{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .cred h3{margin-bottom:6px}
+  .cred p{font-size:.88em;color:var(--sub);margin:0}
+  .cred .ic{font-size:1.4rem;margin-bottom:6px}
+
+  /* services (b2b) */
+  .svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  .svc{border-left:4px solid var(--primary);background:var(--card);border-radius:6px var(--radius) var(--radius) 6px;padding:18px;box-shadow:var(--shadow)}
+  .svc h3{margin-bottom:6px}
+  .svc p{font-size:.9em;color:var(--sub);margin:0}
+
+  /* resources */
+  .res-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+  .res-list li{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .res-list .tt{font-weight:600}
+  .res-list .dd{font-size:.85em;color:var(--sub)}
+  .res-list button{font-family:inherit;font-size:.82em;padding:7px 14px;border-radius:18px;border:1px solid var(--primary);background:#fff;color:var(--primary);cursor:pointer;font-weight:600}
+  .res-list button:hover{background:var(--accent)}
+
+  /* faq */
+  details.faq{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:10px}
+  details.faq summary{cursor:pointer;padding:15px 18px;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  details.faq summary::after{content:"+";font-size:1.3em;color:var(--primary);transition:.2s}
+  details.faq[open] summary::after{transform:rotate(45deg)}
+  details.faq .body{padding:0 18px 16px;color:var(--sub);font-size:.95em}
+
+  /* inquiry dual channel */
+  .inq-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .inq-card{border:1px solid var(--line);border-radius:var(--radius);padding:20px;background:var(--card)}
+  .inq-card.active{border-color:var(--primary);box-shadow:var(--shadow)}
+  .inq-card h3{margin-bottom:8px}
+  .inq-card p{font-size:.9em;color:var(--sub);margin-bottom:12px}
+  .tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .tags button{border:1px solid var(--line);background:#fff;border-radius:18px;padding:7px 14px;cursor:pointer;font-size:.85em;color:var(--ink);font-family:inherit}
+  .tags button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:.85em;color:var(--sub);margin-bottom:4px}
+  .field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font:inherit;background:#fff;color:var(--ink)}
+  .field textarea{min-height:84px;resize:vertical}
+  .btn.submit{width:100%;background:var(--primary);color:#fff;border:none;cursor:pointer;padding:12px;border-radius:10px;font-weight:600;font-family:inherit;font-size:1em}
+  .btn.submit:hover{background:#247a75}
+  .btn.submit:disabled{opacity:.6;cursor:not-allowed}
+  .form-msg{margin-top:10px;font-size:.88em;min-height:20px}
+  .form-msg.ok{color:#1a7f5a}
+  .form-msg.err{color:#b42318}
+  .req::after{content:" *";color:#b42318}
+
+  footer{background:var(--ink);color:#BED8D7;padding:40px 24px;font-size:.9em}
+  footer .wrap{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:24px}
+  footer h5{color:#fff;margin-bottom:10px}
+  footer a{color:#9FD4D2}
+  footer .src{grid-column:1 / -1;border-top:1px solid #2A4A4C;padding-top:14px;font-size:.8em;color:#8DAEAD;margin-top:10px}
+
+  @media(max-width:820px){
+    .hero .wrap{grid-template-columns:1fr}
+    nav.links{display:none}
+    .inq-wrap{grid-template-columns:1fr}
+    footer .wrap{grid-template-columns:1fr}
+  }
+  a:focus-visible,button:focus-visible,.btn:focus-visible,.tags button:focus-visible,summary:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+  @media print{
+    header.nav{position:static}
+    .hero,.stats{background:var(--bg)}
+    section{page-break-inside:avoid}
+    a{color:inherit}
+  }
+</style>
 </head>
 <body>
-  <header class="site">
-    <div class="bar">
-      <div class="brand">DRSELL<span class="dot">.</span></div>
-      <div class="spacer"></div>
-      <nav class="nav"><span>全部商品</span><span>关于</span><span>联系我们</span></nav>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand"><span class="logo">D</span> Drsell <span style="color:var(--sub);font-weight:500;font-size:.85em">MEDTECH</span></div>
+    <nav class="links">
+      <a href="#products">产品与涂层</a>
+      <a href="#apps">应用领域</a>
+      <a href="#creds">资质标准</a>
+      <a href="#services">服务模式</a>
+      <a href="#resources">知识资源</a>
+      <a href="#faq">采购 FAQ</a>
+    </nav>
+    <a class="cta" href="#inquiry" onclick="switchInq('purchaser');return false;">询价咨询</a>
+  </div>
+</header>
+
+<main>
+<!-- HERO -->
+<section class="hero" style="padding-top:48px">
+  <div class="wrap">
+    <div>
+      <span class="badge">● 医疗器械功能涂层全产业链技术服务平台</span>
+      <h1>从涂层到检测到注册，<br>一站式解锁高端医疗器械国产化</h1>
+      <p class="lead">Drsell 聚焦生物材料表面与界面技术，提供医用亲水润滑、抗凝、抗菌等功能涂层、涂覆装备、检验检测与定制开发服务，帮助医疗器械企业突破涂层技术壁垒。本站产品按应用场景组织，采购与技术支持一律走询价对接。</p>
+      <div class="hero-actions">
+        <a class="btn solid" href="#products">浏览产品与涂层</a>
+        <a class="btn ghost" href="#inquiry" onclick="switchInq('distributor');return false;">成为合作伙伴</a>
+      </div>
+      <div class="trust">
+        <span>ISO 13485 体系</span>
+        <span>涂层性能检测能力</span>
+        <span>定制开发 ODM</span>
+        <span>供应链稳定交付</span>
+      </div>
     </div>
-  </header>
+    <aside class="hero-note">
+      <h3>① 这是"内容式官网"</h3>
+      <p class="muted">本页核心导向是<strong>技术内容获客 + 询价闭环</strong>，而非即时结账。产品按应用场景分类、资质证书库、技术资料、AI 采购 FAQ、双渠道询盘入口一应俱全。</p>
+      <h4 style="margin-top:6px">② B2B 询价而非现货</h4>
+      <p class="muted">医用涂层属高值、客制化、合同制交易，本页<strong>不展示价格</strong>，均走"询价（RFQ）→ 工程师评估 → 人工报价"路径。</p>
+    </aside>
+  </div>
+</section>
 
-  <section class="hero">
-    <span class="pill"><span class="dot"></span> Medusa 驱动 · AI 智能客服在线</span>
-    <h1 style="margin-top:14px">精选好物，问答即答</h1>
-    <p>这是 Drsell 独立站示例店面。右下角的智能客服可实时回答商品、价格与订单问题——试着问它「有哪些商品？」。</p>
-  </section>
+<!-- STATS -->
+<section style="padding-top:8px">
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><b id="statProducts">—</b><span>款在售产品与涂层</span></div>
+      <div class="stat"><b>4</b><span>大类功能涂层体系</span></div>
+      <div class="stat"><b>6</b><span>项配套服务能力</span></div>
+      <div class="stat"><b>48h</b><span>询价首次响应</span></div>
+    </div>
+  </div>
+</section>
 
-  <main>
-    <div class="section-title">全部商品</div>
-    <div id="grid" class="grid" aria-live="polite"></div>
-    <div id="state" class="state">正在加载商品…</div>
-  </main>
+<!-- PRODUCTS (B2B 重新设计) -->
+<section id="products">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">产品与涂层 · PRODUCTS</div>
+      <h2>按应用场景组织的产品与涂层矩阵</h2>
+      <p class="muted">涂层是高端医疗器械的关键原料。本模块按 B2B 采购视角组织：先看<strong>用在哪类器械</strong>，再看<strong>规格与合规</strong>，最后<strong>询价或索取资料</strong>。产品数据实时取自 Medusa 商品库。</p>
+    </div>
 
-  <footer class="site">
-    <div class="bar">© <span id="yr"></span> Drsell Store · 由 Medusa + Drsell AI 客服驱动</div>
-  </footer>
+    <div class="filter-bar" id="filters"></div>
+    <div class="prod-grid" id="prodGrid"></div>
+    <div class="loading-note" id="prodState">正在加载产品…</div>
+  </div>
+</section>
 
-  <script>
-    // Medusa Store API 同源调用（nginx 把 /store 反代到 Medusa :9000）。
-    // 发布密钥（publishable key）本就用于前端、可公开；部署时注入。
-    var MEDUSA_PUBLISHABLE_KEY = "__PUBLISHABLE_KEY__";
-    var MEDUSA_REGION_ID = "__REGION_ID__";
-    var CURRENCY = { eur: "€", usd: "$", cny: "¥", gbp: "£" };
+<!-- APPLICATIONS -->
+<section id="apps" style="background:#EDF7F5">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">应用领域 · APPLICATIONS</div>
+      <h2>覆盖人体关键解剖系统与器械场景</h2>
+      <p class="muted">涂层按作用于人体的部位与应用分类，便于器械企业按产品线快速定位。</p>
+    </div>
+    <div class="app-grid">
+      <div class="app">心脏 &amp; 血管介入<small>支架 · 导丝 · 导管</small></div>
+      <div class="app">神经介入<small>微导管 · 导丝</small></div>
+      <div class="app">外周血管<small>球囊 · 血栓抽吸</small></div>
+      <div class="app">泌尿 &amp; 消化<small>导尿管 · 内镜器械</small></div>
+      <div class="app">骨科 &amp; 外科<small>骨钉 · 缝合 · 引流</small></div>
+      <div class="app">长期血液接触<small>透析 · 体外循环</small></div>
+      <div class="app">医美 &amp; 穿刺<small>针具 · 留置针</small></div>
+      <div class="app">生科 &amp; 细胞培养<small>带涂层耗材</small></div>
+    </div>
+  </div>
+</section>
 
-    document.getElementById("yr").textContent = new Date().getFullYear();
+<!-- CREDENTIALS -->
+<section id="creds">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">资质与标准 · COMPLIANCE</div>
+      <h2>用资质与合规体系为产品做信任背书</h2>
+      <p class="muted">B2B 采购方最在意供应能力与合规资质。具体证书与检测报告请通过询价入口索取，由工程师定向提供并记录版本。</p>
+    </div>
+    <div class="cred-grid">
+      <div class="cred"><div class="ic">🏭</div><h3>ISO 13485 体系</h3><p>医疗器械质量管理体系，覆盖涂层研发、生产与检测全过程。</p></div>
+      <div class="cred"><div class="ic">🔬</div><h3>涂层性能检测</h3><p>具备涂层牢固度、均匀性、厚度与功能性能的检验检测能力。</p></div>
+      <div class="cred"><div class="ic">📐</div><h3>标准符合性</h3><p>按器械适用标准开展涂层验证，输出可用于注册申报的资料。</p></div>
+      <div class="cred"><div class="ic">🛡️</div><h3>注册法规支持</h3><p>提供带特种涂层器械的注册与法规文件支持。</p></div>
+      <div class="cred"><div class="ic">🧪</div><h3>配方与工艺积累</h3><p>覆盖亲水润滑、抗凝、抗菌等成体系涂层平台。</p></div>
+      <div class="cred"><div class="ic">⚙️</div><h3>规模化交付</h3><p>涂覆装备与量产工艺保障批次一致性与供应稳定。</p></div>
+    </div>
+  </div>
+</section>
 
-    function money(v) {
-      if (!v || !v.calculated_price) return "";
-      var a = v.calculated_price.calculated_amount;
-      var c = (v.calculated_price.currency_code || "").toLowerCase();
-      if (a == null) return "";
-      return (CURRENCY[c] || (c.toUpperCase() + " ")) + Number(a).toFixed(2);
-    }
+<!-- SERVICES (B2B) -->
+<section id="services" style="background:#EDF7F5">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">合作模式 · PARTNERSHIP</div>
+      <h2>契合四类 B2B 客户的服务矩阵</h2>
+      <p class="muted">从"买涂层"到"委托研发注册"，不同角色的客户走不同入口。</p>
+    </div>
+    <div class="svc-grid">
+      <div class="svc"><h3>涂层 / 涂液采购</h3><p>面向器械厂，提供标准与定制涂层、涂覆装备与检测仪器，支持批量报价。</p></div>
+      <div class="svc"><h3>涂层定制 / ODM</h3><p>基于成体系的涂层平台，承接面向具体器械的涂层定制开发与代工，走 RFQ 询价。</p></div>
+      <div class="svc"><h3>检验检测服务</h3><p>为涂层及带涂层器械提供性能检验检测与报告，支持注册资料引用。</p></div>
+      <div class="svc"><h3>注册 / 法规服务</h3><p>提供带特种涂层器械的注册与法规文件支持。</p></div>
+    </div>
+  </div>
+</section>
 
-    function card(p) {
-      var el = document.createElement("div");
-      el.className = "card";
-      var v = (p.variants && p.variants[0]) || null;
-      var price = money(v);
-      el.innerHTML =
-        '<div class="thumb"' + (p.thumbnail ? ' style="background-image:url(\'' + p.thumbnail.replace(/"/g, "") + '\')"' : "") + '></div>' +
-        '<div class="body">' +
-          '<div class="name">' + (p.title || "未命名商品") + "</div>" +
-          '<div class="price">' + (price || '<span class="muted">价格待定</span>') + "</div>" +
-        "</div>";
-      return el;
-    }
+<!-- RESOURCES -->
+<section id="resources">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">知识资源 · RESOURCES</div>
+      <h2>技术内容获客：白皮书 / 应用案例 / 技术资料</h2>
+      <p class="muted">内容式官网的核心是用专业内容建立信任、驱动自然流量。资料按需提供，索取后由工程师定向发送。</p>
+    </div>
+    <ul class="res-list">
+      <li><span class="tt">医用涂层选型指南 W-101</span><span class="dd">PDF · 中文/英文</span><button type="button" onclick="requestDoc('医用涂层选型指南 W-101')">索取</button></li>
+      <li><span class="tt">抗凝血涂层对比白皮书：肝素 vs 磷酰胆碱</span><span class="dd">PDF · 技术对比</span><button type="button" onclick="requestDoc('抗凝血涂层对比白皮书')">索取</button></li>
+      <li><span class="tt">涂层牢固度检测方法学与标准解读</span><span class="dd">PDF · 方法论</span><button type="button" onclick="requestDoc('涂层牢固度检测方法学')">索取</button></li>
+      <li><span class="tt">介入器械涂层应用案例集</span><span class="dd">资料库 · 持续更新</span><button type="button" onclick="requestDoc('介入器械涂层应用案例集')">索取</button></li>
+      <li><span class="tt">涂层合规与注册：NMPA / FDA / EU MDR 提示</span><span class="dd">PDF · 合规</span><button type="button" onclick="requestDoc('涂层合规与注册提示')">索取</button></li>
+    </ul>
+  </div>
+</section>
 
-    (function load() {
-      var grid = document.getElementById("grid");
-      var state = document.getElementById("state");
-      // 骨架屏
-      for (var i = 0; i < 4; i++) {
-        var s = document.createElement("div");
-        s.className = "card skeleton";
-        s.innerHTML = '<div class="thumb"></div><div class="body"><div class="name">&nbsp;</div><div class="price">&nbsp;</div></div>';
-        grid.appendChild(s);
-      }
-      var url = "/store/products?limit=24&region_id=" + encodeURIComponent(MEDUSA_REGION_ID) +
-                "&fields=title,handle,thumbnail,*variants.calculated_price";
-      fetch(url, { headers: { "x-publishable-api-key": MEDUSA_PUBLISHABLE_KEY } })
-        .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-        .then(function (d) {
-          grid.innerHTML = "";
-          var list = (d && d.products) || [];
-          if (!list.length) { state.textContent = "暂无商品。"; return; }
-          list.forEach(function (p) { grid.appendChild(card(p)); });
-          state.textContent = "";
-        })
-        .catch(function (e) {
-          grid.innerHTML = "";
-          state.textContent = "商品加载失败（" + e.message + "）。你仍可点击右下角客服咨询。";
+<!-- FAQ -->
+<section id="faq" style="background:#EDF7F5">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">AI 采购 FAQ · AI BUYER FAQ</div>
+      <h2>常见采购问题（可被 AI 客服直接应答）</h2>
+      <p class="muted">这些问答与右下角智能客服共用同一套知识，也可直接向客服提问。</p>
+    </div>
+    <details class="faq" open>
+      <summary>如何判断我的器械该用哪种涂层体系？</summary>
+      <div class="body">取决于器械是否长期血液接触、是否需要润滑、是否存在感染风险等。可提供器械类型与使用场景，工程师免费评估并推荐涂层组合。</div>
+    </details>
+    <details class="faq">
+      <summary>涂层采购是现货还是客制化？如何报价？</summary>
+      <div class="body">标准涂层可走目录价 + 批量价；定制/ODM、特殊配方等走询价（RFQ）。提交询价后由工程师评估，48 小时内响应并出具报价。</div>
+    </details>
+    <details class="faq">
+      <summary>你们提供哪些资质与认证文件？</summary>
+      <div class="body">ISO 13485 体系、涂层性能检测能力、注册法规支持；所需证书可在资料库申请索取，由工程师定向提供。</div>
+    </details>
+    <details class="faq">
+      <summary>如何申请打样或免费样品？</summary>
+      <div class="body">通过下方询价入口提交需求，需求类型选择"样品/打样"并注明器械说明，评估后安排样品与技术支持对接。</div>
+    </details>
+    <details class="faq">
+      <summary>订单支持账期吗？如何交付？</summary>
+      <div class="body">面向长期合作的器械企业可支持账期与采购单号流程，具体以签约商务政策为准。</div>
+    </details>
+  </div>
+</section>
+
+<!-- INQUIRY -->
+<section id="inquiry">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">询价与商务 · INQUIRY & RFQ</div>
+      <h2>按身份分流，智能客服 + 人工报价闭环</h2>
+      <p class="muted">双渠道询盘表单，售前 AI 采集需求，复杂诉求自动转人工，最终经报价完成 B2B 闭环。提交的记录会写入商城中台，由对应负责人跟进。</p>
+    </div>
+    <div class="inq-wrap">
+      <div class="inq-card active" id="inq-card">
+        <div class="tags">
+          <button class="active" id="t-purchaser" onclick="switchInq('purchaser')">🏥 采购 / 机构</button>
+          <button id="t-distributor" onclick="switchInq('distributor')">🤝 经销商 / 代理</button>
+        </div>
+        <div class="body" id="inq-body">
+          <div id="b-purchaser">
+            <p>面向医疗机构、器械企业或科研单位的采购需求。请填写器械类型与大致用量，专业顾问对接方案与报价。</p>
+          </div>
+          <div id="b-distributor" style="display:none">
+            <p>面向寻求代理、经销、OEM/ODM 合作的渠道伙伴。请说明您的业务区域与意向合作模式。</p>
+          </div>
+          <form id="inqForm" onsubmit="return submitInquiry(event)">
+            <input type="hidden" id="f-role" value="purchaser" />
+            <div class="field"><label>需求类型</label><select id="f-type">
+              <option value="purchase">产品采购 / 批量询价</option>
+              <option value="cooperation">渠道 / 代理合作</option>
+              <option value="sample">样品 / 打样申请</option>
+              <option value="doc">资料 / 资质索取</option>
+              <option value="after_sales">售后服务</option>
+            </select></div>
+            <div class="field"><label class="req">联系人</label><input type="text" id="f-name" placeholder="姓名" /></div>
+            <div class="field"><label>单位名称</label><input type="text" id="f-company" placeholder="医院 / 器械企业 / 经销商 / 科研机构" /></div>
+            <div class="field"><label class="req">联系方式</label><input type="text" id="f-contact" placeholder="手机 / 邮箱 / 微信（至少填一项）" /></div>
+            <div class="field"><label>所在地区</label><input type="text" id="f-region" placeholder="例：江苏苏州" /></div>
+            <div class="field"><label>关注的产品 / 服务</label><select id="f-product"><option value="">（可稍后沟通）</option></select></div>
+            <div class="field"><label>应用器械 / 场景（简述）</label><textarea id="f-scene" placeholder="例：冠脉导丝，需亲水+抗凝组合涂层，年用量约 5 万支…"></textarea></div>
+            <div class="field"><label>预计采购时间</label><select id="f-timeline">
+              <option value="">（暂不确定）</option>
+              <option value="immediate">1 个月内</option>
+              <option value="quarter">1 个季度内</option>
+              <option value="half_year">半年内</option>
+              <option value="planning">仅前期了解</option>
+            </select></div>
+            <button class="btn submit" type="submit" id="f-submit">提交询价 · 工程师将快速响应</button>
+            <div class="form-msg" id="f-msg"></div>
+          </form>
+        </div>
+      </div>
+      <div class="inq-card">
+        <h3>💬 智能客服已上线</h3>
+        <p>右下角 <strong>AI 智能客服</strong>（站内 7×24）可自动应答产品、资质、采购流程问题；涉及配方、价格、法规与定制需求时，可转接人工工程师。</p>
+        <h4 style="margin-top:10px">📩 也可直接提交</h4>
+        <p class="muted">本页询价表单提交后进入商城中台线索池，由对应负责人按需求类型跟进。<br>线下布点：苏州工业园区</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <h5>Drsell 医疗科技</h5>
+      <p>医疗器械功能涂层全产业链技术服务平台。本站为内容式官网，产品与资质数据以最终商务确认为准。</p>
+    </div>
+    <div>
+      <h5>导航</h5>
+      <p><a href="#products">产品与涂层</a><br><a href="#apps">应用领域</a><br><a href="#creds">资质标准</a><br><a href="#inquiry" onclick="switchInq('purchaser');return false;">询价咨询</a></p>
+    </div>
+    <div>
+      <h5>技术底座</h5>
+      <p style="font-size:.85em">商品与线索由 <strong>Medusa</strong> 商城中台驱动；页面为无构建静态页，同源调用 Store API 渲染。</p>
+    </div>
+    <div class="src">注：本页产品目录来自 Medusa 商品库（演示数据）。价格与联系方式等以正式上线配置为准。</div>
+  </div>
+</footer>
+
+<script>
+  // ---- Medusa Store API（同源：nginx 把 /store 反代到 Medusa :9000）----
+  var MEDUSA_PUBLISHABLE_KEY = "__PUBLISHABLE_KEY__";
+  var MEDUSA_REGION_ID = "__REGION_ID__";
+
+  // ---- 产品模块：按分类筛选 + B2B 规格卡 ----
+  var ALL_PRODUCTS = [];
+  var activeCat = "全部";
+
+  // 为每个产品补 B2B 采购关心的规格要点。
+  // **规格是数据，不是代码**：存在 Medusa 商品的 `metadata.specs`，业务方在后台改即可，
+  // 不需要动这个文件。此处**不再硬编码**——曾有 SPECS 常量映射 handle，
+  // 改一条规格要改代码 + 重新部署（DEPLOY.md §7 缺口 8.13，已修）。
+  //
+  // ⚠ 顺序：Medusa 的 `metadata` 列是 **jsonb**，会**打乱键顺序**（实测存进去
+  //    {涂层类型,适用器械,基材,交付形式} 读出来变成按字典序）。
+  //    规格矩阵的阅读顺序是有意义的，故约定 metadata.specsOrder 给出展示顺序：
+  //      metadata.specs      = {标签: 值}      —— 内容
+  //      metadata.specsOrder = [标签, ...]     —— 展示顺序（可选；缺省用字典序）
+  //    写入见 scripts/seed-shop-specs.sh。
+  var SPECS_FALLBACK = {};   // 仅用于 metadata 缺失时兜底，正常应为空
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+    });
+  }
+
+  function parseMaybeJson(v) {
+    if (typeof v !== "string") return v;
+    // 后台手填时容易把对象存成 JSON 字符串，容错解析一次
+    try { return JSON.parse(v); } catch (e) { return null; }
+  }
+
+  function readSpecs(p) {
+    var m = p && p.metadata;
+    var s = parseMaybeJson(m && m.specs);
+    var order = parseMaybeJson(m && m.specsOrder);
+    if (s && typeof s === "object" && !Array.isArray(s)) {
+      // 按 specsOrder 排序；order 里没提到的键追加在后面（字典序），保证不丢内容
+      if (Array.isArray(order) && order.length) {
+        var sorted = {};
+        order.forEach(function (k) {
+          if (Object.prototype.hasOwnProperty.call(s, k)) sorted[k] = s[k];
         });
-    })();
-  </script>
+        Object.keys(s).forEach(function (k) {
+          if (!Object.prototype.hasOwnProperty.call(sorted, k)) sorted[k] = s[k];
+        });
+        return sorted;
+      }
+      return s;
+    }
+    return SPECS_FALLBACK[p && p.handle] || null;
+  }
 
-  <!-- Drsell AI 智能客服挂件 (Phase 7)。data-shop 必须等于 drsell 侧该店 Shop.shopDomain (= INGEST_STORE_DOMAIN)。 -->
-  <div id="drsell-chat-root" data-shop="drsell-shop.szchada.top"></div>
-  <script>window.DRSELL_API_BASE = "https://drsell.szchada.top/api";</script>
-  <script src="https://drsell.szchada.top/drsell-chat.js" defer></script>
+  function specHtml(p) {
+    var s = readSpecs(p);
+    if (!s) return "";
+    var rows = "";
+    for (var k in s) if (s.hasOwnProperty(k)) {
+      rows += "<dt>" + esc(k) + "</dt><dd>" + esc(s[k]) + "</dd>";
+    }
+    return '<div class="spec"><dl>' + rows + "</dl></div>";
+  }
+
+  function prodCard(p) {
+    var cat = (p.categories && p.categories[0] && p.categories[0].name) || "未分类";
+    var el = document.createElement("div");
+    el.className = "prod";
+    el.setAttribute("data-cat", cat);
+    el.innerHTML =
+      '<span class="tag">' + esc(cat) + "</span>" +
+      "<h3>" + esc(p.title || "未命名产品") + "</h3>" +
+      (p.subtitle ? '<p class="sub">' + esc(p.subtitle) + "</p>" : "") +
+      '<p class="desc">' + esc((p.description || "").slice(0, 120)) + "</p>" +
+      specHtml(p) +
+      '<div class="prod-actions">' +
+        '<button type="button" class="primary" data-inq="' + esc(p.title) + '">索取报价</button>' +
+        '<button type="button" data-doc="' + esc(p.title) + '">索取资料</button>' +
+      "</div>";
+    return el;
+  }
+
+  function renderFilters(cats) {
+    var box = document.getElementById("filters");
+    box.innerHTML = "";
+    ["全部"].concat(cats).forEach(function (c) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = c;
+      if (c === activeCat) b.className = "active";
+      b.onclick = function () { activeCat = c; renderProducts(); };
+      box.appendChild(b);
+    });
+  }
+
+  function renderProducts() {
+    var grid = document.getElementById("prodGrid");
+    grid.innerHTML = "";
+    var list = ALL_PRODUCTS.filter(function (p) {
+      var cat = (p.categories && p.categories[0] && p.categories[0].name) || "未分类";
+      return activeCat === "全部" || cat === activeCat;
+    });
+    list.forEach(function (p) { grid.appendChild(prodCard(p)); });
+    document.getElementById("prodState").textContent = list.length ? "" : "该分类下暂无产品。";
+    renderFilters(Array.from(new Set(ALL_PRODUCTS.map(function (p) {
+      return (p.categories && p.categories[0] && p.categories[0].name) || "未分类";
+    }))));
+  }
+
+  (function loadProducts() {
+    var state = document.getElementById("prodState");
+    // metadata 不在默认字段集里，必须显式带上——否则规格永远渲染不出来
+    var url = "/store/products?limit=100&region_id=" + encodeURIComponent(MEDUSA_REGION_ID) +
+              "&fields=title,handle,subtitle,description,metadata,*categories";
+    fetch(url, { headers: { "x-publishable-api-key": MEDUSA_PUBLISHABLE_KEY } })
+      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(function (d) {
+        ALL_PRODUCTS = (d && d.products) || [];
+        document.getElementById("statProducts").textContent = ALL_PRODUCTS.length || "—";
+        renderProducts();
+        fillProductSelect();
+      })
+      .catch(function (e) {
+        state.textContent = "产品加载失败（" + e.message + "）。你仍可点击右下角客服或下方表单咨询。";
+      });
+  })();
+
+  function fillProductSelect() {
+    var sel = document.getElementById("f-product");
+    if (!sel) return;
+    ALL_PRODUCTS.forEach(function (p) {
+      var o = document.createElement("option");
+      o.value = p.title;
+      o.textContent = p.title;
+      sel.appendChild(o);
+    });
+  }
+
+  // ---- 询价表单：提交到 Medusa 自定义 API（/store/inquiries）----
+  var role = "purchaser";
+  function switchInq(m) {
+    role = m;
+    document.getElementById("f-role").value = m;
+    var isP = m === "purchaser";
+    document.getElementById("b-purchaser").style.display = isP ? "block" : "none";
+    document.getElementById("b-distributor").style.display = isP ? "none" : "block";
+    document.getElementById("t-purchaser").classList.toggle("active", isP);
+    document.getElementById("t-distributor").classList.toggle("active", !isP);
+    // 渠道合作默认切到合作类型
+    if (!isP) document.getElementById("f-type").value = "cooperation";
+    else if (document.getElementById("f-type").value === "cooperation") {
+      document.getElementById("f-type").value = "purchase";
+    }
+  }
+
+  function scrollToInquiry(type, product) {
+    var sec = document.getElementById("inquiry");
+    if (sec) sec.scrollIntoView({ behavior: "smooth" });
+    if (type) {
+      var sel = document.getElementById("f-type");
+      if (sel) sel.value = type;
+    }
+    if (product) {
+      var p = document.getElementById("f-product");
+      if (p) {
+        var found = Array.prototype.some.call(p.options, function (o) { return o.value === product; });
+        if (found) p.value = product;
+        else if (p.options[0]) p.options[0].textContent = "（" + product + "）等，可稍后沟通";
+      }
+      var scene = document.getElementById("f-scene");
+      if (scene && !scene.value) scene.placeholder = "咨询产品：" + product + "。请补充应用器械与年用量…";
+    }
+  }
+
+  function requestDoc(name) {
+    scrollToInquiry("doc");
+    var scene = document.getElementById("f-scene");
+    if (scene) scene.value = "资料索取：" + name;
+  }
+
+  // 产品卡上的两个动作（事件委托，避免内联 onclick 转义问题）
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (!t || t.tagName !== "BUTTON") return;
+    if (t.getAttribute("data-inq")) {
+      scrollToInquiry("purchase", t.getAttribute("data-inq"));
+    } else if (t.getAttribute("data-doc")) {
+      scrollToInquiry("doc", t.getAttribute("data-doc"));
+    }
+  });
+
+  function submitInquiry(ev) {
+    ev.preventDefault();
+    var msg = document.getElementById("f-msg");
+    var btn = document.getElementById("f-submit");
+    var name = document.getElementById("f-name").value.trim();
+    var contact = document.getElementById("f-contact").value.trim();
+    var isEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contact);
+
+    msg.className = "form-msg err";
+    if (!name) { msg.textContent = "请填写联系人。"; return false; }
+    if (!contact) { msg.textContent = "请填写手机、邮箱或微信，否则无法跟进。"; return false; }
+    if (contact.indexOf("@") !== -1 && !isEmail) { msg.textContent = "邮箱格式不正确。"; return false; }
+
+    var payload = {
+      contactRole: role,
+      inquiryType: document.getElementById("f-type").value,
+      contactName: name,
+      companyName: document.getElementById("f-company").value.trim() || undefined,
+      contactEmail: isEmail ? contact : undefined,
+      contactPhone: isEmail ? undefined : contact,
+      region: document.getElementById("f-region").value.trim() || undefined,
+      productsOfInterest: document.getElementById("f-product").value || undefined,
+      applicationScene: document.getElementById("f-scene").value.trim() || undefined,
+      purchaseTimeline: document.getElementById("f-timeline").value || undefined
+    };
+
+    btn.disabled = true;
+    msg.className = "form-msg";
+    msg.textContent = "正在提交…";
+
+    fetch("/store/inquiries", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-publishable-api-key": MEDUSA_PUBLISHABLE_KEY
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+      .then(function (res) {
+        if (res.ok && res.d && res.d.ok) {
+          msg.className = "form-msg ok";
+          msg.textContent = "已收到您的询价，受理编号 " + String(res.d.id).slice(-8) + "。工程师将在 48 小时内与您联系。";
+          document.getElementById("inqForm").reset();
+          document.getElementById("f-role").value = role;
+        } else {
+          msg.className = "form-msg err";
+          var why = (res.d && (res.d.error || res.d.message)) || ("HTTP " + res.status);
+          msg.textContent = "提交失败：" + why + "。也可直接点击右下角客服咨询。";
+        }
+      })
+      .catch(function () {
+        msg.className = "form-msg err";
+        msg.textContent = "网络错误，请重试，或点击右下角客服咨询。";
+      })
+      .then(function () { btn.disabled = false; });
+
+    return false;
+  }
+
+  // 平滑锚点
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      var id = a.getAttribute("href").slice(1);
+      if (document.getElementById(id)) {
+        e.preventDefault();
+        document.getElementById(id).scrollIntoView({ behavior: "smooth" });
+      }
+    });
+  });
+</script>
+
+<!-- Drsell AI 智能客服挂件。data-shop 必须等于 drsell 侧该店 Shop.shopDomain (= INGEST_STORE_DOMAIN)。 -->
+<div id="drsell-chat-root" data-shop="drsell-shop.szchada.top"></div>
+<script>window.DRSELL_API_BASE = "https://drsell.szchada.top/api";</script>
+<script src="https://drsell.szchada.top/drsell-chat.js?v=20260913c" defer></script>
 </body>
 </html>

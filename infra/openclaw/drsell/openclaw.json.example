@@ -68,6 +68,52 @@
       }
     }
   },
+  "tools": {
+    "deny": [
+      "exec",
+      "process",
+      "bash",
+      "apply_patch",
+      "write",
+      "edit",
+      "read",
+      "file_write",
+      "file_fetch",
+      "dir_fetch",
+      "dir_list",
+      "browser",
+      "canvas",
+      "gateway",
+      "nodes",
+      "sessions_list",
+      "sessions_history",
+      "sessions_send",
+      "sessions_spawn",
+      "sessions_yield",
+      "session_status",
+      "subagents",
+      "agents_list",
+      "skill_workshop",
+      "skills",
+      "cron",
+      "message",
+      "tts",
+      "web_fetch",
+      "web_search",
+      "x_search",
+      "image_generate",
+      "video_generate",
+      "create_goal",
+      "get_goal",
+      "update_goal"
+    ],
+    "agentToAgent": {
+      "enabled": false
+    },
+    "sessions": {
+      "visibility": "self"
+    }
+  },
   "gateway": {
     "port": 18790,
     "mode": "local",

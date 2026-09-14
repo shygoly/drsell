@@ -4,8 +4,10 @@ openspec change `dtc-store-medusa` 的店面层：一个**面向顾客**的商�
 并内嵌 drsell AI 智能客服挂件。**不入 pnpm workspace**（见根 `pnpm-workspace.yaml` 的
 `!apps/shop-web`）——它是无构建的静态页 + 一个零依赖的 node 静态服务器。
 
-线上：**https://medusa.szchada.top/**（2026-09-13 上线并端到端验证：页面展示 4 款 Medusa
-商品，右下角挂件可就商品/价格正常对话）。
+线上：**https://medusa.szchada.top/**（2026-09-13 上线并端到端验证：商品网格由 Store API
+实时渲染，右下角挂件可就商品正常对话）。截至 2026-09-13 复测，`/store/products` 供 **6 款**
+商品（医疗器械功能涂层系列），价格均为 0 —— 与「隐藏价 → 询价 → 人工报价」的 B2B 惯例一致，
+**不是缺陷**。
 
 ## 构成
 
@@ -39,7 +41,26 @@ nginx（`medusa.szchada.top` vhost，在 `webrtc-ws-proxy` 容器 `conf.d/`）�
 
 ## 待续（相对 openspec Phase 6/8 的诚实缺口）
 
-本页是**目录展示 + 挂件**的最小可交易前身，**不含购物车/结算/Stripe/顾客登录**（Phase
+本页是**目录展示 + 挂件 + 询盘**的最小可交易前身，**不含购物车/结算/Stripe/顾客登录**（Phase
 6.2/6.3）与 shadcn/Next SSR（6.4）——GOAL 是「页面能正常智能客服对话」，已达成。
-Phase 7.2 的**按登录顾客隔离订单/售后**（D8 签名令牌）待做：当前挂件为匿名会话，
-可查本店商品，订单/售后按顾客过滤需先接顾客令牌。
+
+> **2026-09-13 更正**：本节原先写「Phase 7.2 按登录顾客隔离订单/售后待做：当前挂件为匿名会话」——
+> **该描述已过期**。7.2 已完成并公网验过：挂件带 `window.DRSELL_CUSTOMER_TOKEN`（店面登录
+> Medusa `/auth/customer/emailpass` 后设），drsell 用 `MEDUSA_JWT_SECRET` 验签后按顾客拉取
+> 订单/售后**注入 prompt**（不给模型跨顾客订单工具）。curl + 浏览器已验证：登录顾客只见本人
+> 订单，窥探他人订单被拒，匿名一律引导登录。权威见
+> `openspec/changes/dtc-store-medusa/tasks.md` 7.2。
+
+**真正剩余**：Stripe 支付 + 购物车 + 结算 → 下单（1.2/6.2）；顾客登录页与 `account/orders`
+售后申请入口（6.3）；shadcn/Next SSR 升级（6.4，按需）。
+
+> 另注：页面已含 B2B 询盘（RFQ）提交通路（`POST /store/inquiries`，反代到 Medusa），
+> 该能力**未记录在 openspec tasks.md**，源码见 `apps/shop/apps/backend/src/modules/inquiry/`。
+
+## 非 Medusa 标准能力一览（易被漏读）
+
+| 能力 | 位置 |
+|---|---|
+| 询盘模块（模型/服务/迁移） | `apps/shop/apps/backend/src/modules/inquiry/` |
+| 公开提交通路 | `apps/shop/apps/backend/src/api/store/inquiries/route.ts` |
+| 管理端线索列表 / 状态更新 | `apps/shop/apps/backend/src/api/admin/inquiries/` |

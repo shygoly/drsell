@@ -44,8 +44,26 @@ nginx 在 `medusa.szchada.top` 分流：`/`→店面 :5020（pm2 `drsell-shop-we
 Medusa 里改一个商品 → subscriber 触发 → `/api/ingest/products`（401 无 key、200 带 key）→
 drsell PG `products` 出现 `source='medusa'` 行。端到端打通。
 
-## 待续（openspec dtc-store-medusa 剩余 Phase）
+## 待续（openspec dtc-store-medusa 剩余缺口）
 
-4.2 subscriber 的 outbox/可靠投递 + Redis event bus；4.3 库存/软删/售后用真实事件校验；
-5 AI reader 加 `adp_get_after_sales` + prompt 按 source 参数化（生产 reader 改动，过 trap-1）；
-6 Next 店面；7 店内挂件；8 正式部署（pm2/nginx，替代当前 /root 手工运行）；9 治理验收。
+> 本节曾列出「5/6/7/8 未做」——**该清单写于这些 Phase 完成之前，已过期并造成误判**
+> （2026-09-13 有人据此把线上已完成的店面/挂件/部署当成未做）。**判断进度以
+> `openspec/changes/dtc-store-medusa/tasks.md` 的勾选状态 + 线上实测为准，不要以本文为准。**
+
+**已完成（勿再当作待办）**：5 AI reader（`adp_get_after_sales` + prompt 按 source 参数化，
+公网复验通过）· 6.1 目录展示 · 7 店内挂件（含按登录顾客隔离订单/售后）·
+8 生产部署（Redis + 独立 `drsell_shop` 库 + pm2 `drsell-shop-web`/`drsell-shop-medusa` + nginx vhost）。
+
+**真正剩余**：
+
+- **4.2 / 4.3** subscriber 的 outbox / Redis 可靠投递（现为 in-memory bus，失败仅记日志）；
+  库存、软删、售后的真实事件校验。
+- **1.2 / 6.2 / 6.3 在线交易闭环**：Stripe 支付、购物车、结算 → 下单、顾客登录 +
+  `account/orders` 及售后申请入口。**这是唯一未实现的整层能力。**
+- **8.3** Admin 后台访问保护（`/app` 目前公网可达登录页）。
+- **9 治理验收**：`DECISIONS.md` 登记 ADR（复用 `shopify*Id` 列）/ DEP（引入 Redis）；
+  `pnpm spec`、`pnpm test` 跑绿；下单→支付→售后全链路公网复验。
+
+**未记录在 tasks.md 但已存在的能力**：B2B 询盘（RFQ）模块
+（`apps/backend/src/modules/inquiry/` + `api/{store,admin}/inquiries/`）——身份分流 × 需求分级
+× 线索状态机，见该目录源码注释。

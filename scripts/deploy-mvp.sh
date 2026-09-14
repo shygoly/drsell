@@ -276,6 +276,23 @@ if [[ "$PUBLIC_FAIL" != "0" ]]; then
   exit 1
 fi
 
+# ── 浏览器体检（渲染 + console 错误）─────────────────────────────────────
+# 上面 verify_public 断言的是**内容特征**，它抓不住「200、内容对，但页面在浏览器里
+# 是坏的」：JS 运行时报错、/_next/ 静态资源 404（assetPrefix / nginx location 配错
+# 时 HTML 照常返回、chunk 全 404）、组件没挂载。
+#
+#   BROWSER_VERIFY=1 bash scripts/deploy-mvp.sh   → 额外打印浏览器验证规格
+#
+# dsh-pilot 是进程内工具，没有 HTTP 接口，bash 调不动它，所以这里只打印**规格**
+# （该验哪些 URL、断言什么内容特征），实际浏览器操作由 agent 用 pilot_* 执行。
+# 判据留在脚本里（可评审、可 diff），执行交给 agent（能看渲染）。
+# 默认关闭：无人值守部署时没有 agent 在场。
+if [[ "${BROWSER_VERIFY:-0}" == "1" ]]; then
+  echo ""
+  echo "==> Browser verification spec (run with pilot_* tools)"
+  bash "$ROOT/scripts/verify-prod-browser.sh" --check || echo "!! 浏览器前置检查失败，见上"
+fi
+
 echo "==> Prune stale drsell nginx backups on wjclaw"
 ssh "$HOST" "rm -f ${NGINX_CONF_DIR}/drsell.szchada.com.conf.bak ${NGINX_CONF_DIR}/default.conf.bak 2>/dev/null || true"
 

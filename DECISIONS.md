@@ -16,7 +16,7 @@
 | 前缀 | 含义 | 出处（论证在此） | 数量 |
 |---|---|---|---|
 | `INV-n` | **不变量**：任何实现都不得违反的硬约束 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 3 |
-| `ADR-n` | **架构决策**：工程层不可逆选择 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 18 |
+| `ADR-n` | **架构决策**：工程层不可逆选择 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 25 |
 | `B-n` | **边界规矩**：模块/包之间的硬边界 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 5 |
 | `DS-n` | **UI 反模式**：呈现层禁止事项 | [`DESIGN.md`](DESIGN.md) | 10 |
 
@@ -47,7 +47,7 @@
 | `ADR-6` | 双设计系统并存：web = Polaris 13，storefront = shadcn/Tailwind v4 | `apps/storefront/package.json` | 已守护 |
 | `ADR-7` | ADP 智能体经 `adp_reader` 直连 PG，仅可执行 `adp_*` 函数 | `apps/api/prisma/sql/adp-reader.sql` + `scripts/verify-adp-isolation.sh` | 已守护 |
 | `ADR-8` | `Shop.accessToken` 落库 AES-256-GCM 加密（`SHOP_ACCESS_TOKEN_KEY`） | `apps/api/src/crypto/shop-token-cipher.ts` | 已守护 |
-| `ADR-9` | 客服对话经 wjclaw 本地 OpenClaw Gateway（`--profile drsell` :18790），不再调腾讯 ADP | `packages/openclaw` + `infra/openclaw/drsell/` | 已守护 |
+| `ADR-9` | 客服对话经 wjclaw 本地 OpenClaw Gateway（`--profile drsell` :18790），不再调腾讯 ADP | `packages/openclaw` + `infra/openclaw/drsell/` | 已守护（工具面另见 `ADR-19`） |
 | `ADR-10` | `drsell.szchada.top` 根路径由 `apps/storefront` 服务（pm2 `drsell-storefront` :5010）；`apps/web` 暂停生产部署 | `scripts/deploy-mvp.sh` | 已守护 |
 | `ADR-11` | 运营台是独立应用 `apps/ops`，独立 `server_name` `ops.szchada.top`；商家端不得存在 `/admin` 或 `/ops` 路由 | `infra/nginx/ops.szchada.top.conf` + `spec/check-ops-entry.mjs` | 已守护 |
 | `ADR-12` | 运营台第三套设计令牌（`apps/ops/app/tokens.css` → `globals.css` shadcn 映射），经 `stitch-to-shadcn-pro` + Tailwind v4 + shadcn/ui 落地；禁止 Polaris | `apps/ops/app/globals.css` + `.stitch/` + `spec/check-design.mjs` | 已守护 |
@@ -57,6 +57,13 @@
 | `ADR-16` | 会话状态是数据库枚举 `ChatThreadStatus`（`ai`/`pending`/`human`/`closed`），迁移统一经 `ConversationService` | `apps/api/prisma/schema.prisma` + `apps/api/src/adp/adp.service.spec.ts` | 已守护 |
 | `ADR-17` | 会话上下文由本地 `ChatMessage` 组装为完整 `messages`，system prompt 走 system 角色；网关会话键只作日志关联 | `packages/openclaw/src/index.ts` + `apps/api/src/adp/adp.service.spec.ts` | 已守护 |
 | `ADR-18` | 订阅状态是服务前置条件：`ACTIVE`/试用中/到期后 2 天宽限内才服务，闸门在配额之前；默认只观测不拦截（`SUBSCRIPTION_GATE_ENFORCE`），确认无误判再开 | `apps/api/src/subscription/subscription-state.ts` + `subscription-state.spec.ts` | 已守护 |
+| `ADR-19` | 网关按**敌意多租户**配工具策略：`tools.deny` 关闭 exec/write/read/浏览器/会话遍历等，`agentToAgent` 关、`sessions.visibility=self`。**不得改用 `tools.allow`**——它在 MCP 工具注册前解析，会让客服链路 fail closed（2026-09-13 实测中断约 4 分钟） | `infra/openclaw/drsell/openclaw.json.example` | 配置已固化；**待补自动断言** |
+| `ADR-20` | DTC 独立站的可靠投递基建**必须注册 Redis 实现**（`event-bus-redis`+`workflow-engine-redis`+`caching`+`locking`）。Redis 用 wjclaw **宿主 systemd** 的 `redis-server`（127.0.0.1:6379），**不用容器**；drsell 占 **db2**（db0 属其他项目）。不注册时 Medusa 静默回落进程内内存实现——事件随重启丢失且无重放 | `apps/shop/apps/backend/medusa-config.ts` + `scripts/deploy-shop.sh` | 已守护（启动日志四模块连接成功 + 事件端到端落库） |
+| `ADR-21` | DTC 独立站与 drsell 主站是**两套独立部署链路**：Medusa 侧在服务器上构建（`medusa build` → `.medusa/server`，pm2 `drsell-shop-medusa`），不并入 drsell 的 pnpm workspace（`!apps/shop`、`!apps/shop-web`）；两边 nginx vhost 各自入仓、各自同步 | `apps/shop/README.md` + `scripts/deploy-shop.sh` + `infra/nginx/medusa.szchada.top.conf` | 已守护 |
+| `ADR-22` | DTC 摄取**复用 Shopify 语义的列名**（`shopify_product_id`/`shopify_order_id` 承载 Medusa 的 `id`/`display_id`），以 `source` 列区分来源（`shopify` 默认 / `medusa`）；**改名推迟**——改名会动生产读路径，收益仅是名字好看 | `apps/api/prisma/schema.prisma` + `apps/api/src/ingest/` | 已守护（`source @default("shopify")` 保证 Shopify 写入零改动） |
+| `ADR-23` | B2B 询价线索是 **Medusa 自定义 module**（表 `inquiry` 在 `drsell_shop`），写入只经 `/store/inquiries`（公开，zod 校验 + 限流）与 `/admin/inquiries`（受后台鉴权），**不直写库**；管理端只读列表 + 状态推进 | `apps/shop/apps/backend/src/modules/inquiry/` + `src/api/{store,admin}/inquiries/` | 已守护（store GET 非 200、admin 无 token 401） |
+| `ADR-24` | DTC 店面是**内容式官网**（内容获客 + 询价闭环），非即时结账店面；产品卡是**规格矩阵卡且不标价**，规格是**数据**（`metadata.specs`+`metadata.specsOrder`）而非前端硬编码。**`specsOrder` 不可省**——`metadata` 是 jsonb，不保留键顺序 | `apps/shop-web/index.html` + `scripts/seed-shop-specs.sh` | 已守护（回读断言顺序与键集） |
+| `ADR-25` | DTC 站**不做购物车 / 在线结算 / Stripe**；「闭环」定义为 **询价 → 人工报价 → Medusa 草稿订单 → 合同账期**，成单状态记在 `inquiry` + 草稿订单，不经过在线支付。顾客登录**保留**（B2B 客户查自己订单/对账） | `apps/shop/apps/backend/src/modules/inquiry/` + `apps/shop-web/index.html` | 已守护（页面零购物车元素；询价单可转草稿订单） |
 
 ---
 
