@@ -99,6 +99,7 @@ export class PublicStorefrontService {
     text: string;
     visitorId: string;
     conversationId?: string;
+    customerToken?: string;
     onChunk: (c: string) => void;
     signal?: AbortSignal;
   }) {
@@ -107,6 +108,7 @@ export class PublicStorefrontService {
       visitorId: params.visitorId,
       text: params.text,
       conversationId: params.conversationId,
+      customerToken: params.customerToken,
       onChunk: params.onChunk,
       signal: params.signal,
     });

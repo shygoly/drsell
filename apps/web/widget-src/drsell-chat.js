@@ -399,10 +399,13 @@
     state.input.value = '';
     append('me', text);
     try {
+      var payload = { shopDomain: shop, text: text, visitorId: visitorId };
+      // 独立站已登录顾客令牌（D8）：店面登录后设 window.DRSELL_CUSTOMER_TOKEN，带上则按顾客隔离。
+      if (window.DRSELL_CUSTOMER_TOKEN) payload.customerToken = window.DRSELL_CUSTOMER_TOKEN;
       var res = await fetch(apiBase + '/public/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shopDomain: shop, text: text, visitorId: visitorId })
+        body: JSON.stringify(payload)
       });
       if (!res.ok) {
         append('bot', 'Error: ' + res.status);

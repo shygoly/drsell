@@ -84,8 +84,14 @@ export class IngestService {
     return d;
   }
 
-  private shop() {
-    return this.tenants.ensureShopTenant(this.storeDomain());
+  private async shop() {
+    const shop = await this.tenants.ensureShopTenant(this.storeDomain());
+    // 该店由 DTC 独立站（Medusa）摄取而来 → 标记 source='medusa'（供 AI prompt 参数化）。
+    // 自愈：首次或存量行仍是默认 'shopify' 时纠正；之后为幂等空操作。
+    if (shop.source !== 'medusa') {
+      return this.prisma.shop.update({ where: { id: shop.id }, data: { source: 'medusa' } });
+    }
+    return shop;
   }
 
   private toDate(v?: Date | string): Date | undefined {

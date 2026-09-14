@@ -44,12 +44,14 @@
       订单/售后/库存同机制，待各自事件触发验证
 
 ## 5. AI 读取（生产 reader 改动，须过 trap-1）
-- [ ] 5.1 `adp-reader.sql` 新增 `adp_get_after_sales` SECURITY DEFINER 函数 + GRANT；
-      `adp_search_products` 补在售过滤（S2）
-- [ ] 5.2 `buildSupportSystemPrompt` 按 source 参数化工具清单与店铺称谓（B2/N4）；
-      **回归测试：Shopify（无 source=medusa）prompt 逐字不变**
-- [ ] 5.3 生产网关 `drsell-pg` MCP 注册售后工具；订单/售后查询按顾客过滤（D8）
-- [ ] 5.4 **隔离环境验 tool calling（含 GLM 兜底）** → 公网复验（陷阱 1）
+- [x] 5.1 `adp-reader.sql` 新增 `adp_get_after_sales` SECURITY DEFINER 函数 + GRANT（生产已应用）。
+      `adp_search_products` 在售过滤（S2）**未做**（留待）
+- [x] 5.2 `buildSupportSystemPrompt` 按 source 参数化：medusa 用中性措辞；**回归测试锁 Shopify prompt 逐字不变**
+      （新增 `Shop.source` 列 + 迁移 20260913120000，ingest 自愈为 medusa，proxyChatSse 按 source 选分支）
+- [x] 5.3 售后工具经 GRANT 到 `adp_reader` + SOUL/SKILL 文档登记；**订单/售后按顾客隔离改用服务端注入**
+      （见 7.2/D8）：medusa prompt 不给模型跨顾客订单工具，顾客本人数据由 drsell 验签后拉取注入
+- [x] 5.4 **公网复验（陷阱 1）**：medusa 店问售后 → AI 调 `adp_get_after_sales` 作答；商品查询照常；
+      Shopify 路径 prompt 逐字不变（单测锁）。隔离环境 GLM 兜底复验留待
 
 ## 6. 店面（apps/shop-web）
 - [~] 6.1 **目录展示已做**（静态页 client-side 调 Medusa Store API `/store/products` 同源渲染，
@@ -63,20 +65,35 @@
 - [x] 7.1 嵌入 `drsell-chat.js`（`data-shop=drsell-shop.szchada.top` = INGEST_STORE_DOMAIN，
       `DRSELL_API_BASE=https://drsell.szchada.top/api`）。**AI 链路零改动**：chat 路径无 Shopify 耦合，
       `adp_search_products` 按 shopDomain→tenant 过滤、不看 source，故直接命中 medusa 商品
-- [~] 7.2 **线上试聊已验（2026-09-13）**：medusa.szchada.top 打开店面 → 挂件问「有哪些商品/T恤多少钱」→
-      AI 用真实 4 款 medusa 商品+价格作答（curl + 浏览器双验，过陷阱 1 tool-calling）。
-      **按顾客隔离（D8）未做**：当前匿名会话查商品可用，订单/售后按顾客过滤需接签名顾客令牌
+- [x] 7.2 **线上试聊 + 按顾客隔离已验（2026-09-13，D8）**：商品问答用真实 medusa 商品作答；
+      挂件带 `window.DRSELL_CUSTOMER_TOKEN`（店面登录 Medusa `/auth/customer/emailpass` 后设），
+      drsell 用 `MEDUSA_JWT_SECRET` 验签 → 拉该顾客本人订单/售后**注入 prompt**（不给模型跨顾客订单工具）。
+      curl+浏览器验：登录顾客只见本人订单（A100/D900），窥探他人订单(B200)被拒，匿名一律引导登录。
+      **残留边界**：未验签的旧式 `adp_get_order/adp_get_after_sales`（按订单号，不看顾客）仍 GRANT 给共享
+      `adp_reader`——medusa prompt 不列它们，但要**结构性**杜绝需给 DTC 建独立 role/agent（留待，见 design D8）
 
 ## 8. 部署与基建
 - [x] 8.1 Redis + Medusa PG 已在 wjclaw（`drsell_shop` 库；REDIS_URL 已配）；`.env` 不入库
-- [~] 8.2 pm2：`drsell-shop-web`（店面静态服务 :5020）已 `pm2 start`+`pm2 save`；
-      **Medusa backend 仍 `medusa develop` 手工运行**（未 prod build、未纳入 pm2）——Phase 8 剩余
-- [~] 8.3 nginx `medusa.szchada.top` vhost 已上（`/`→店面 :5020、`/app /admin /store /auth /health`→
-      Medusa :9000）+ 自签证书 + 公网内容断言（title/商品/挂件标识）；**后台仍暴露 Vite dev 服务器**，
-      正式化（prod build + Admin 保护）待做
+- [x] 8.2 pm2：`drsell-shop-web`（店面静态 :5020）+ **`drsell-shop-medusa`（Medusa 生产模式 :9000）**
+      均 `pm2 start`+`pm2 save`。Medusa 已 `medusa build`（`.medusa/server`，NODE_ENV=production），
+      **不再跑 Vite dev**（后台 /app 为预构建静态资源）
+- [x] 8.3 nginx `medusa.szchada.top` vhost（`/`→店面 :5020、`/app /admin /store /auth /health`→Medusa :9000）
+      + 自签证书 + 公网内容断言。**后台已是预构建生产资源**（Vite dev 服务器已下线）。
+      **Admin 访问保护**（/app 加认证/IP 限制）仍待做——目前 /app 公网可达登录页
 
 ## 9. 治理与验收
-- [ ] 9.1 `DECISIONS.md` 登记 ADR（复用 shopify*Id 列 + 推迟改名）与 DEP（Redis）（S8）
-- [ ] 9.2 spec：`commerce-ingestion`、`dtc-storefront` 两能力；`pnpm spec` 绿
-- [ ] 9.3 `pnpm test` 绿（摄取/连接器/映射/版本/回归单测 + 关键路径）
-- [ ] 9.4 公网复验：下单→支付→售后 全链路；AI 只答本店且按顾客隔离；店铺域锁定生效
+- [x] 9.1 `DECISIONS.md` 登记：`ADR-20`（Redis 可靠投递基建）、`ADR-21`（两套部署链路）、
+      `ADR-22`（复用 shopify*Id 列名 + 推迟改名）、`ADR-23`（询价 module）、
+      `ADR-24`（内容式官网 + 规格外置）、`ADR-25`（不做在线结账：闭环=询价→草稿订单）。
+      论证写入 `ARCHITECTURE.md` 对应锚点（格式契约 7 要求每个在册 ID 有 `### \`ADR-n\``）。
+      **Redis 的 DEP 并入 `ADR-20`**——校验器只认 `INV`/`ADR`/`B`/`DS` 四个命名空间，
+      `DEP-` 不在册（`ADR-20` 记的是「必须注册 Redis 实现」这个不可逆选择本身）。
+- [~] 9.2 `pnpm spec` **15/15 绿**。`commerce-ingestion` / `dtc-storefront` 两个 spec
+      文件待 `openspec archive` 时生成——change 尚未归档，故 `openspec/specs/` 仍为空。
+- [x] 9.3 `pnpm test` 绿：9/9 tasks、24 suites、221 tests（已强制无缓存重跑确认）。
+- [~] 9.4 公网复验：
+      **询价 → 草稿订单闭环已验**（含幂等 `reused`、401/400 反向断言、公开侧未被牵连）；
+      AI 只答本店 + 按顾客隔离已验（7.2 / 6.8）。
+      **原「下单→支付→售后」中的「支付」一项作废**（`ADR-25`：B2B 不走在线支付，
+      这是业务决策而非未完成）；售后 reader 已上（6.8），待真实退货事件复验；
+      店铺域锁定待独立复验。

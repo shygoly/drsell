@@ -7,6 +7,7 @@ import {
 } from '@drsell/openclaw';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConversationService } from '../conversation/conversation.service';
+import { verifyMedusaCustomerToken } from '../public-storefront/medusa-customer-token';
 import {
   QuotaExceededError,
   QuotaService,
@@ -94,11 +95,71 @@ export class AdpService {
     return { skipped: true as const };
   }
 
+  /**
+   * D8：拉取某已验证顾客在本店的订单与售后摘要，供注入 system prompt。
+   * 严格只查该顾客（Order.customerId = actorId）本人数据 + 本店；限量、短、纯文本。
+   */
+  private async buildMedusaCustomerContext(
+    shopDomain: string,
+    actorId: string,
+  ): Promise<string> {
+    const orders = await this.prisma.order.findMany({
+      where: { customerId: actorId, shop: { shopDomain } },
+      orderBy: { shopifyCreatedAt: 'desc' },
+      take: 10,
+      select: {
+        shopifyOrderId: true,
+        status: true,
+        financialStatus: true,
+        fulfillmentStatus: true,
+        total: true,
+      },
+    });
+    if (orders.length === 0) return 'This customer has no orders on record.';
+    const ids = orders.map((o) => o.shopifyOrderId);
+    const afters = await this.prisma.afterSales.findMany({
+      where: { orderExternalId: { in: ids }, shop: { shopDomain } },
+      select: {
+        orderExternalId: true,
+        type: true,
+        status: true,
+        reason: true,
+        amount: true,
+        currency: true,
+      },
+    });
+    const byOrder = new Map<string, string[]>();
+    for (const a of afters) {
+      const k = a.orderExternalId ?? '';
+      const line =
+        `  ${a.type}: ${a.status ?? 'n/a'}` +
+        (a.amount != null
+          ? `, refund ${a.amount}${a.currency ? ' ' + a.currency.toUpperCase() : ''}`
+          : '') +
+        (a.reason ? ` (reason: ${a.reason})` : '');
+      const arr = byOrder.get(k) ?? [];
+      arr.push(line);
+      byOrder.set(k, arr);
+    }
+    return orders
+      .map((o) => {
+        const head =
+          `Order ${o.shopifyOrderId}: status ${o.status ?? 'n/a'}, ` +
+          `payment ${o.financialStatus ?? 'n/a'}, fulfillment ${o.fulfillmentStatus ?? 'n/a'}, ` +
+          `total ${o.total ?? 'n/a'}`;
+        const sub = byOrder.get(o.shopifyOrderId) ?? [];
+        return [head, ...sub].join('\n');
+      })
+      .join('\n');
+  }
+
   async proxyChatSse(params: {
     shopDomain: string;
     visitorId: string;
     text: string;
     conversationId?: string;
+    // 独立站挂件传来的已登录顾客令牌（Medusa JWT）。验签通过才按该顾客隔离订单/售后（D8）。
+    customerToken?: string;
     onChunk: (chunk: string) => void;
     signal?: AbortSignal;
   }) {
@@ -169,6 +230,8 @@ export class AdpService {
         aiTone: true,
         aiLanguage: true,
         aiSystemPrompt: true,
+        // 店铺来源：medusa（独立站）时 prompt 走中性措辞并开放售后工具。
+        shop: { select: { source: true } },
       },
     });
 
@@ -244,17 +307,40 @@ export class AdpService {
     // 上下文从自己的库里组装——网关侧会话丢失也重建得出来。
     const messages = await this.conversations.buildContext(thread.id);
 
+    // D8 顾客隔离：独立站(medusa)且带有效顾客令牌时，服务端拉取该顾客本人订单/售后注入 prompt；
+    // 匿名会话不注入、prompt 也不给订单工具，从根上不泄露他人订单。
+    const source =
+      botSetting?.shop?.source === 'medusa' ? ('medusa' as const) : undefined;
+    let customerContext: string | null = null;
+    if (source === 'medusa' && params.customerToken) {
+      const cust = verifyMedusaCustomerToken(
+        params.customerToken,
+        process.env.MEDUSA_JWT_SECRET,
+      );
+      if (cust) {
+        customerContext = await this.buildMedusaCustomerContext(
+          params.shopDomain,
+          cust.actorId,
+        );
+      }
+    }
+
     let assistantText = '';
     await this.openclaw.chatStream({
       shopDomain: params.shopDomain,
       visitorId: params.visitorId,
       conversationId: params.conversationId,
-      systemPrompt: buildSupportSystemPrompt(params.shopDomain, {
-        name: botSetting?.aiPersonaName,
-        tone: botSetting?.aiTone,
-        language: botSetting?.aiLanguage,
-        customInstructions: botSetting?.aiSystemPrompt,
-      }),
+      systemPrompt: buildSupportSystemPrompt(
+        params.shopDomain,
+        {
+          name: botSetting?.aiPersonaName,
+          tone: botSetting?.aiTone,
+          language: botSetting?.aiLanguage,
+          customInstructions: botSetting?.aiSystemPrompt,
+        },
+        source,
+        customerContext,
+      ),
       messages,
       onChunk: (chunk) => {
         assistantText += chunk;

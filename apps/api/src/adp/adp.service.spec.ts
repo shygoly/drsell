@@ -27,6 +27,7 @@ type BotSettingSeed = {
   aiTone: string | null;
   aiLanguage: string | null;
   aiSystemPrompt: string | null;
+  shop?: { source: string | null } | null;
 };
 
 const DEFAULT_BOT_SETTING: BotSettingSeed = {
@@ -35,6 +36,7 @@ const DEFAULT_BOT_SETTING: BotSettingSeed = {
   aiTone: null,
   aiLanguage: null,
   aiSystemPrompt: null,
+  shop: null,
 };
 
 /**
@@ -319,12 +321,34 @@ describe('AdpService AI 开关与人设', () => {
 
     await send(svc);
 
-    expect(buildPrompt).toHaveBeenCalledWith(SHOP, {
-      name: 'Ava',
-      tone: 'friendly',
-      language: 'en',
-      customInstructions: 'Be nice.',
+    expect(buildPrompt).toHaveBeenCalledWith(
+      SHOP,
+      {
+        name: 'Ava',
+        tone: 'friendly',
+        language: 'en',
+        customInstructions: 'Be nice.',
+      },
+      // Shopify（默认 seed 无 shop.source）→ source undefined，无顾客态注入
+      undefined,
+      null,
+    );
+  });
+
+  it('medusa 店铺 → source=medusa（匿名：无顾客令牌，customerContext=null）', async () => {
+    const { svc } = build({ status: ChatThreadStatus.ai }, false, false, {
+      ...DEFAULT_BOT_SETTING,
+      shop: { source: 'medusa' },
     });
+
+    await send(svc);
+
+    expect(buildPrompt).toHaveBeenCalledWith(
+      SHOP,
+      expect.objectContaining({}),
+      'medusa',
+      null,
+    );
   });
 
   it('沙盒预览：用草稿人设一次性试聊，不落库、不影响真实会话', async () => {

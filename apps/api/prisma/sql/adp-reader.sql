@@ -87,3 +87,30 @@ $fn$;
 ALTER FUNCTION adp_get_order(text, text) OWNER TO drsell_app;
 REVOKE ALL ON FUNCTION adp_get_order(text, text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION adp_get_order(text, text) TO adp_reader;
+
+-- adp_get_after_sales —— 售后（退货/换货/理赔）查询。按店铺隔离，与 adp_get_order 同风格。
+-- p_order_id 可选：给了就只返回该订单的售后。返回列刻意精简，不含顾客 PII。
+-- 注：这是「按店铺 + 订单号」的查询，隐私边界与 adp_get_order 一致；
+-- 「按登录顾客隔离」（D8）由 Part B 的顾客态令牌方案加固，见 openspec dtc-store-medusa Phase 5/7。
+CREATE OR REPLACE FUNCTION adp_get_after_sales(p_shop text, p_order_id text DEFAULT NULL)
+RETURNS TABLE (
+  order_external_id text,
+  type              text,
+  status            text,
+  reason            text,
+  amount            numeric,
+  currency          text,
+  updated_at        timestamp
+) LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public, pg_temp AS $fn$
+  SELECT a.order_external_id, a.type, a.status, a.reason, a.amount, a.currency, a.source_updated_at
+  FROM after_sales a
+  JOIN "Shop" s ON s."tenantId" = a.tenant_id
+  WHERE s."shopDomain" = p_shop
+    AND s."uninstalledAt" IS NULL
+    AND (a.shop_id IS NULL OR a.shop_id = s.id)
+    AND (p_order_id IS NULL OR p_order_id = '' OR a.order_external_id = p_order_id);
+$fn$;
+
+ALTER FUNCTION adp_get_after_sales(text, text) OWNER TO drsell_app;
+REVOKE ALL ON FUNCTION adp_get_after_sales(text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION adp_get_after_sales(text, text) TO adp_reader;

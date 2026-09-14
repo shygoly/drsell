@@ -1,6 +1,6 @@
 import { IngestService } from './ingest.service';
 
-const SHOP = { id: 'shop_1', tenantId: 'tenant_1', shopDomain: 'mystore.example.com' };
+const SHOP = { id: 'shop_1', tenantId: 'tenant_1', shopDomain: 'mystore.example.com', source: 'medusa' };
 
 // 服务从配置解析店铺域（不信前端），测试提供该 env；具体值不重要（ensureShopTenant 被 mock）。
 process.env.INGEST_STORE_DOMAIN = 'mystore.example.com';
@@ -29,6 +29,7 @@ function makeDeps(existing: Record<string, { sourceUpdatedAt: Date | null }> = {
     order: model('order'),
     customer: model('customer'),
     afterSales: model('afterSales'),
+    shop: model('shop'),
   };
   const tenants = { ensureShopTenant: jest.fn().mockResolvedValue(SHOP) };
   const svc = new IngestService(prisma as never, tenants as never);
@@ -46,6 +47,16 @@ describe('IngestService', () => {
     expect(u.where).toEqual({ tenantId_shopifyProductId: { tenantId: 'tenant_1', shopifyProductId: 'prod_01' } });
     expect(u.create).toMatchObject({ tenantId: 'tenant_1', shopId: 'shop_1', shopifyProductId: 'prod_01', source: 'medusa', name: 'Tee' });
     expect(u.update).toMatchObject({ shopId: 'shop_1', source: 'medusa', name: 'Tee' });
+  });
+
+  it('自愈：ensureShopTenant 返回的店铺仍是 source=shopify 时，纠正为 medusa', async () => {
+    const { svc, tenants, updates } = makeDeps();
+    tenants.ensureShopTenant.mockResolvedValueOnce({ ...SHOP, source: 'shopify' });
+    await svc.upsertProduct({ externalId: 'prod_heal', name: 'Tee' });
+    const shopUpdate = updates.find((u) => u.model === 'shop');
+    expect(shopUpdate).toBeDefined();
+    expect(shopUpdate!.where).toEqual({ id: 'shop_1' });
+    expect(shopUpdate!.data).toEqual({ source: 'medusa' });
   });
 
   it('产品：来源版本更旧则跳过（不 upsert）', async () => {

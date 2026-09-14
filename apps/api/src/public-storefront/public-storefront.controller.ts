@@ -29,6 +29,11 @@ class PublicChatDto {
   @IsOptional()
   @IsString()
   conversationId?: string;
+
+  // 独立站已登录顾客的 Medusa JWT（D8）。可选：匿名会话不带；带上则服务端验签后按顾客隔离。
+  @IsOptional()
+  @IsString()
+  customerToken?: string;
 }
 
 @Controller()
@@ -75,6 +80,7 @@ export class PublicStorefrontController {
         text: body.text,
         visitorId: body.visitorId,
         conversationId: body.conversationId,
+        customerToken: body.customerToken,
         onChunk: (c) => res.write(c),
       });
       res.end();

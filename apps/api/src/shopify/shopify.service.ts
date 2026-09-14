@@ -313,8 +313,20 @@ export class ShopifyService implements OnModuleInit {
   }
 
   async getOnboardingState(shopDomain: string) {
-    const setting = await this.getOrCreateBotSetting(shopDomain);
-    return this.toOnboardingState(setting);
+    const shop = await this.tenants.ensureShopTenant(shopDomain);
+    const setting = await this.prisma.botSetting.upsert({
+      where: { shopId: shop.id },
+      create: { shopId: shop.id, shopName: shop.shopDomain },
+      update: {},
+    });
+    const state = this.toOnboardingState(setting);
+    // 非 Shopify 店铺（Medusa DTC 独立站，由 ingest 脚本绑定）：Shopify 式初始化向导
+    // （连 Shopify、装主题 app extension、Shopify 计费）都不适用，直接视为完成，
+    // 免得 OnboardingGuard 把商家困在向导里。见 DEPLOY.md §6.8 / dtc-store-medusa。
+    if (shop.source && shop.source !== 'shopify') {
+      return { ...state, step: 'done' as const, activated: true };
+    }
+    return state;
   }
 
   async patchOnboardingState(

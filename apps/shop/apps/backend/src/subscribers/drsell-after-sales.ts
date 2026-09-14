@@ -14,7 +14,7 @@ const MAP: Record<string, { entity: string; type: "return" | "exchange" | "claim
 };
 
 export default async function drsellAfterSales({
-  event: { eventName, data },
+  event: { name: eventName, data },
   container,
 }: SubscriberArgs<{ id: string }>) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);

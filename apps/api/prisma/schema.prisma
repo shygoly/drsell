@@ -35,6 +35,9 @@ model Shop {
   scopes                String?
   installedAt           DateTime  @default(now())
   uninstalledAt         DateTime?
+  // 店铺来源：'shopify'（默认，存量与 Shopify 装店）| 'medusa'（DTC 独立站，经 /api/ingest 建店）。
+  // 供 AI 客服 prompt 按来源参数化（中性措辞 + 售后工具）与 D9 额度豁免判定。
+  source                String    @default("shopify")
   botSetting            BotSetting?
   expiryNotices         ExpiryNotice[]
   inboxUsers            InboxUser[]
