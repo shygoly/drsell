@@ -64,6 +64,7 @@
 | `ADR-23` | B2B 询价线索是 **Medusa 自定义 module**（表 `inquiry` 在 `drsell_shop`），写入只经 `/store/inquiries`（公开，zod 校验 + 限流）与 `/admin/inquiries`（受后台鉴权），**不直写库**；管理端只读列表 + 状态推进 | `apps/shop/apps/backend/src/modules/inquiry/` + `src/api/{store,admin}/inquiries/` | 已守护（store GET 非 200、admin 无 token 401） |
 | `ADR-24` | DTC 店面是**内容式官网**（内容获客 + 询价闭环），非即时结账店面；产品卡是**规格矩阵卡且不标价**，规格是**数据**（`metadata.specs`+`metadata.specsOrder`）而非前端硬编码。**`specsOrder` 不可省**——`metadata` 是 jsonb，不保留键顺序 | `apps/shop-web/index.html` + `scripts/seed-shop-specs.sh` | 已守护（回读断言顺序与键集） |
 | `ADR-25` | DTC 站**不做购物车 / 在线结算 / Stripe**；「闭环」定义为 **询价 → 人工报价 → Medusa 草稿订单 → 合同账期**，成单状态记在 `inquiry` + 草稿订单，不经过在线支付。顾客登录**保留**（B2B 客户查自己订单/对账） | `apps/shop/apps/backend/src/modules/inquiry/` + `apps/shop-web/index.html` | 已守护（页面零购物车元素；询价单可转草稿订单） |
+| `ADR-26` | B2B 客户建站**每客户独立 Medusa 实例 + 独立数据库**；不共享自家 DTC 实例（`drsell_shop`），不用多 sales channel 承载多客户。b2b-site-build skill 建成前**禁止手工起客户实例** | `.claude/skills/`（建站流水线；b2b-site-build 待建） | 待守护（b2b-site-build 建成时以脚本+断言执行；当前零客户实例） |
 
 ---
 
