@@ -5,6 +5,11 @@ User-agent: OAI-SearchBot
 User-agent: Claude-SearchBot
 User-agent: PerplexityBot
 User-agent: Google-Extended
+# 中文检索底座（喂文心/Qwen/智谱/豆包 等；见 references/geo-china.md）
+User-agent: Baiduspider
+User-agent: YisouSpider
+User-agent: Sogou web spider
+User-agent: Bytespider
 Allow: /
 
 # 训练类 bot——有 IP 顾虑的客户可把下面两行的 Allow 改成拒绝

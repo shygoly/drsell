@@ -160,6 +160,18 @@ const smP = path.join(siteDir, 'sitemap.xml');
 if (!fs.existsSync(smP)) err('缺 sitemap.xml');
 else { const s = fs.readFileSync(smP, 'utf8'); if (!/<urlset/.test(s) || !/<loc>https?:\/\//.test(s)) err('sitemap.xml 不是合法 urlset 或无 <loc>'); }
 
+// 中文 delta（依据 references/geo-china.md）：robots 放行中文检索底座 + 百度时间因子
+if (fs.existsSync(robotsP)) {
+  const r0 = fs.readFileSync(robotsP, 'utf8');
+  if (!/User-agent:\s*Baiduspider/.test(r0)) warn('robots.txt 未列 Baiduspider——中文侧最大底座（百度→文心/AI 搜索），建议放行');
+}
+// 百度落地页时间因子（百度唯一在用的 JSON-LD）：应有 cambrian 词表 + 合法 pubDate
+if (!/ziyuan\.baidu\.com\/contexts\/cambrian/.test(html)) warn('无百度落地页时间因子 JSON-LD（cambrian）——中文收录/排序依据，建议补');
+else {
+  const tf = html.match(/cambrian[\s\S]*?"pubDate":\s*"([^"]+)"/);
+  if (!tf || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(tf[1])) err(`百度时间因子 pubDate 格式应为 YYYY-MM-DDThh:mm:ss，实际「${tf ? tf[1] : '缺失'}」`);
+}
+
 // ---- 汇总 ----
 for (const w of warns) console.error(`  ⚠ ${w}`);
 if (errors.length) {

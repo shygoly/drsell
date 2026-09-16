@@ -36,6 +36,12 @@ build 时从 catalog 生成的 SEO 快照**，与 ADR-24 的「后台改规格�
 放行搜索/检索类 AI bot（被抓是被引前提）；`llms.txt` 是近零成本默认产物，**别当卖点**
 （实证 97% 从不被读）。validate-build.mjs 守这些的离线确定性。
 
+**中文侧 delta**（依据 `references/geo-china.md`）：中文 AI 的「联网」是调搜索 API、不是 LLM 爬你，
+真杠杆是进**百度/Bing/夸克·神马/搜狗/字节**这几家底座索引（碎片化，与西方「索引≈自家 AI 底座」不同，
+且百度是西方 GEO 不碰的整个底座）。生成器自动补:robots 增列 `Baiduspider/YisouSpider/Sogou web
+spider/Bytespider`、**百度落地页时间因子** JSON-LD（cambrian 词表 `pubDate/upDate`，百度**唯一在用**
+的结构化数据，schema.org 富结果对百度≈无效）。手动门后（收录提交 + ICP）见 `b2b-cs-attach` runbook。
+
 ### 阶段 2 · Provision 独立实例（生产基建，ADR-26，需人确认）
 
 **每客户独立 Medusa 实例 + 独立库**，不共享 DTC 实例、不用多 sales channel。

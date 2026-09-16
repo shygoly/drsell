@@ -50,12 +50,24 @@ description: Use when 某客户站已由 b2b-site-build 生成、要接上 drsel
 **在泛化提问里被 AI 主动引用 = 几周~几个月且不保证**（靠相关性 + 权威度，非一次性开关）。
 进模型训练权重（模型「天生知道」你）= 数月到一年+、不可控，**别规划它**。
 
-**收录动作（人工，需客户/我方的 Google/Bing 账号——脚本代不了）：**
+**收录动作（人工，需客户/我方的搜索引擎站长账号——脚本代不了）。西方与中文两套底座分开做：**
+
+西方（→ ChatGPT/Gemini/Perplexity/Copilot）：
 1. **Google Search Console**（→ Gemini grounding / AI Overviews 的前提）：加站点 → 提交
    `sitemap.xml`（生成器已产）→ 对首页「请求编入索引」。最快的一步（几小时~几天）。
-2. **Bing Webmaster Tools**（→ Copilot、部分 ChatGPT 搜索）：加站点 + 提交 sitemap；
-   可用 **IndexNow**（提交 URL 变更，可脚本化 ping）加速。
-3. 确认 `robots.txt` 放行搜索/检索类 AI bot（生成器默认已放行）。
+2. **Bing Webmaster Tools**（→ Copilot、部分 ChatGPT 搜索）：加站点 + 提交 sitemap；开 **IndexNow** 加速。
+
+中文（→ 文心/Qwen/智谱/DeepSeek/豆包；机制是「AI 调搜索 API」，杠杆是进底座索引，见
+`b2b-site-build/references/geo-china.md`）：
+3. **百度搜索资源平台** `ziyuan.baidu.com`：加站→验证→「普通收录」提交 URL / sitemap（最大中文底座 + 文心自有索引）。
+4. **Bing 再确认**：博查 Bocha≈对齐必应且覆盖国内约 60% AI 应用（含 DeepSeek），Bing 收录在中文侧被放大，性价比高。
+5. **神马站长** `zhanzhang.sm.cn`（阿里系，喂 Qwen/智谱）、**搜狗站长** `zhanzhang.sogou.com`（腾讯系，喂智谱/微信搜一搜）：提交 sitemap/URL。
+6. **DeepSeek 别承诺直达**：它靠博查、博查无公开提交口——只能靠「广爬 + 进 Bing」间接达成，写进客户预期。
+7. **ICP 备案**：中文侧独有的收录/信任门槛（并入 b2b-site-build 阶段 2 的域名/ICP 拍板项）。
+8. 确认 `robots.txt` 放行搜索/检索类 + 中文底座 bot（生成器默认已放行 Baiduspider/YisouSpider/Sogou/Bytespider）。
+
+**冷启动即时演示（不依赖收录）**：把站点 URL 直接粘进 ChatGPT/Perplexity/Kimi/豆包/千问/智谱对话，
+用户触发直读即可引用——销售现场「让 AI 认识新站」的利器。
 
 **分发/被提及（「被引用」的真杠杆，非收录能替代）：** 行业目录挂公司/产品拿反外链、
 LinkedIn 公司页与行业 group 经营、行业新闻/PR 争取被报道——**具体渠道清单见

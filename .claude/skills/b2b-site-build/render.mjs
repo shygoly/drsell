@@ -314,12 +314,13 @@ const domain = (cfg.site?.publicDomain || widgetShop || '__DOMAIN__').replace(/^
 const baseUrl = `https://${domain}`;
 const orgName = sc.footer?.company || cat.brand?.name || domain;
 const orgDesc = (cat.brand?.positioning || sc.seo?.description || '').split(/[。.]/)[0].slice(0, 300);
+const buildDate = new Date().toISOString().slice(0, 19); // YYYY-MM-DDThh:mm:ss（百度时间因子/schema 日期共用）
 
 // JSON-LD @graph：Organization + WebSite + 每产品 Product(叠加 MedicalDevice 语义) + BreadcrumbList + FAQPage。
 // 值全部来自契约，不硬编码。MedicalDevice 是 MedicalEntity 子类、非 Product——故用 additionalType 叠加，不替换。
 const graph = [
   { '@type': 'Organization', '@id': `${baseUrl}/#org`, name: orgName, url: `${baseUrl}/`, description: orgDesc },
-  { '@type': 'WebSite', '@id': `${baseUrl}/#website`, url: `${baseUrl}/`, name: orgName, publisher: { '@id': `${baseUrl}/#org` } },
+  { '@type': 'WebSite', '@id': `${baseUrl}/#website`, url: `${baseUrl}/`, name: orgName, publisher: { '@id': `${baseUrl}/#org` }, datePublished: buildDate, dateModified: buildDate },
   ...(cat.products || []).map((p) => {
     const m = p.metadata || {}; const specs = m.specs || {}; const order = m.specsOrder || Object.keys(specs);
     const specLine = order.filter((k) => specs[k]).map((k) => `${k}：${specs[k]}`).join('；');
@@ -343,6 +344,13 @@ const graph = [
 ];
 const jsonLd = `<script type="application/ld+json">\n${JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }, null, 2)}\n</script>`;
 
+// 中文 delta（依据 references/geo-china.md）：百度落地页时间因子——百度官方明说「仅支持 JSON-LD」，
+// 是其收录/排序依据，用独立于 schema.org 的 cambrian 词表。公司/产品/供求页正是适用页型。
+// appid 需百度站长注册后回填；pubDate/upDate 从构建时间烘焙（首建两者相同）。
+const baiduTimeFactor = `<script type="application/ld+json">
+${JSON.stringify({ '@context': { '@vocab': 'https://ziyuan.baidu.com/contexts/cambrian.jsonld' }, '@id': `${baseUrl}/`, title: sc.seo?.title || orgName, pubDate: buildDate, upDate: buildDate }, null, 2)}
+</script>`;
+
 const metaHead = [
   `<meta name="robots" content="index,follow">`,
   `<link rel="canonical" href="${h(baseUrl)}/">`,
@@ -360,6 +368,11 @@ User-agent: OAI-SearchBot
 User-agent: Claude-SearchBot
 User-agent: PerplexityBot
 User-agent: Google-Extended
+# 中文检索底座（喂文心/Qwen/智谱/豆包 等；见 references/geo-china.md）
+User-agent: Baiduspider
+User-agent: YisouSpider
+User-agent: Sogou web spider
+User-agent: Bytespider
 Allow: /
 
 # 训练类 bot——有 IP 顾虑的客户可把下面两行的 Allow 改成拒绝
@@ -399,6 +412,7 @@ const out = `<!doctype html>
 ${metaHead}
 ${style}
 ${jsonLd}
+${baiduTimeFactor}
 </head>
 <body>
 
