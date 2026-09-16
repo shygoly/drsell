@@ -43,10 +43,13 @@ async function seed() {
     shop = await prisma.shop.update({ where: { id: shop.id }, data: { source: 'medusa' } });
   }
   // BotSetting（挂件渲染 + AI 开启）
+  const shopName = cat.brand?.name || shopDomain;
+  const welcomeMessage = `您好，这里是${cat.brand?.name || ''}智能客服，可咨询产品、资质与采购流程。`;
   await prisma.botSetting.upsert({
     where: { shopId: shop.id },
-    create: { shopId: shop.id, shopName: cat.brand?.name || shopDomain, aiEnabled: true, aiLanguage: 'zh-Hans', welcomeMessage: `您好，这里是${cat.brand?.name || ''}智能客服，可咨询产品、资质与采购流程。` },
-    update: { aiEnabled: true },
+    create: { shopId: shop.id, shopName, aiEnabled: true, aiLanguage: 'zh-Hans', welcomeMessage },
+    // update 也刷新展示字段——否则改名/换文案后重跑不生效（幂等要覆盖，不只保活）
+    update: { shopName, welcomeMessage, aiEnabled: true, aiLanguage: 'zh-Hans' },
   });
   // Products（规格折进 description，AI 才答得出注册证等）
   const now = new Date();
