@@ -65,6 +65,17 @@ b2b-cs-attach）与 Medusa 的 `__PUBLISHABLE_KEY__`/`__REGION_ID__`，rsync 站
 pm2、nginx（容器内 `nginx -t` 再 reload）。**验证走公网域名 + 断言内容特征**
 （陷阱 3：直连 127.0.0.1 会放过「200 但内容错」），断言产物指纹（首页 chunk 哈希变了才算部署上）。
 
+**GEO 联网发布门（可选，需联网）**：
+
+```bash
+node .claude/skills/b2b-site-build/validate-geo-online.mjs --url https://<域名>/ --client clients/<slug>
+```
+
+走公网断言 200 + 产品事实在原始 HTML（`<noscript>` 快照真被服务），并把页面交
+**schema.org 官方验证器**断言结构化数据零致命错误。任一失败 exit 1，可挂进部署脚本作发布门。
+不查 Google Rich Results Test——它查富结果资格（Product 需 offers/价格/评分），B2B 无价格会
+显示「不符资格」，那是**预期**非缺陷，不是合法性判据。
+
 ## 铁律
 
 | 想法 | 现实 |
