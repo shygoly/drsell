@@ -1,0 +1,8 @@
+# KSL 医疗科技有限公司
+> KSL 医疗是泛血管介入器械平台型企业，以外周介入「一站式」治疗体系为核心，业务覆盖冠脉介入、心脏电生理与神经介入
+
+## 主要板块（同源）
+- [产品中心](https://test-ksl.szchada.top/#products): 按临床场景组织的产品与规格
+- [资质认证](https://test-ksl.szchada.top/#creds): 可溯源的认证与注册信息
+- [采购 FAQ](https://test-ksl.szchada.top/#faq): 常见采购问题
+- [询价](https://test-ksl.szchada.top/#inquiry): 按身份分流的询价入口

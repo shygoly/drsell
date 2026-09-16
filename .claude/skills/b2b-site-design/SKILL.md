@@ -67,6 +67,8 @@ hero 侧卡/hero-note、inquiry aside 卡。收尾时全文 grep 模板残留：
 
 1. **读输入**：`catalog.json`（事实）、`research.md`（**未验证清单就是雷区图**——
    每条都对应一个「不能写」）、模板 `apps/shop-web/index.html`（槽位与现有机制）。
+   设计取舍参考 `references/meddevice-ia.md`（全球器械站 IA 精髓：双入口、量化背书条、
+   意图分流、可溯源信任层、法规市场可用性声明；及产品详情页区块顺序与国产出海站通病）。
 2. **先读后端**：打开询价路由拿 contactRole/inquiryType/purchaseTimeline 枚举，
    以及模板未用但后端支持的字段（如 expectedVolume）——设计受实现约束，先看约束。
 3. **逐槽位写 sitecopy.json**：只用 verified 事实。调研里有、目录里没有的产品线

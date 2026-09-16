@@ -109,12 +109,26 @@ ${stats}
 
 function productsBlock() {
   const ph = sc.products_head || {};
+  // 交互网格仍运行时从 Medusa 拉（ADR-24：规格是后台可改的数据）；但 AI 检索抓取器不跑 JS，
+  // 原始 HTML 里必须有产品事实才可能被引用（GEO 铁律）。故补一份 <noscript> 事实快照：
+  // 有 JS 的人看交互网格，无 JS 的爬虫/agent 读这份原子化事实。快照来自 catalog.json（build 时），
+  // 与 seed 同源；后台直接改规格后需重新 render 才同步——SEO 快照可接受的滞后。
+  const seo = (cat.products || []).map((p) => {
+    const m = p.metadata || {}; const specs = m.specs || {}; const order = m.specsOrder || Object.keys(specs);
+    const rows = order.filter((k) => specs[k]).map((k) => `<dt>${h(k)}</dt><dd>${h(specs[k])}</dd>`).join('');
+    return `      <article><h3>${h(p.title)}</h3><p>${h(p.description)}</p>${rows ? `<dl>${rows}</dl>` : ''}</article>`;
+  }).join('\n');
   return `<section id="products">
   <div class="wrap">
     ${secHead(ph.kicker, ph.h2, ph.sub)}
     <div class="filter-bar" id="filters"></div>
     <div class="prod-grid" id="prodGrid"></div>
     <div class="loading-note" id="prodState">正在加载产品…</div>
+    <noscript>
+      <div class="seo-products">
+${seo}
+      </div>
+    </noscript>
   </div>
 </section>`;
 }
@@ -294,6 +308,86 @@ const widget = `<div id="drsell-chat-root" data-shop="${h(widgetShop)}"></div>
 <script>window.DRSELL_API_BASE = ${JSON.stringify(widgetApiBase)};</script>
 <script src="${h(widgetScript)}" defer></script>`;
 
+// ---- GEO/AEO：结构化数据 + 语义 meta + robots/sitemap/llms（依据 clients/_research/geo-aeo-*）----
+// 站点公网域：从构建配置取；未回填时用占位（校验器会提醒）。
+const domain = (cfg.site?.publicDomain || widgetShop || '__DOMAIN__').replace(/^https?:\/\//, '').replace(/\/$/, '');
+const baseUrl = `https://${domain}`;
+const orgName = sc.footer?.company || cat.brand?.name || domain;
+const orgDesc = (cat.brand?.positioning || sc.seo?.description || '').split(/[。.]/)[0].slice(0, 300);
+
+// JSON-LD @graph：Organization + WebSite + 每产品 Product(叠加 MedicalDevice 语义) + BreadcrumbList + FAQPage。
+// 值全部来自契约，不硬编码。MedicalDevice 是 MedicalEntity 子类、非 Product——故用 additionalType 叠加，不替换。
+const graph = [
+  { '@type': 'Organization', '@id': `${baseUrl}/#org`, name: orgName, url: `${baseUrl}/`, description: orgDesc },
+  { '@type': 'WebSite', '@id': `${baseUrl}/#website`, url: `${baseUrl}/`, name: orgName, publisher: { '@id': `${baseUrl}/#org` } },
+  ...(cat.products || []).map((p) => {
+    const m = p.metadata || {}; const specs = m.specs || {}; const order = m.specsOrder || Object.keys(specs);
+    const specLine = order.filter((k) => specs[k]).map((k) => `${k}：${specs[k]}`).join('；');
+    return {
+      '@type': 'Product', '@id': `${baseUrl}/#product-${p.handle}`,
+      additionalType: 'https://schema.org/MedicalDevice',
+      name: p.title, sku: p.handle,
+      description: `${p.description || ''}${specLine ? `\n规格：${specLine}` : ''}`,
+      category: (cat.categories || []).find((c) => c.id === p.category)?.name || undefined,
+      brand: { '@type': 'Brand', name: (orgName.split(/\s|（/)[0]) || orgName },
+      manufacturer: { '@id': `${baseUrl}/#org` },
+    };
+  }),
+  { '@type': 'BreadcrumbList', itemListElement: [
+    { '@type': 'ListItem', position: 1, name: '首页', item: `${baseUrl}/` },
+    { '@type': 'ListItem', position: 2, name: sc.products_head?.h2 || '产品中心' },
+  ] },
+  ...((cat.faq || []).length ? [{ '@type': 'FAQPage', mainEntity: (cat.faq || []).map((f) => ({
+    '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })) }] : []),
+];
+const jsonLd = `<script type="application/ld+json">\n${JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }, null, 2)}\n</script>`;
+
+const metaHead = [
+  `<meta name="robots" content="index,follow">`,
+  `<link rel="canonical" href="${h(baseUrl)}/">`,
+  `<meta property="og:type" content="website">`,
+  `<meta property="og:title" content="${h(sc.seo?.title)}">`,
+  `<meta property="og:description" content="${h(sc.seo?.description)}">`,
+  `<meta property="og:url" content="${h(baseUrl)}/">`,
+].join('\n');
+
+// robots.txt：默认放行搜索/检索类 AI bot（被抓是被引的前提）+ 指向 sitemap（研究结论）。
+const robotsTxt = `# 搜索/检索类 AI bot——默认放行以获得引用（GEO 研究结论）
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: OAI-SearchBot
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Google-Extended
+Allow: /
+
+# 训练类 bot——有 IP 顾虑的客户可把下面两行的 Allow 改成拒绝
+User-agent: GPTBot
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: *
+Allow: /
+
+Sitemap: ${baseUrl}/sitemap.xml
+`;
+const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>${baseUrl}/</loc><changefreq>weekly</changefreq></url>
+</urlset>
+`;
+// llms.txt：近零成本默认产物（研究：消费端≈0，别当卖点）；只放同源锚点、无指令形状文本（防注入）。
+const llmsTxt = `# ${orgName}
+> ${orgDesc}
+
+## 主要板块（同源）
+- [产品中心](${baseUrl}/#products): 按临床场景组织的产品与规格
+- [资质认证](${baseUrl}/#creds): 可溯源的认证与注册信息
+- [采购 FAQ](${baseUrl}/#faq): 常见采购问题
+- [询价](${baseUrl}/#inquiry): 按身份分流的询价入口
+`;
+
 // ---- 组装 ----
 const out = `<!doctype html>
 <html lang="zh-CN">
@@ -302,7 +396,9 @@ const out = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${h(sc.seo?.title)}</title>
 <meta name="description" content="${h(sc.seo?.description)}">
+${metaHead}
 ${style}
+${jsonLd}
 </head>
 <body>
 
@@ -342,5 +438,9 @@ const outDir = path.join(clientDir, 'site');
 fs.mkdirSync(outDir, { recursive: true });
 const outPath = path.join(outDir, 'index.html');
 fs.writeFileSync(outPath, out);
-console.log(`✓ 生成 ${outPath}（${(out.length / 1024).toFixed(1)} KB；样式取自 ${templatePath}，产品运行时拉 Medusa）`);
-console.log(`  widget data-shop = ${widgetShop}${widgetShop.includes('__') ? '（占位，待 b2b-cs-attach 回填）' : ''}`);
+fs.writeFileSync(path.join(outDir, 'robots.txt'), robotsTxt);
+fs.writeFileSync(path.join(outDir, 'sitemap.xml'), sitemapXml);
+fs.writeFileSync(path.join(outDir, 'llms.txt'), llmsTxt);
+console.log(`✓ 生成 ${outPath}（${(out.length / 1024).toFixed(1)} KB）+ robots.txt + sitemap.xml + llms.txt`);
+console.log(`  GEO：JSON-LD @graph ${graph.length} 节点（含 ${(cat.products || []).length} Product）+ <noscript> 产品事实快照（AI 爬虫无需 JS 即可读）`);
+console.log(`  域名 = ${domain}${domain.includes('__') ? '（占位，回填 site.config.site.publicDomain 或 widget.shopDomain）' : ''}；widget data-shop = ${widgetShop}`);

@@ -21,9 +21,20 @@ node .claude/skills/b2b-site-build/render.mjs --client clients/<slug>
 node .claude/skills/b2b-site-build/validate-build.mjs clients/<slug>   # 红了改契约或 render，不改产物
 ```
 
-产出 `clients/<slug>/site/index.html`。可选 `clients/<slug>/site.config.json`
-配 widget/主题/实例占位（见科塞尔成例）。**产品不烘焙进 HTML**（ADR-24），运行时
-拉 Medusa。预览（产品需 Medusa，本地用 mock 注入 fetch 即可看到产品卡）。
+产出 `clients/<slug>/site/index.html` + `robots.txt` + `sitemap.xml` + `llms.txt`。
+可选 `clients/<slug>/site.config.json` 配 widget/主题/实例占位/公网域名（见科塞尔成例）。
+**交互产品网格不烘焙进 HTML**（ADR-24），运行时拉 Medusa。预览（产品需 Medusa，本地用 mock
+注入 fetch 即可看到产品卡）。
+
+**GEO/AEO（让 AI 答案引擎抓到/提取/引用，依据 `clients/_research/geo-aeo-*`）**：render.mjs
+自动从契约烘焙 —— JSON-LD `@graph`（Organization + 每产品 Product〔叠加 `additionalType:
+MedicalDevice`，它非 Product 子类故不替换〕+ BreadcrumbList + FAQPage）+ 语义 meta
+（canonical/og/robots/单 h1）+ **`<noscript>` 产品事实快照**。最后一条是关键:AI 检索抓取器
+**不跑 JS**，交互网格对它们不可见，故必须把产品名/规格/注册证号写进原始 HTML。**这份快照是
+build 时从 catalog 生成的 SEO 快照**，与 ADR-24 的「后台改规格即生效」是两条路——人看交互
+网格（实时），爬虫读快照（改规格后需重 render 才同步，SEO 可接受的滞后）。`robots.txt` 默认
+放行搜索/检索类 AI bot（被抓是被引前提）；`llms.txt` 是近零成本默认产物，**别当卖点**
+（实证 97% 从不被读）。validate-build.mjs 守这些的离线确定性。
 
 ### 阶段 2 · Provision 独立实例（生产基建，ADR-26，需人确认）
 

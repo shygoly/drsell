@@ -19,7 +19,7 @@ const PRODUCTS = (cat.products || []).map((p) => ({
   metadata: { specs: p.metadata.specs, specsOrder: p.metadata.specsOrder },
   categories: [{ name: catName[p.category] || p.category }],
 }));
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
 
 http.createServer((req, res) => {
   const u = decodeURIComponent((req.url || '/').split('?')[0]);

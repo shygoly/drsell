@@ -112,6 +112,54 @@ const shopMatch = html.match(/id="drsell-chat-root" data-shop="([^"]*)"/);
 if (!shopMatch) err('缺客服挂件 drsell-chat-root');
 else if (shopMatch[1].includes('__')) warn(`挂件 data-shop 仍为占位「${shopMatch[1]}」——上线前须由 b2b-cs-attach 回填真实 shopDomain`);
 
+// ---- GEO/AEO：让 AI 答案引擎抓到、正确提取、被引用（依据 clients/_research/geo-aeo-*）----
+// 语义 meta（离线确定性）
+if ((html.match(/<h1[ >]/g) || []).length !== 1) err(`应恰有 1 个 <h1>（AI 解析靠标题层级），实际 ${(html.match(/<h1[ >]/g) || []).length} 个`);
+if (!/<link rel="canonical"/.test(html)) err('缺 <link rel="canonical">');
+if (!/<meta name="robots"/.test(html)) err('缺 robots meta');
+for (const og of ['og:title', 'og:description', 'og:url']) if (!html.includes(`property="${og}"`)) err(`缺 OpenGraph ${og}`);
+
+// JSON-LD 结构化数据
+const ld = html.match(/<script type="application\/ld\+json">\s*([\s\S]*?)\s*<\/script>/);
+if (!ld) err('缺 JSON-LD 结构化数据（<script type="application/ld+json">）');
+else {
+  let g;
+  try { g = JSON.parse(ld[1]); } catch (e) { err(`JSON-LD 解析失败：${e.message}`); }
+  if (g) {
+    if (g['@context'] !== 'https://schema.org') err('JSON-LD @context 应为 https://schema.org');
+    const nodes = g['@graph'] || [g];
+    const types = nodes.map((n) => n['@type']);
+    if (!types.includes('Organization')) err('JSON-LD 缺 Organization（实体消歧/可信度信号）');
+    const prodNodes = nodes.filter((n) => n['@type'] === 'Product');
+    if (prodNodes.length !== (cat.products || []).length) err(`JSON-LD Product 节点 ${prodNodes.length} 个，catalog 有 ${(cat.products || []).length} 产品`);
+    if (!types.includes('BreadcrumbList')) err('JSON-LD 缺 BreadcrumbList');
+    // MedicalDevice 只作 additionalType 叠加，不得当独立 @type 替换 Product
+    if (types.includes('MedicalDevice')) err('MedicalDevice 不是 Product 子类、无富结果——应作 Product 的 additionalType 叠加，不得作独立节点替换 Product');
+    // @id 交叉引用不悬空（manufacturer/publisher 指向的 @id 必须有定义）
+    const ids = new Set(nodes.filter((n) => n['@id']).map((n) => n['@id']));
+    const refIds = [...ld[1].matchAll(/(?:manufacturer|publisher)"?:\s*\{\s*"@id":\s*"([^"]+)"/g)].map((m) => m[1]);
+    for (const rid of refIds) if (!ids.has(rid)) err(`JSON-LD @id 引用悬空：${rid}`);
+  }
+}
+
+// AI 爬虫无 JS → 产品事实必须在原始 HTML（noscript 快照）。这是 AI 可见性的硬门槛。
+if (!/<div class="seo-products">/.test(html)) err('缺 <noscript> 产品事实快照——AI 检索抓取器不跑 JS，产品名/规格必须在原始 HTML 中才可能被引用');
+for (const p of (cat.products || []).slice(0, 3))
+  if (p.title && !html.includes(p.title)) err(`产品「${p.title}」不在原始 HTML——AI 爬虫看不到，GEO 失效`);
+
+// robots.txt / sitemap.xml（同目录产物）
+const siteDir = path.join(clientDir, 'site');
+const robotsP = path.join(siteDir, 'robots.txt');
+if (!fs.existsSync(robotsP)) err('缺 robots.txt');
+else {
+  const r = fs.readFileSync(robotsP, 'utf8').split('\n').filter((l) => !l.trim().startsWith('#')).join('\n');
+  if (/User-agent:\s*(Googlebot|OAI-SearchBot|PerplexityBot)[\s\S]*?Disallow:\s*\/\s*$/m.test(r)) err('robots.txt 屏蔽了搜索/检索类 AI bot——被抓是被引的前提，应放行');
+  if (!/^Sitemap:\s*https?:\/\//m.test(r)) err('robots.txt 缺 Sitemap: 行');
+}
+const smP = path.join(siteDir, 'sitemap.xml');
+if (!fs.existsSync(smP)) err('缺 sitemap.xml');
+else { const s = fs.readFileSync(smP, 'utf8'); if (!/<urlset/.test(s) || !/<loc>https?:\/\//.test(s)) err('sitemap.xml 不是合法 urlset 或无 <loc>'); }
+
 // ---- 汇总 ----
 for (const w of warns) console.error(`  ⚠ ${w}`);
 if (errors.length) {
@@ -119,4 +167,4 @@ if (errors.length) {
   for (const m of errors) console.error(`  - ${m}`);
   process.exit(1);
 }
-console.log(`✓ ${htmlPath} build 校验通过：零工厂残留，${(sc.creds?.cards || []).length} 资质卡 / ${(cat.faq || []).length} FAQ / ${roles.length} 询价 tab 均落位，产品接 Medusa、询价接后端、枚举对齐${warns.length ? `（${warns.length} 条提醒见上）` : ''}`);
+console.log(`✓ ${htmlPath} build 校验通过：零工厂残留，${(sc.creds?.cards || []).length} 资质卡 / ${(cat.faq || []).length} FAQ / ${roles.length} 询价 tab 均落位，产品接 Medusa、询价接后端、枚举对齐；GEO：JSON-LD + 语义 meta + noscript 产品事实 + robots/sitemap 均在位${warns.length ? `（${warns.length} 条提醒见上）` : ''}`);
