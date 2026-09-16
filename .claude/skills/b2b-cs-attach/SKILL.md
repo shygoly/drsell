@@ -39,6 +39,30 @@ description: Use when 某客户站已由 b2b-site-build 生成、要接上 drsel
    - 挂件配置：`curl https://drsell.szchada.top/api/botSettings/shop/<shopDomain>` 返回非空、aiEnabled；
    - AI 应答：`POST /api/public/chat {shopDomain,text:"你们有<某产品>吗",visitorId}`，断言应答命中真实产品；
    - D8 隔离：问另一 shop 的产品应答「不属于本店」/查不到。
+   - GEO 发布门（可选）：`node .claude/skills/b2b-site-build/validate-geo-online.mjs --url https://<域名>/ --client clients/<slug>`。
+
+6. **上线后：收录 + 分发**（决定多久进 AI 答案的**不是代码，是这步**——见下）。
+
+## 上线后收录与分发（进 ChatGPT/Gemini 的真实杠杆）
+
+站点合规只是「够格被抓、被正确提取」的入场券，不制造「被引用」所需的权威度。真实时间线：
+**点名让 AI 现场读 URL = 今天就能**；**被搜索引擎收录 = 主动推几小时~几天 / 不推几天~几周**；
+**在泛化提问里被 AI 主动引用 = 几周~几个月且不保证**（靠相关性 + 权威度，非一次性开关）。
+进模型训练权重（模型「天生知道」你）= 数月到一年+、不可控，**别规划它**。
+
+**收录动作（人工，需客户/我方的 Google/Bing 账号——脚本代不了）：**
+1. **Google Search Console**（→ Gemini grounding / AI Overviews 的前提）：加站点 → 提交
+   `sitemap.xml`（生成器已产）→ 对首页「请求编入索引」。最快的一步（几小时~几天）。
+2. **Bing Webmaster Tools**（→ Copilot、部分 ChatGPT 搜索）：加站点 + 提交 sitemap；
+   可用 **IndexNow**（提交 URL 变更，可脚本化 ping）加速。
+3. 确认 `robots.txt` 放行搜索/检索类 AI bot（生成器默认已放行）。
+
+**分发/被提及（「被引用」的真杠杆，非收录能替代）：** 行业目录挂公司/产品拿反外链、
+LinkedIn 公司页与行业 group 经营、行业新闻/PR 争取被报道——**具体渠道清单见
+`references/distribution-channels.md`**（国外器械行业目录 / LinkedIn / 新闻媒体，附优先级）。
+
+> 对测试站的实话：冷僻测试子域 + 零外链的新域名，权威度≈0，泛化提问不会被引；
+> 用「点名让 AI 打开该 URL」验证 GEO 管道即可，别拿它等泛化引用。
 
 ## 铁律
 
