@@ -10,7 +10,9 @@
 
 ## Claude 专有
 
-- B2B 客户建站流水线 skills 在 `.claude/skills/`：`b2b-research`（已建，事实契约
-  `clients/<slug>/catalog.json`）→ `b2b-site-design`（已建，表达契约 `sitecopy.json`，
-  跨文件校验：资质锚定 catalog + 询价枚举现读后端路由）→ `b2b-site-build` →
-  `b2b-cs-attach`（待建）。每个 skill 自带校验器；首个完整客户档案在 `clients/kossel-medtech/`。
+- B2B 客户建站流水线 skills 在 `.claude/skills/`：`b2b-research`（事实契约
+  `catalog.json`）→ `b2b-site-design`（表达契约 `sitecopy.json`）→ `b2b-site-build`
+  （已建：render.mjs 把契约烘焙成 `site/index.html`，工厂拥 runtime/客户拥内容，
+  产品不硬编码走 Medusa=ADR-24，validate-build.mjs 守零残留+接线；provision/seed/deploy
+  是生产门后步骤，遵 ADR-26 独立实例）→ `b2b-cs-attach`（待建：回填 shopDomain + ingest
+  + 客服知识源）。每个 skill 自带校验器；首个完整客户档案在 `clients/kossel-medtech/`。
