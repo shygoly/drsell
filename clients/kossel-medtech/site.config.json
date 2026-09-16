@@ -2,7 +2,7 @@
   "_note": "构建配置（非内容、非事实）。widget.shopDomain 待 b2b-cs-attach 在 drsell 侧建 Shop 后回填；域名本身是客户拍板项（szchada.top 子域 vs 客户自有域，见 design.md §4）。",
   "slug": "kossel-medtech",
   "widget": {
-    "shopDomain": "__SHOP_DOMAIN__",
+    "shopDomain": "test-ksl.szchada.top",
     "apiBase": "https://drsell.szchada.top/api",
     "scriptSrc": "https://drsell.szchada.top/drsell-chat.js"
   },
