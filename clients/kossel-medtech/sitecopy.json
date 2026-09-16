@@ -1,0 +1,162 @@
+{
+  "meta": {
+    "client": "kossel-medtech",
+    "template": "apps/shop-web/index.html",
+    "consumes": "clients/kossel-medtech/catalog.json",
+    "date": "2026-09-15"
+  },
+  "seo": {
+    "title": "科塞尔医疗 Kossel Medtech · 泛血管介入器械与 OEM/CDMO 平台",
+    "description": "科塞尔医疗科技（苏州）——泛血管介入器械平台型企业：外周介入一站式治疗体系、冠脉介入与心脏电生理产品线，两款国家创新医疗器械已商业化，多款产品获欧盟 CE-MDR 认证，并提供 OEM/CDMO 受托生产与 CNAS 检测服务。采购与委托均走询价对接。"
+  },
+  "brand_header": {
+    "logo_letter": "K",
+    "brand_text": "Kossel 科塞尔医疗",
+    "brand_sub": "MEDTECH"
+  },
+  "nav": [
+    { "href": "#products", "label": "产品中心" },
+    { "href": "#apps", "label": "应用领域" },
+    { "href": "#creds", "label": "资质认证" },
+    { "href": "#services", "label": "合作模式" },
+    { "href": "#resources", "label": "技术资料" },
+    { "href": "#faq", "label": "采购 FAQ" },
+    { "href": "#inquiry", "label": "询价" }
+  ],
+  "hero": {
+    "kicker": "泛血管介入 · VASCULAR INTERVENTION",
+    "h1": "泛血管介入器械平台，让爱穿行于心",
+    "lead": "科塞尔医疗以外周介入「一站式」治疗体系为核心，业务覆盖冠脉介入、心脏电生理与神经介入。两款创新医疗器械已商业化，多款产品获欧盟 CE-MDR 认证，产品注册覆盖海外 20 余个国家，并以受托生产许可证与 CNAS 认可实验室提供 OEM/CDMO 全链条服务。本站产品按临床场景组织，采购与委托一律走询价对接。",
+    "ctas": [
+      { "label": "按产品线选型", "href": "#products" },
+      { "label": "提交询价 / 委托", "href": "#inquiry" }
+    ],
+    "stats": [
+      { "value": "2", "label": "创新医疗器械", "basis": "catalog:products[octoparms].certifications[0]（No.116，国家药监局通道）+ products[cathlink].certifications[0]（No.008，通道级别待核——故不写「国家」定语，见 needs_verification）" },
+      { "value": "6", "label": "欧盟 CE-MDR 认证产品", "basis": "https://www.kosselmed.com/ce-mdr-2/ 载明外周 4 款 + 此前冠脉 2 款；catalog:faq[0]" },
+      { "value": "20+", "label": "海外注册国家", "basis": "catalog:brand.positioning + faq[1]（官网关于页口径）" },
+      { "value": "auto", "label": "款在售产品", "basis": "模板 statProducts 由 Medusa 产品数动态计数，不手填" }
+    ]
+  },
+  "products_head": {
+    "kicker": "产品中心 · PRODUCTS",
+    "h2": "按临床场景组织的泛血管介入产品矩阵",
+    "sub": "规格与注册证信息取自各产品注册资料；点击产品卡可加入询价单，价格与供货以询价对接为准。"
+  },
+  "success_toast": "已收到您的询价，受理信息已记录。市场部将按需求类型安排对应负责人与您联系。",
+  "apps": {
+    "kicker": "应用领域 · APPLICATIONS",
+    "h2": "覆盖泛血管临床场景与器械企业委托场景",
+    "sub": "产品按临床场景组织，医院与经销伙伴按术式定位，器械企业按委托类型进入。",
+    "cards": [
+      { "name": "肺栓塞防治", "small": "腔静脉滤器 · 回收器" },
+      { "name": "外周血栓清除", "small": "血栓抽吸系统" },
+      { "name": "外周血管扩张", "small": "约束型球囊" },
+      { "name": "冠脉血运重建", "small": "药物支架 · NC 球囊" },
+      { "name": "介入通路建立", "small": "亲水导丝 · 穿刺套件" },
+      { "name": "心脏电生理", "small": "左束支起搏导引鞘" },
+      { "name": "海外市场准入", "small": "CE-MDR · 20+ 国注册" },
+      { "name": "OEM/CDMO", "small": "受托生产 · CNAS 检测" }
+    ]
+  },
+  "creds": {
+    "kicker": "资质与标准 · COMPLIANCE",
+    "h2": "已坐实的资质，为每一次采购背书",
+    "sub": "以下资质均可溯源至官网载明页；具体证书文件与各产品注册证信息请通过询价入口索取，由市场部定向提供。",
+    "cards": [
+      {
+        "type": "certification",
+        "cert_ref": "国家药监局创新医疗器械（创新器械 No.116，首个国产伞状长效腔静脉滤器）",
+        "icon": "🏅",
+        "title": "创新医疗器械 No.116",
+        "text": "Octoparms® 腔静脉滤器——首个国产伞状长效腔静脉滤器，已商业化。"
+      },
+      {
+        "type": "certification",
+        "cert_ref": "二类创新医疗器械（No.008，首个国产电极导线导引鞘组）",
+        "icon": "🏅",
+        "title": "创新医疗器械 No.008",
+        "text": "Cathlink™ 电极导线导引鞘组——首个国产电极导线导引鞘组，填补国产空白。"
+      },
+      {
+        "type": "certification",
+        "cert_ref": "欧盟 CE-MDR 认证（外周介入系列）",
+        "icon": "🇪🇺",
+        "title": "欧盟 CE-MDR 认证",
+        "text": "外周介入系列四款产品获 CE-MDR，与此前冠脉两款双线并行，取得欧洲市场准入。"
+      },
+      {
+        "type": "certification",
+        "cert_ref": "医疗器械生产许可证（江苏省药品监督管理局颁发，含受托生产）",
+        "icon": "🏭",
+        "title": "生产许可证（含受托）",
+        "text": "江苏省药监局颁发，覆盖自产与受托生产，支撑 OEM/CDMO 业务合规开展。"
+      },
+      {
+        "type": "certification",
+        "cert_ref": "CNAS 认可实验室（中国合格评定国家认可委员会，检测服务能力）",
+        "icon": "🔬",
+        "title": "CNAS 认可实验室",
+        "text": "检测能力获国家认可，覆盖老化、物理、化学、有源、微生物与环境检测。"
+      },
+      {
+        "type": "certification",
+        "cert_ref": "国家专精特新「小巨人」企业（含国家重点小巨人）",
+        "icon": "⭐",
+        "title": "国家专精特新「小巨人」",
+        "text": "国家级专精特新小巨人企业，并获批国家重点小巨人。"
+      }
+    ]
+  },
+  "services": {
+    "kicker": "合作模式 · PARTNERSHIP",
+    "h2": "两类客户，四条合作通道",
+    "sub": "医院与经销伙伴走产品采购通道；器械企业走受托生产与检测委托通道。",
+    "cards": [
+      { "title": "院线采购与经销", "text": "面向医院、配送商与区域经销伙伴：产品报价、注册证信息、样品与学术支持，均可经询价入口对接。" },
+      { "title": "海外注册与市场合作", "text": "「Local Base, Global Reach」：欧洲与东南亚制造中心、日本等地分支机构，多款产品持 CE-MDR，支持海外市场准入合作。" },
+      { "title": "OEM/CDMO 受托生产", "text": "植入类金属支架、介入类球囊及电生理导管定制：支架产能 40 万根/年、球囊导管约 80 万根/年，有跨省受托产品注册获批先例。" },
+      { "title": "CNAS 检验检测服务", "text": "超 600 平方米 CNAS 认可实验室，承接老化、物理性能、化学、有源、微生物与环境检测委托。" }
+    ]
+  },
+  "resources": {
+    "kicker": "知识资源 · RESOURCES",
+    "h2": "技术资料按需索取，由市场部定向发送",
+    "sub": "官网各产品页均设「产品资料」入口；以下资料包经询价/索取入口申请。",
+    "items": [
+      { "title": "产品注册证与技术资料（按产品索取）", "meta": "资料包 · 中文", "type": "existing", "source_url": "https://www.kosselmed.com/product/octoparms/" },
+      { "title": "CE-MDR 认证产品清单与欧洲准入说明", "meta": "PDF · 出海合作", "type": "planned" },
+      { "title": "OEM/CDMO 受托生产能力与产能说明", "meta": "PDF · 委托生产", "type": "planned" },
+      { "title": "肺栓塞（PE/DVT）介入防治产品方案", "meta": "资料库 · 临床", "type": "planned" },
+      { "title": "CNAS 检测服务项目清单与委托流程", "meta": "PDF · 检测委托", "type": "planned" }
+    ]
+  },
+  "inquiry": {
+    "kicker": "询价与委托 · RFQ",
+    "h2": "按身份分流，智能客服 + 市场部报价闭环",
+    "tabs": [
+      { "id": "distributor", "value": "distributor", "label": "🤝 经销 · 海外代理", "body": "面向配送商、区域经销与海外代理：区域合作洽谈、注册文件包与市场支持。" },
+      { "id": "institution", "value": "institution", "label": "🏥 医院 · 临床机构", "body": "面向医院与临床科室：产品报价、注册证信息、样品申请与学术支持。" },
+      { "id": "purchaser", "value": "purchaser", "label": "🏭 器械企业 · OEM/CDMO", "body": "面向医疗器械企业：支架/球囊/电生理导管受托生产、CNAS 检测委托与联合开发。" }
+    ],
+    "types": [
+      { "label": "产品采购报价", "value": "purchase" },
+      { "label": "样品申请", "value": "sample" },
+      { "label": "注册证 / 技术资料索取", "value": "doc" },
+      { "label": "经销 / 海外代理合作", "value": "cooperation" },
+      { "label": "OEM/CDMO 受托生产", "value": "cooperation" },
+      { "label": "CNAS 检测委托", "value": "cooperation" },
+      { "label": "售后支持", "value": "after_sales" }
+    ],
+    "expected_volume": { "label": "预计年用量", "placeholder": "例：腔静脉滤器 500 套/年（可不填）" },
+    "company_placeholder": "医院 / 器械企业 / 经销商 / 海外合作方",
+    "scene_placeholder": "例：外周血栓抽吸系统院线采购，年用量预估；或：球囊导管受托生产，需对接 CE 体系……",
+    "submit_label": "提交询价 · 市场部快速响应"
+  },
+  "footer": {
+    "company": "科塞尔医疗科技（苏州）股份有限公司",
+    "address": "苏州虎丘区科技城锦峰路 8 号 6 号楼",
+    "phone": "0512-87174080",
+    "email": "marketing@kosselmed.com"
+  }
+}

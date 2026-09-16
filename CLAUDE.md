@@ -10,5 +10,7 @@
 
 ## Claude 专有
 
-- B2B 客户建站流水线 skills 在 `.claude/skills/`：`b2b-research`（已建，产出契约
-  `clients/<slug>/`，校验器随 skill 附带）→ `b2b-site-build` → `b2b-cs-attach`（待建）。
+- B2B 客户建站流水线 skills 在 `.claude/skills/`：`b2b-research`（已建，事实契约
+  `clients/<slug>/catalog.json`）→ `b2b-site-design`（已建，表达契约 `sitecopy.json`，
+  跨文件校验：资质锚定 catalog + 询价枚举现读后端路由）→ `b2b-site-build` →
+  `b2b-cs-attach`（待建）。每个 skill 自带校验器；首个完整客户档案在 `clients/kossel-medtech/`。
