@@ -28,7 +28,7 @@ export const EXTENSION_HANDLE = "drsell-chat";
 export const EMBED_BLOCK_HANDLE = "chat-embed";
 export const CLIENT_ID =
   process.env.NEXT_PUBLIC_SHOPIFY_API_KEY ||
-  "0b36b70772220b71b2fe296b3deba914";
+  "f286a4af8f1d80cb8e6228bc648f4786";
 
 /** app handle，用于托管计费的套餐选择页深链（与 shopify.app.toml 的 handle 一致）。 */
 export const APP_HANDLE = "drseller-alpha";
