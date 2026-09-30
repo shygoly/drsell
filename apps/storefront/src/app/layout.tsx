@@ -11,7 +11,7 @@ const inter = Inter({
 
 const SHOPIFY_API_KEY =
   process.env.NEXT_PUBLIC_SHOPIFY_API_KEY ||
-  "0b36b70772220b71b2fe296b3deba914";
+  "f286a4af8f1d80cb8e6228bc648f4786";
 
 export const metadata: Metadata = {
   title: "Dr Sell — AI customer support",
