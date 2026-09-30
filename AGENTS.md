@@ -75,21 +75,18 @@ bash scripts/deploy-mvp.sh   # 构建 + rsync 到 wjclaw + pm2 重启四进程 +
 
 ## 陷阱（踩过的，别再踩）
 
-1. **AI 回复链路走 OpenClaw，不是 Coze。** `apps/api` → `packages/openclaw` →
-   wjclaw 上的 OpenClaw gateway（`127.0.0.1:18790`，OpenAI 兼容 `/v1/chat/completions`，
-   provider DeepSeek-V4，pm2 进程 `openclaw-drsell`）。仓库配置模板在
-   `infra/openclaw/drsell/`。该 gateway **正在服务生产对话**：改
-   `agents.defaults.model.primary` 前先备份、先验 tool calling，改完走公网复验，
-   并同步 `ADR-15` 与配置模板。全仓 `coze` 零命中。
-
-   主 key 欠费时会自动切到 `fallbacks` 里的 `zhipu/glm-4.5-flash`（`ADR-15`）——
+1. **AI 回复链路走进程内 Pi，不是 Coze，也不是默认走 OpenClaw 网关。** `apps/api` →
+   `@drsell/openclaw`（`PiSupportClient`）→ DeepSeek V4 Flash，billing 时切
+   `zhipu/glm-4.5-flash`。全仓 `coze` 零命中。改 primary 前先验 tool calling
+   （`scripts/probe-glm-tools.mjs`），改完走公网复验，并同步 `ADR-15`。
    **`deepseek-v4-flash` 与 `deepseek-v4-pro` 共用同一个 key**，换 DeepSeek 型号
-   兜不住欠费，只有换 provider 才行。
-   OpenClaw 把 402/余额不足归为 `billing` 失败并换模型，**生产上真的兜住过**
-   （2026-09-08 日志：`decision=fallback_model reason=billing
-   from=deepseek-v4/... → candidate_succeeded zhipu/glm-4.5-flash`）。**换备用模型前必须先验证它支持
-   tool calling**：本链路靠 `adp_search_products`/`adp_get_order` 查真实数据，
-   不支持工具调用的模型会一本正经地编造商品，比直接报错更糟。
+   兜不住欠费，只有换 provider 才行。`PiSupportClient` 把 402/余额不足归为
+   `billing` 并换模型（日志 `event=chat_agent_fallback reason=billing`）。
+   **换备用模型前必须先验证它支持 tool calling**：本链路靠
+   `adp_search_products`/`adp_get_order` 查真实数据，不支持工具调用的模型会
+   一本正经地编造商品，比直接报错更糟。
+   回滚：`CHAT_AGENT=openclaw` 且 `openclaw-drsell` 仍在时才走网关 HTTP 客户端。
+   模型 key 只从 api `.env` 读，Nest **禁止**读 `/root/.openclaw-drsell/`。
 
 2. **`apps/web` 与 `apps/storefront` 共用 `drsell.szchada.top` 域名根，抢同一片路径空间。**
    `location /` → storefront，`location ^~ /app` → web。两者静态资产都在 `/_next/`，
@@ -114,12 +111,11 @@ bash scripts/deploy-mvp.sh   # 构建 + rsync 到 wjclaw + pm2 重启四进程 +
    `curl` 首页取 `/_next/static/chunks/app/layout-<hash>.js`，
    哈希没变就是没部署上去。指纹比任何退出码都硬。
 
-4. **Shopify app 只有一个合法身份**：client_id `0b36b70772220b71b2fe296b3deba914`
-   （name `Drsell`，handle `drseller-alpha`，App ID 264501002241）。
-   legacy jade app `f286a4af8f1d80cb8e6228bc648f4786` **严禁用于生产**——
-   它那份**可用的** `shopify.app.toml` 现已移入 `obsolete/chatbot/`（不再位于仓库根附近），
-   但 `shopify app deploy` **仍必须带 `--path apps/web`**：仓库根没有 toml，路径写错就可能
-   发错 app。
+4. **Shopify app 只有一个合法身份**：client_id `fb28d7cc61d6e9c16f47eb28114087ae`
+   （name `Pichat`，handle `pichat`，App ID 429852852225）。
+   已下架的 Drsell `0b36b70772220b71b2fe296b3deba914`（handle `drseller-alpha`，App ID 264501002241）
+   与 legacy jade `f286a4af8f1d80cb8e6228bc648f4786` **严禁用于生产**。
+   `shopify app deploy` **必须带 `--path apps/web`**：仓库根没有 toml，路径写错就可能发错 app。
    CLI 4.7.1 起 deploy 会**覆盖 Partner 后台配置**（含 name/handle）。
 
 5. **`.stitch/` 不在版本库**（2026-09-03 决定，见 `docs/RELEASE-2026-09-02.md`）。

@@ -33,7 +33,7 @@ chmod +x scripts/deploy-mvp.sh
 ```
 
 - 应用 URL：`https://drsell.szchada.top`
-- Partner：**Drsell** App `264501002241` — 见 [docs/DRSELL_PUBLISH.md](docs/DRSELL_PUBLISH.md)
+- Partner：**Pichat** App `429852852225` — 见 [docs/DRSELL_PUBLISH.md](docs/DRSELL_PUBLISH.md)
 
 ## 登录认证（drsell.szchada.top/login）
 

@@ -41,7 +41,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
         <header className="bg-card flex h-14 w-full shrink-0 items-center justify-between border-b px-5">
           <div className="flex h-full items-center gap-6">
-            <div className="text-primary font-semibold md:hidden">Dr Sell</div>
+            <div className="text-primary font-semibold md:hidden">Pichat</div>
             {/* 稿中此处为全局搜索框：目前无搜索后端，暂移除以免出现点了没反应的死控件。 */}
             <nav
               aria-label="Section navigation"

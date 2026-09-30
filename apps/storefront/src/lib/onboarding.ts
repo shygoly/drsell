@@ -28,10 +28,10 @@ export const EXTENSION_HANDLE = "drsell-chat";
 export const EMBED_BLOCK_HANDLE = "chat-embed";
 export const CLIENT_ID =
   process.env.NEXT_PUBLIC_SHOPIFY_API_KEY ||
-  "f286a4af8f1d80cb8e6228bc648f4786";
+  "fb28d7cc61d6e9c16f47eb28114087ae";
 
 /** app handle，用于托管计费的套餐选择页深链（与 shopify.app.toml 的 handle 一致）。 */
-export const APP_HANDLE = "drseller-alpha";
+export const APP_HANDLE = "pichat";
 
 /**
  * Shopify 托管计费的套餐选择页。

@@ -1,4 +1,4 @@
-# Shopify App Store listing — Dr Sell
+# Shopify App Store listing — Pichat
 
 提交表单的**唯一事实来源**。改文案先改这里，再抄进表单，避免每次重新想一遍。
 
@@ -11,21 +11,23 @@
 
 | | |
 |---|---|
-| App | Dr Sell |
-| App ID | 264501002241 |
-| client_id | `0b36b70772220b71b2fe296b3deba914` |
-| handle | `drseller-alpha` |
-| 提交表单 | https://apps.shopify.com/services/partner-app-submissions/0b36b70772220b71b2fe296b3deba914/en |
-| 当前状态 | **Delisted — 由 Shopify 下架，原因在邮件里**（见下方「真正的阻塞点」） |
-| 测试店铺 | `chatbotdomaintest.myshopify.com` |
-| 最后核对 | 2026-09-05，对应扩展版本 `drseller-alpha-31` |
+| App | Pichat |
+| App ID | 429852852225 |
+| client_id | `fb28d7cc61d6e9c16f47eb28114087ae` |
+| handle | `pichat` |
+| 提交表单 | https://apps.shopify.com/services/partner-app-submissions/fb28d7cc61d6e9c16f47eb28114087ae/en |
+| 当前状态 | 新应用；旧 Drsell listing 保持 Delisted |
+| 测试店铺 | 需在新 app 上重新安装（旧店安装不迁移） |
+| 最后核对 | 2026-09-30，扩展版本 `pichat-2` |
 | 演示店 widget 配色 | `#008A57` / `#0A3D2E`（原为商家设的 `#8a5d0a`，为素材统一改绿） |
 
 ---
 
-## 真正的阻塞点：应用处于 Delisted，Publish 被锁
+## 旧应用 Drsell（264501002241）保持下架
 
-2026-09-05 查到的实况。Partner 后台
+这是 **Pichat** 的 listing 草稿。旧 app Drsell / `drseller-alpha` 按 Shopify 邮件保持 Delisted，不再往那只 app 上提交。
+
+2026-09-05 查到的旧 app 实况。Partner 后台
 `https://partners.shopify.com/3746733/apps/264501002241/distribution/app-store` 上写着：
 
 > **Critical — Delisted。Check your email for details.**
@@ -48,7 +50,7 @@ Delisted 解除之前，无论内容多完整都发不出去。下一步不是�
 
 | 字段 | 值 | 限额 |
 |---|---|---|
-| App name | `Dr Sell` | 7/30 |
+| App name | `Pichat` | 6/30 |
 | Primary category | Store management › Support › Chat | — |
 | Category details | Real-time messaging · AI chatbots · Automated responses · Customization · Chat window | 最少 1 个 |
 | Languages | English | — |
@@ -67,7 +69,7 @@ AI chat that answers product and order questions on your storefront, in each sho
 ### App details （499/500）
 
 ```
-Dr Sell adds an AI support agent to your storefront via a theme app extension — one toggle, no code.
+Pichat adds an AI support agent to your storefront via a theme app extension — one toggle, no code.
 
 It answers from live Shopify data: product availability and pricing, and order status once a shopper gives an order number. It replies in the shopper's own language.
 
@@ -166,7 +168,7 @@ customer service, more actively encourages customers to place orders"）。换�
 | 字段 | 值 | 限额 |
 |---|---|---|
 | Subtitle | `AI chat answering product and order questions in any language` | 60/62 |
-| Title tag | `Dr Sell \| AI Chat Widget for Product and Order Questions` | 56/60 |
+| Title tag | `Pichat \| AI Chat Widget for Product and Order Questions` | 55/60 |
 | Meta description | `Add an AI chat widget to your storefront that answers product and order questions. Track chats and AI-resolved conversations from one dashboard.` | 143/160 |
 | Search terms | `Smart Customer Service` · `Shopping Guidance` · `Intelligent Chatbot` · `AI customer support` · `live chat`（上限 5 条，已满） |
 
@@ -184,7 +186,7 @@ HERE >>>`，需人工替换——把密码填进输入框不是我能做的操�
 Test store: chatbotdomaintest.myshopify.com
 Storefront password: <<< ENTER STOREFRONT PASSWORD HERE >>>
 
-1. Install Dr Sell and approve the standard authorization for your store.
+1. Install Pichat and approve the standard authorization for your store.
 2. The app opens in your Shopify admin. Complete the guided setup.
 3. Open Widget Config and set the widget colour, then Save.
 4. Open the storefront (enter the storefront password above), and click the

@@ -101,7 +101,7 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Settings</h1>
         <p className="text-muted-foreground text-sm">
-          Account, stores and billing for your Dr Sell installation.
+          Account, stores and billing for your Pichat installation.
         </p>
       </div>
 

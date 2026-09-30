@@ -71,7 +71,7 @@ export function SidebarNav() {
           <Bot className="h-5 w-5" aria-hidden="true" />
         </div>
         <div className="min-w-0">
-          <h1 className="text-lg leading-tight font-bold">Dr Sell</h1>
+          <h1 className="text-lg leading-tight font-bold">Pichat</h1>
           {/* 副标题显示实际连接的店铺；原稿这里是设计稿遗留的虚构公司名。 */}
           <p className="text-muted-foreground truncate text-[13px]">
             {shop || "AI customer support"}

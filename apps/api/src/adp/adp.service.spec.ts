@@ -283,6 +283,7 @@ describe('AdpService 上下文所有权', () => {
     const arg = chatStream.mock.calls[0][0];
     expect(arg.systemPrompt).toBe(`SYSTEM for ${SHOP}`);
     expect(arg.shopDomain).toBe(SHOP);
+    expect(arg.source).toBe('shopify');
   });
 });
 
@@ -349,6 +350,7 @@ describe('AdpService AI 开关与人设', () => {
       'medusa',
       null,
     );
+    expect(chatStream.mock.calls[0][0].source).toBe('medusa');
   });
 
   it('沙盒预览：用草稿人设一次性试聊，不落库、不影响真实会话', async () => {

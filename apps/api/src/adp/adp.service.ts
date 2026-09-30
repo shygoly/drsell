@@ -330,6 +330,7 @@ export class AdpService {
       shopDomain: params.shopDomain,
       visitorId: params.visitorId,
       conversationId: params.conversationId,
+      source: source ?? 'shopify',
       systemPrompt: buildSupportSystemPrompt(
         params.shopDomain,
         {

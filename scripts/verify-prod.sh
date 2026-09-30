@@ -26,7 +26,7 @@ QUIET=0
 # isbot(userAgent)，命中就返 410 且不设 Location，路由随即 500。
 # curl 默认 UA 会被判成 bot——据此判过一次「OAuth 对所有店都坏了」，是假警报。
 UA='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36'
-CLIENT_ID='0b36b70772220b71b2fe296b3deba914'   # AGENTS.md 陷阱 4：唯一合法身份
+CLIENT_ID='fb28d7cc61d6e9c16f47eb28114087ae'   # AGENTS.md 陷阱 4：唯一合法身份
 
 fails=0; warns=0
 ok()   { [[ $QUIET -eq 1 ]] || printf '  \033[32mok\033[0m    %s\n' "$1"; }

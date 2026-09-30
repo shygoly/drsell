@@ -1,14 +1,14 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "f286a4af8f1d80cb8e6228bc648f4786"
-name = "Drsell: Chat Agent"
+client_id = "fb28d7cc61d6e9c16f47eb28114087ae"
+name = "Pichat"
 # 根路径 = apps/storefront，商家在 admin 里看到的就是它（完整仪表盘 UI）。
 # 它已用 App Bridge idToken 换发会话；此前会出现第三方登录页，是 AuthGuard
 # 在异步换发完成前就重定向到 /login（见 apps/storefront 的 auth-guard.tsx）。
 # OAuth 回调、webhooks、/privacy 仍由 apps/web 处理（nginx 按更具体的 location 分流）。
 application_url = "https://drsell.szchada.top"
 embedded = true
-handle = "drseller-alpha"
+handle = "pichat"
 
 [build]
 automatically_update_urls_on_dev = false
@@ -19,23 +19,18 @@ api_version = "2026-07"
   [[webhooks.subscriptions]]
   uri = "/api/webhooks"
   topics = [
-  "orders/create",
   "products/delete",
   "products/update",
-  "orders/delete",
   "products/create",
-  "orders/updated",
   "app/uninstalled",
   "app/scopes_update",
   # 托管计费：商家在 Shopify 界面换套餐后，这是我们唯一的知情渠道。
   # 不订阅的话，付 $30 的 Pro 商家会被按 basic 的额度掐掉（见 ADR-14）。
   "app_subscriptions/update"
 ]
-
-  # Shopify 强制合规 webhook 单独走 /webhook（apps/web 代理 → apps/api 同一入口）
-  [[webhooks.subscriptions]]
-  uri = "/webhook"
-  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
+  # orders/* 与 GDPR compliance webhook 含受保护客户数据，新 app 未批准前不能订阅。
+  # Dev Dashboard 填完 Protected customer data 后加回 orders/create|delete|updated
+  # 以及 compliance_topics customers/data_request, customers/redact, shop/redact。
 
 [access.admin]
 direct_api_mode = "online"

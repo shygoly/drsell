@@ -18,7 +18,7 @@ describe('storeHandleOf', () => {
 describe('buildAdminAppUrl', () => {
   it('装完落在 Admin 内的嵌入应用，而不是站外页面', () => {
     expect(buildAdminAppUrl('chatbotdomaintest.myshopify.com')).toBe(
-      'https://admin.shopify.com/store/chatbotdomaintest/apps/drseller-alpha',
+      'https://admin.shopify.com/store/chatbotdomaintest/apps/pichat',
     );
   });
 

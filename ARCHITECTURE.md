@@ -41,6 +41,18 @@ Shopify 店铺 → storefront (Remix 风格 Next, :3100) → api (NestJS, :3001)
 **守护**：`spec/check-ops-audit.mjs` 扫描 ops controller 的写 handler 是否标注 `@Audit`；
 `apps/api/src/ops/` 审计日志写入 `AuditLog` 表。
 
+### `INV-4`
+
+`b2b-reg-roadmap` 的合规路线图，只有 `status=verified` 且带非空 `source_url` 的监管
+字段才可作为权威输出；未核实或无出处的一律渲染为「待核实」，绝不断言。
+**为什么**：家用器械跨境是法律动作，编造一个注册路径/文件清单/周期比缺数据糟得多
+——它会诱导真实的选品与建站决策。本仓对器械资质的既有铁律（`b2b-research`：只收
+verified、逐条带出处）在这里升格为不变量：**没有校验器能拦住「言之凿凿的幻觉」，
+只能靠「无出处即不可输出」这条硬约束**。
+**守护**：`.claude/skills/b2b-reg-roadmap/validate.mjs`（待建）——扫描被输出的每个监管
+字段是否 verified + 非空 source_url + as_of 在新鲜窗口内；引用了某国但该国包未
+verified 时，断言引擎确实降级为「待核实」。
+
 ## 2. ADR — 架构决策论证
 
 ### `ADR-1`
@@ -94,38 +106,24 @@ ADP 智能体经 `adp_reader` 直连 PG，仅可执行 `adp_*` 函数。
 
 ### `ADR-9`
 
-客服对话经 wjclaw 本地 OpenClaw Gateway（`--profile drsell` :18790），不再调腾讯 ADP。
-**为什么**：客服回复延迟与数据合规；本地网关可审计、可回放、不依赖外部云。
-**守护**：`packages/openclaw` + `infra/openclaw/drsell/`。
+客服对话经 `apps/api` 进程内 Pi SDK（`packages/openclaw` 的 `PiSupportClient`），
+不再经 OpenClaw Gateway，也不再调腾讯 ADP。
+**为什么**：OpenClaw 网关以 root 跑、共享 workspace、另有 gateway token 一面；
+Pi 本来就是网关内部的 agent 循环，拆掉中间层后工具白名单可以在 `createAgentSession`
+里硬编码，延迟与闸门仍在 api。回滚窗口保留 HTTP `OpenClawClient`（`CHAT_AGENT=openclaw`）。
+**守护**：`packages/openclaw/src/pi-client.ts` + `packages/openclaw/src/tool-allowlist.ts`。
 
 ### `ADR-19`
 
-网关按**敌意多租户**收敛工具面：`tools.deny` 关掉 `exec`/`write`/`read`/`apply_patch`/
-浏览器/会话遍历等，`agentToAgent.enabled=false`，`sessions.visibility=self`。
-**为什么**：`ADR-9` 原来把「已守护」写成完整，实际只守住了**数据权限**（`adp_reader` 零表
-权限，见 `INV-2`）与**记忆**（`startupContext`/`memorySearch` 关闭，见 `ADR-17`），
-**没有**守工具面。2026-09-13 在生产网关实测：`main` agent 可见 `write`/`exec`/`read`
-等 33 个工具，且**真的能执行**——让模型写 `/tmp/probe-marker.txt` 即写出成功；
-网关进程以 root 运行，`/root/.openclaw-drsell/openclaw.json` 与 `drsell-secrets.env`
-（600 root，含 DeepSeek/GLM key 与网关 token）对它可读。而 OpenClaw 自身的审计把默认
-信任模型定为「personal assistant (one trusted operator boundary), **not hostile
-multi-tenant on one shared gateway**」——DrSell 恰恰是反例：一个 `main` agent、一个
-**所有店铺共享**的工作区、输入来自不可信顾客。`SOUL.md` 规则 5 只禁止写记忆文件，
-既非强制也不覆盖 `/tmp` 与密钥路径。
-**为什么用 `deny` 而不是 `allow`**：`tools.allow` 是**绝对白名单**，但它在 MCP server
-注册工具**之前**解析，故 `drsell-pg__*` 永远匹配不上，网关直接 fail closed
-（`No callable tools remain after resolving explicit tool allowlist`）——2026-09-13
-实测踩过，生产客服中断约 4 分钟。**这是本条最容易被后人「顺手改成 allow」而复发的点。**
-`deny` 不替换工具集，故 MCP 工具照常注册；实测 deny 生效后 agent 可见面恰为
-`drsell-pg__query` / `__resources_list` / `__resources_read` 三项只读 DB 工具。
-**边界**：`deny` 是「关掉已知危险项」，新增的内置工具默认仍是**可用**——它是黑名单，
-不是白名单。真正的兜底依旧是 `INV-2`（`adp_reader` 零表权限），工具策略只是
-把「模型被说服后能做什么」从「任意 shell」压到「三个只读查询」。
-**守护**：`infra/openclaw/drsell/openclaw.json.example`（配置已固化并经 diff 断言与
-生产一致）；`scripts/setup-wjclaw.sh` 重建服务器即复现。
-**待补**：尚无自动断言。`security audit --deep` 会报告攻击面，但不检查
-`tools.deny` 是否覆盖 `write`/`exec`；应仿 `verify-adp-isolation.sh` 加一条
-「让 agent 尝试写文件、必须失败」的端到端断言。
+Pi `tools` **白名单** = 本次允许的 `adp_*`（Shopify 三个，Medusa 两个商品工具）。
+编码工具（`bash`/`read`/`write`/`edit`/`exec`）与 `adp_get_after_sales` 不得出现在
+`createAgentSession({ tools })` 里；`noTools: "builtin"` 与白名单同时设。
+**为什么**：OpenClaw 的 `tools.deny` 是黑名单，新内置工具默认可用——2026-09-13
+生产网关实测 `write`/`exec` 真的能执行。Pi 的 `tools` 数组是 allowlist，custom tools
+与它一起传入，不再踩 OpenClaw `tools.allow` 在 MCP 注册前解析导致 fail closed 的时序坑。
+**禁止**再引入 OpenClaw `tools.allow` 式 MCP 配置。真正的数据边界仍是 `INV-2`
+（`adp_reader` 零表权限）。
+**守护**：`packages/openclaw/src/tool-allowlist.ts`（静态断言）+ custom tools 单测。
 
 ### `ADR-10`
 
@@ -186,24 +184,23 @@ subscription changes.」而它曾是 `syncFromShopify` 的唯一调用方，于�
 ### `ADR-15`
 
 模型走「主 + 备」：primary `deepseek-v4/deepseek-v4-flash`，
-fallbacks `zhipu/glm-4.5-flash`。OpenClaw 把 402/余额不足归为 `billing` 失败并
-自动切到备用模型。
+fallbacks `zhipu/glm-4.5-flash`。`PiSupportClient` 捕获 402 / billing 后，
+用**同一组 messages 与同一组 `adp_*` 工具**再跑 GLM。
 **为什么**：单一 provider 的 key 一旦欠费，**全部商家的客服对话同时失败**，
 而这属于我们向商家收了钱的核心功能。备用链路让欠费从「立即全线中断」降级为
 「变慢、变笨，但仍在回答」。
 **换模型的前置条件**：必须先验证它支持本链路依赖的 tool calling
 （`adp_search_products` 等）——不支持 tool calling 的模型会一本正经地编造商品，
-比报错更糟。`glm-4.5-flash` 与 `deepseek-v4-flash` 均已实测通过：
-直连 `api.deepseek.com/chat/completions` 带 `tools` 时正确发出 `tool_calls`，
-且切换后经网关端到端复验能真的查出该店商品数。
+比报错更糟。切生产前跑 `scripts/probe-glm-tools.mjs`。
 **注意主备同 key**：`deepseek-v4-flash` 与 `deepseek-v4-pro` 共用同一个
 provider key，所以在 primary 上换 DeepSeek 型号**解决不了欠费**——
 billing 失败时唯一有效的备用是另一个 provider（`zhipu`）。
 **已实测发生过**：2026-09-08 生产日志出现
 `decision=fallback_model reason=billing from=deepseek-v4/deepseek-v4-pro`
-→ `candidate_succeeded ... zhipu/glm-4.5-flash`，本条备用链路在生产上真的兜住过。
-**守护**：`infra/openclaw/drsell/openclaw.json.example` + `setup-wjclaw.sh`
-（服务器重建即复现该配置）。
+→ `candidate_succeeded ... zhipu/glm-4.5-flash`，本条备用链路在网关时代真的兜住过；
+切 Pi 后等价日志为 `event=chat_agent_fallback reason=billing`。
+**守护**：`packages/openclaw/src/pi-client.ts` + `packages/openclaw/src/billing.ts`
++ `scripts/probe-glm-tools.mjs`。
 
 ### `ADR-16`
 
@@ -221,25 +218,14 @@ billing 失败时唯一有效的备用是另一个 provider（`zhipu`）。
 ### `ADR-17`
 
 会话上下文的所有权在本地库：每次推理由 `ChatMessage` 组装完整 `messages` 数组，
-system prompt 以独立 `system` 角色发出；网关侧会话键仅用于日志关联与限流。
-**为什么**：原实现每次只发单条消息，多轮记忆存在 OpenClaw 的 `x-openclaw-session-key`
-里，`ChatMessage` 只是事后写的日志。网关重启 / profile 变更 / token 轮换都会让记忆
-消失，而历史无法从本地库重建。这也是 `ADR-15` 的前提——备用模型是**自动**切换的，
-记忆若在网关侧，切换时的上下文语义是不明确的。同时 system prompt 原先拼在用户消息
-前缀里，顾客可以把它当普通文本对待；移到 system 角色后，店铺域由服务端注入，
-正文里伪造 `[shop=...]` 无效。
+system prompt 以独立 `system` 角色发出（Pi `DefaultResourceLoader.systemPrompt`）。
+Pi 使用 `SessionManager.inMemory()`，**每请求新建 session 并 `dispose`**，不落盘、不复用。
+**为什么**：多轮记忆若在网关/agent 侧，重启与主备切换时语义不明确；本地库可以重建。
+system prompt 不拼进用户消息前缀，店铺域由服务端注入，正文里伪造 `[shop=...]` 无效。
 **注意**：这条只降低 prompt injection 的难度，不消除它。真正的边界仍是
 `adp_reader` 的零表权限（`INV-2`）——即使模型被说服，它也只能调那三个只读函数。
-**必须同时关掉网关侧记忆**，否则两份上下文叠加：实测网关的会话记忆按
-`x-openclaw-session-key` 累积（同键第二轮不带历史仍答得出第一轮口令），
-另有一层跨租户的落盘 agent 记忆（`workspace-drsell/memory/*.md`，换键甚至不带键
-都读得到）。故 `sessionKey()` 每请求附 uuid，且 profile 置
-`startupContext.enabled=false` + `memorySearch.enabled=false`。
-**守护**：`packages/openclaw` 的接口只收 `messages` + `systemPrompt`，
-不泄漏网关专有语义；`adp.service.spec.ts` 断言网关记忆缺失时仍能从本地库重建上下文；
-`infra/openclaw/drsell/openclaw.json.example` 固化记忆关闭，
-`scripts/deploy-mvp.sh` 每次部署同步 `SOUL.md`/`SKILL.md`（此前只有重建服务器才推，
-导致提示词与代码失配）。
+**守护**：`packages/openclaw` 的接口只收 `messages` + `systemPrompt`；
+`adp.service.spec.ts` 断言从本地库重建上下文；Pi in-memory 由 `pi-client` 单测覆盖。
 
 ### `ADR-18`
 
@@ -395,6 +381,25 @@ B2B 客户建站（`.claude/skills/` 流水线）**每客户独立 Medusa 实例
 `ADR-21` 的「两套部署链路」会随客户数变成 N+2 套。这份成本必须由 b2b-site-build
 skill 脚本化吸收；**skill 建成前禁止手工起客户实例**，防止无脚本可复现的雪花部署。
 **守护**：待守护——b2b-site-build 建成时以脚本 + 断言执行；当前零客户实例。
+
+### `ADR-27`
+
+`b2b-reg-roadmap`（家用/低值器械 · 合规路线图匹配 skill）的监管知识走**混合可信
+模型**：人工核实的**国家知识包**（每国一份数据，每条断言带官方 `source_url` +
+`as_of`）当地基；LLM+联网只做**起草与刷新**（费用/文件清单/周期等易变项），产出先落
+`status=draft`，经人核准才转 `verified`；引擎只装配并输出 verified 格子。
+**为什么**：家用器械 Class I–II 是 1688→独立站真正可代发的一档，选品期需要「这台能
+不能顺利卖到某国」的可执行答案；但监管数据既要**广度**（用户要 US/EU/英加澳/中东
+东南亚/拉美 ≈11 国）又不能**幻觉**（`INV-4`）。纯人工核编稳但扩不动，纯 LLM 联网快但
+对法规推理不可复现、风险高。混合模型把「稳定结构」人工焊死、「易变项」自动起草，用
+「**自动起草 → 人核准 → 引擎只发 verified**」消解矛盾——与 `b2b-research`「调研提议、
+只有 verified 进 catalog」同构。
+**覆盖是纯数据**：引擎与国家无关，加一国 = 加一个知识包文件，非改代码；未 verified
+的国由验证器（`INV-4`）强制降级为「待核实」，故广度扩张永不破红线。v1 只把 US、EU
+两包做到 verified，其余先建骨架置 draft。
+**与建站流水线的关系**：本 skill 上游于 `b2b-research`，产出 go/no-go + 投入估算，
+决定哪些 1688 器械进 `ADR-26` 的建站流水线；选中的器械按 `ADR-24` 走 Medusa 产品源。
+**守护**：待守护——`.claude/skills/b2b-reg-roadmap/validate.mjs` 建成时执行；当前零知识包。
 
 ## 3. B — 边界规矩论证
 

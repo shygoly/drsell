@@ -34,7 +34,8 @@ wjclaw 上跑着**两条互不相干的部署链路**。它们共用一台机器
 | Web (Next) | `drsell-web` | 5012 | `/opt/drsell-run/apps/web/standalone/apps/web` |
 | Storefront (Next) | `drsell-storefront` | 5010 | `/opt/drsell-run/apps/storefront/standalone/apps/storefront` |
 | Ops (Next) | `drsell-ops` | 5013 | `/opt/drsell-run/apps/ops/standalone/apps/ops` |
-| AI 网关 | `openclaw-drsell` | 18790 | — |
+| AI 网关 | `openclaw-drsell` | 18790 | **已停用目标态**：Pi 切流完成后 `pm2 stop`；`/root/.openclaw-drsell/` 第一期保留作回滚。DeepSeek / GLM key 在 **api** `.env`（cwd `/opt/drsell-run/apps/api`），只指路不抄值。 |
+
 | DTC 店面（静态） | `drsell-shop-web` | 5020 | `/opt/drsell-shop-web`（`SHOP_WEB_ROOT`） |
 | **Medusa 引擎** | `drsell-shop-medusa` | 9000 | `/root/drsell-shop-build/shop/apps/backend/.medusa/server` |
 
@@ -102,14 +103,14 @@ Next 在**构建时**把本地 `apps/<app>/.env` 复制进 `.next/standalone/`�
 
 ## 3. Shopify 密钥实况
 
-唯一合法 client_id 见 `AGENTS.md` 陷阱 4。密钥的两把指纹：
+唯一合法 client_id 见 `AGENTS.md` 陷阱 4（Pichat `fb28d7cc…`）。密钥的两把指纹：
 
 | 变量 | 指纹 | 实况 |
 |---|---|---|
-| `SHOPIFY_API_SECRET` | `58e8f70fb2a5` | **Shopify 实际在用的那把**（2026-09-09 对调后） |
-| `SHOPIFY_API_SECRET_PREVIOUS` | `4c3a72ece258` | 2026-09-03 填入的那把，Shopify 从未使用 |
+| `SHOPIFY_API_SECRET` | `67190ae31160` | **Pichat 那把**（2026-09-30 切换） |
+| `SHOPIFY_API_SECRET_PREVIOUS` | `58e8f70fb2a5` | 旧 Drsell 那把（2026-09-09 起至切换前在用） |
 
-2026-09-09 之前两者是反的，OAuth 因此全线失败——见 §5 的 DEP-1。
+2026-09-09 之前 current/previous 曾对调，OAuth 因此全线失败——见 §5 的 DEP-1。
 判据是持久化的，不靠翻日志：
 `WebhookSecretUse` 表按「密钥代 × topic」记录每条 webhook 的验签命中，
 运营台 `/gate` 展示。该表**只能由真实 Shopify webhook 填充**——自签探针会伪造出
@@ -762,7 +763,7 @@ DTC 侧的回归现在由 `scripts/deploy-shop.sh` 第 7 步兜底（公网 + �
   → `POST /public/chat` 带 `customerToken` → drsell 用 `MEDUSA_JWT_SECRET` 验 HS256（内置 crypto，无新依赖）
   → 拉该顾客本人订单/售后**注入 system prompt**。匿名不注入、prompt 引导登录。
   **`MEDUSA_JWT_SECRET` 必须 = Medusa `JWT_SECRET`**（同一把签名密钥），入 drsell `apps/api/.env`。
-- SOUL.md / drsell-pg SKILL.md 登记售后工具后，`pm2 restart openclaw-drsell`（同 `deploy-mvp.sh` §—部分）。
+- 客服 agent 现为进程内 Pi（`ADR-9`）。OpenClaw SOUL/SKILL 不再随 `deploy-mvp.sh` 同步；回滚见 `infra/openclaw/drsell/DEPRECATED.md`。
 
 **两个部署陷阱（这次踩到）**：
 

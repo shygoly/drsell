@@ -12,7 +12,7 @@
 | **首次安装 Onboarding Wizard** | `/app/onboarding` Steps 1–3 + 5 |
 | 店面 Theme Extension + ADP 对话代理 | `extensions/chatbot`, `PublicStorefrontModule` |
 | 部署 | `https://drsell.szchada.top` @ wjclaw |
-| Partner 上架 | Drsell `264501002241`，更新 URL 后提审 |
+| Partner 上架 | Pichat（client_id `fb28d7cc…`），旧 Drsell listing 保持下架 |
 
 ## P1 — 下一迭代
 

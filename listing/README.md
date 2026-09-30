@@ -25,7 +25,7 @@ listing/
 
 1. Shopify admin 语言设为 **English**（在账户「首选语言」，不是店铺语言设置）
 2. 浏览器 `navigator.language` 为 `en-*`（widget 按它切语言）
-3. 打开 `https://admin.shopify.com/store/<store>/apps/drseller-alpha`
+3. 打开 `https://admin.shopify.com/store/<store>/apps/pichat`
 4. 截图后裁掉 Shopify 左侧导航与顶栏，等比缩放补边到 1600x900：
 
 ```bash

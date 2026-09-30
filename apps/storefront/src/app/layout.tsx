@@ -12,10 +12,10 @@ const inter = Inter({
 
 const SHOPIFY_API_KEY =
   process.env.NEXT_PUBLIC_SHOPIFY_API_KEY ||
-  "f286a4af8f1d80cb8e6228bc648f4786";
+  "fb28d7cc61d6e9c16f47eb28114087ae";
 
 export const metadata: Metadata = {
-  title: "Dr Sell — AI customer support",
+  title: "Pichat — AI customer support",
   description:
     "Shopify AI customer service dashboard — converted from Google Stitch via P0-P8 pipeline",
   other: {

@@ -1,0 +1,33 @@
+{
+  "providers": {
+    "deepseek-v4": {
+      "baseUrl": "https://api.deepseek.com/v1",
+      "apiKey": "$DEEPSEEK_API_KEY",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "deepseek-v4-flash",
+          "name": "DeepSeek V4 Flash",
+          "reasoning": true,
+          "input": ["text"],
+          "contextWindow": 131072,
+          "maxTokens": 8192
+        }
+      ]
+    },
+    "zhipu": {
+      "baseUrl": "$GLM_BASE_URL",
+      "apiKey": "$GLM_API_KEY",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "glm-4.5-flash",
+          "name": "GLM 4.5 Flash",
+          "input": ["text"],
+          "contextWindow": 131072,
+          "maxTokens": 8192
+        }
+      ]
+    }
+  }
+}

@@ -1,5 +1,5 @@
 /** App handle from apps/web/shopify.app.toml — the slug in Admin app URLs. */
-export const APP_HANDLE = 'drseller-alpha';
+export const APP_HANDLE = 'pichat';
 
 /** Strip protocol/trailing slash and the .myshopify.com suffix. */
 export function storeHandleOf(shop: string) {

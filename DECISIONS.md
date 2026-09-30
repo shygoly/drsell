@@ -15,8 +15,8 @@
 
 | 前缀 | 含义 | 出处（论证在此） | 数量 |
 |---|---|---|---|
-| `INV-n` | **不变量**：任何实现都不得违反的硬约束 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 3 |
-| `ADR-n` | **架构决策**：工程层不可逆选择 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 25 |
+| `INV-n` | **不变量**：任何实现都不得违反的硬约束 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 4 |
+| `ADR-n` | **架构决策**：工程层不可逆选择 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 27 |
 | `B-n` | **边界规矩**：模块/包之间的硬边界 | [`ARCHITECTURE.md`](ARCHITECTURE.md)（子项目 3 创建） | 5 |
 | `DS-n` | **UI 反模式**：呈现层禁止事项 | [`DESIGN.md`](DESIGN.md) | 10 |
 
@@ -32,6 +32,7 @@
 | `INV-1` | 所有租户数据必须经 `Shop` 外键可达（`tenantId` 或 `shopId`） | DB 外键约束；**未配** |
 | `INV-2` | `adp_reader` 不得持有任何表、视图或序列的权限 | `scripts/verify-adp-isolation.sh` 断言 1–8 |
 | `INV-3` | 运营台的每一次写操作都必须留下审计记录（操作者、对象店铺、动作、时间） | `spec/check-ops-audit.mjs` |
+| `INV-4` | `b2b-reg-roadmap`：监管结论只有 `status=verified` 且带非空 `source_url` 才可作为权威输出；未核实/无出处一律渲染为「待核实」，绝不断言 | `.claude/skills/b2b-reg-roadmap/validate.mjs`（待建） |
 
 ---
 
@@ -47,17 +48,17 @@
 | `ADR-6` | 双设计系统并存：web = Polaris 13，storefront = shadcn/Tailwind v4 | `apps/storefront/package.json` | 已守护 |
 | `ADR-7` | ADP 智能体经 `adp_reader` 直连 PG，仅可执行 `adp_*` 函数 | `apps/api/prisma/sql/adp-reader.sql` + `scripts/verify-adp-isolation.sh` | 已守护 |
 | `ADR-8` | `Shop.accessToken` 落库 AES-256-GCM 加密（`SHOP_ACCESS_TOKEN_KEY`） | `apps/api/src/crypto/shop-token-cipher.ts` | 已守护 |
-| `ADR-9` | 客服对话经 wjclaw 本地 OpenClaw Gateway（`--profile drsell` :18790），不再调腾讯 ADP | `packages/openclaw` + `infra/openclaw/drsell/` | 已守护（工具面另见 `ADR-19`） |
+| `ADR-9` | 客服对话经 `apps/api` 进程内 Pi SDK（`packages/openclaw` 的 `PiSupportClient`），不再经 OpenClaw Gateway | `packages/openclaw/src/pi-client.ts` | 已守护 |
 | `ADR-10` | `drsell.szchada.top` 根路径由 `apps/storefront` 服务（pm2 `drsell-storefront` :5010）；`apps/web` 暂停生产部署 | `scripts/deploy-mvp.sh` | 已守护 |
 | `ADR-11` | 运营台是独立应用 `apps/ops`，独立 `server_name` `ops.szchada.top`；商家端不得存在 `/admin` 或 `/ops` 路由 | `infra/nginx/ops.szchada.top.conf` + `spec/check-ops-entry.mjs` | 已守护 |
 | `ADR-12` | 运营台第三套设计令牌（`apps/ops/app/tokens.css` → `globals.css` shadcn 映射），经 `stitch-to-shadcn-pro` + Tailwind v4 + shadcn/ui 落地；禁止 Polaris | `apps/ops/app/globals.css` + `.stitch/` + `spec/check-design.mjs` | 已守护 |
 | `ADR-13` | 本地订阅状态只镜像 Shopify `AppSubscriptionStatus` 的六个取值，不自造状态词 | `apps/api/prisma/schema.prisma` + `spec/check-ops-status.mjs` | 已守护 |
 | `ADR-14` | 套餐只有两档，价格与 AI 回答额度定义在 `@drsell/shared` 的 `PLANS`（basic $15/1500、pro $30/5000）；走 Shopify 托管计费，plan handle 即 `PlanCode`；镜像靠回跳即查 + 陈旧度补查（`app_subscriptions/update` 自 2026-04-28 起已停发，见 ARCHITECTURE 的更正） | `packages/shared/src/index.ts` + `spec/check-pricing.mjs` | 已守护 |
-| `ADR-15` | 模型主备：primary `deepseek-v4/deepseek-v4-flash`，fallbacks `zhipu/glm-4.5-flash`；余额不足（`billing`）自动切换。换任何一端前必须先验证它支持 tool calling；主备同 key 换型号解决不了欠费 | `infra/openclaw/drsell/openclaw.json.example` + `setup-wjclaw.sh` | 已守护 |
+| `ADR-15` | 模型主备：primary `deepseek-v4/deepseek-v4-flash`，fallbacks `zhipu/glm-4.5-flash`；`PiSupportClient` 捕获 402/billing 后用同一 messages 再跑 GLM。换任何一端前必须先验证它支持 tool calling；主备同 key 换型号解决不了欠费 | `packages/openclaw/src/pi-client.ts` + `packages/openclaw/src/billing.ts` + `scripts/probe-glm-tools.mjs` | 已守护 |
 | `ADR-16` | 会话状态是数据库枚举 `ChatThreadStatus`（`ai`/`pending`/`human`/`closed`），迁移统一经 `ConversationService` | `apps/api/prisma/schema.prisma` + `apps/api/src/adp/adp.service.spec.ts` | 已守护 |
-| `ADR-17` | 会话上下文由本地 `ChatMessage` 组装为完整 `messages`，system prompt 走 system 角色；网关会话键只作日志关联 | `packages/openclaw/src/index.ts` + `apps/api/src/adp/adp.service.spec.ts` | 已守护 |
+| `ADR-17` | 会话上下文由本地 `ChatMessage` 组装为完整 `messages`，system prompt 走 system 角色；Pi 每请求 `SessionManager.inMemory()` 新 session，不落盘 | `packages/openclaw/src/pi-client.ts` + `apps/api/src/adp/adp.service.spec.ts` | 已守护 |
 | `ADR-18` | 订阅状态是服务前置条件：`ACTIVE`/试用中/到期后 2 天宽限内才服务，闸门在配额之前；默认只观测不拦截（`SUBSCRIPTION_GATE_ENFORCE`），确认无误判再开 | `apps/api/src/subscription/subscription-state.ts` + `subscription-state.spec.ts` | 已守护 |
-| `ADR-19` | 网关按**敌意多租户**配工具策略：`tools.deny` 关闭 exec/write/read/浏览器/会话遍历等，`agentToAgent` 关、`sessions.visibility=self`。**不得改用 `tools.allow`**——它在 MCP 工具注册前解析，会让客服链路 fail closed（2026-09-13 实测中断约 4 分钟） | `infra/openclaw/drsell/openclaw.json.example` | 配置已固化；**待补自动断言** |
+| `ADR-19` | Pi `tools` 白名单 = 本次允许的 `adp_*`；禁止编码工具与 `adp_get_after_sales`。禁止再引入 OpenClaw `tools.allow` 式 MCP 时序坑 | `packages/openclaw/src/tool-allowlist.ts` | 已守护 |
 | `ADR-20` | DTC 独立站的可靠投递基建**必须注册 Redis 实现**（`event-bus-redis`+`workflow-engine-redis`+`caching`+`locking`）。Redis 用 wjclaw **宿主 systemd** 的 `redis-server`（127.0.0.1:6379），**不用容器**；drsell 占 **db2**（db0 属其他项目）。不注册时 Medusa 静默回落进程内内存实现——事件随重启丢失且无重放 | `apps/shop/apps/backend/medusa-config.ts` + `scripts/deploy-shop.sh` | 已守护（启动日志四模块连接成功 + 事件端到端落库） |
 | `ADR-21` | DTC 独立站与 drsell 主站是**两套独立部署链路**：Medusa 侧在服务器上构建（`medusa build` → `.medusa/server`，pm2 `drsell-shop-medusa`），不并入 drsell 的 pnpm workspace（`!apps/shop`、`!apps/shop-web`）；两边 nginx vhost 各自入仓、各自同步 | `apps/shop/README.md` + `scripts/deploy-shop.sh` + `infra/nginx/medusa.szchada.top.conf` | 已守护 |
 | `ADR-22` | DTC 摄取**复用 Shopify 语义的列名**（`shopify_product_id`/`shopify_order_id` 承载 Medusa 的 `id`/`display_id`），以 `source` 列区分来源（`shopify` 默认 / `medusa`）；**改名推迟**——改名会动生产读路径，收益仅是名字好看 | `apps/api/prisma/schema.prisma` + `apps/api/src/ingest/` | 已守护（`source @default("shopify")` 保证 Shopify 写入零改动） |
@@ -65,6 +66,7 @@
 | `ADR-24` | DTC 店面是**内容式官网**（内容获客 + 询价闭环），非即时结账店面；产品卡是**规格矩阵卡且不标价**，规格是**数据**（`metadata.specs`+`metadata.specsOrder`）而非前端硬编码。**`specsOrder` 不可省**——`metadata` 是 jsonb，不保留键顺序 | `apps/shop-web/index.html` + `scripts/seed-shop-specs.sh` | 已守护（回读断言顺序与键集） |
 | `ADR-25` | DTC 站**不做购物车 / 在线结算 / Stripe**；「闭环」定义为 **询价 → 人工报价 → Medusa 草稿订单 → 合同账期**，成单状态记在 `inquiry` + 草稿订单，不经过在线支付。顾客登录**保留**（B2B 客户查自己订单/对账） | `apps/shop/apps/backend/src/modules/inquiry/` + `apps/shop-web/index.html` | 已守护（页面零购物车元素；询价单可转草稿订单） |
 | `ADR-26` | B2B 客户建站**每客户独立 Medusa 实例 + 独立数据库**；不共享自家 DTC 实例（`drsell_shop`），不用多 sales channel 承载多客户。b2b-site-build skill 建成前**禁止手工起客户实例** | `.claude/skills/`（建站流水线；b2b-site-build 待建） | 待守护（b2b-site-build 建成时以脚本+断言执行；当前零客户实例） |
+| `ADR-27` | `b2b-reg-roadmap`（家用器械·合规路线图匹配 skill）监管知识走**混合可信模型**：人工核实的国家知识包当地基，LLM+联网只起草/刷新（`draft`），经人核准才转 `verified`，引擎只发 verified 格；国家覆盖是纯数据（每国一包），未 verified 的国由验证器强制降级「待核实」而非编造（`INV-4`） | `openspec/changes/b2b-reg-roadmap/` + `.claude/skills/b2b-reg-roadmap/`（待建） | 待守护（skill 建成时 `validate.mjs` 执行；当前零知识包） |
 
 ---
 

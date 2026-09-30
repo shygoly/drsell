@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Drsell',
-  description: 'Drsell Shopify AI assistant platform',
+  title: 'Pichat',
+  description: 'Pichat Shopify AI assistant platform',
   icons: {
     icon: [
       { url: '/brand/favicon.ico', sizes: 'any', type: 'image/x-icon' },
